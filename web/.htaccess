@@ -1,0 +1,13 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L]
+<IfModule mod_headers.c>
+    <FilesMatch "\.(pdf)$">
+        Header set Content-Type application/pdf
+        Header set Content-Disposition inline
+        Header set X-Content-Type-Options nosniff
+    </FilesMatch>
+</IfModule>
+
+

@@ -1,0 +1,1234 @@
+2021-07-16 11:37:21 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "HRMIS.STAFFLIST_VIEW" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/models/User.php:216
+    in /var/www/html/lecmodule/models/LoginForm.php:86
+2021-07-16 11:37:20 [41.89.65.134][8187][-][info][application] $_GET = []
+
+$_POST = [
+    '_csrf' => 'rXMbvU5-KRiVjaF25ztSX7Ai2gKtOlmxWP0qDqui_NXXKiPINCd-UP-1wwHVSGFvyUq1OugMNfJojF5C0fiypg=='
+    'LoginForm' => [
+        'payrollNumber' => '176740'
+        'userPassword' => 'KENYA176740'
+    ]
+]
+
+$_FILES = []
+
+$_COOKIE = [
+    '_csrf' => 'f7d73d30fe780d1f2e56885ab66c27f685e7b6daa6523c340f884d40fa4146e4a:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"zY8uzYWHj8bw2s30yho8E6lC0qtLzZNs\";}'
+    'PHPSESSID' => 'sha7ump9kukt4ogk8ni73bktcl'
+]
+
+$_SESSION = [
+    '__flash' => [
+        'create' => -1
+    ]
+    'sec.session' => '£·.1*(+ø#uÉ)ª¿À¿'
+    'sec.token' => '\'1up/eM‚…š:ª`Ø'
+    'user.password' => '37526d53487575374f30516859707756684531507743334e2f544552437539307946326d6a4165552f44516131306f5873534c77517034636661325134467575427362517267654e73554a7568584b4b446c743176773d3d'
+    'user.username' => '176740'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_FAC_ADMIN'
+        2 => 'LEC_SMIS_HOD'
+        3 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 8187
+    'create' => [
+        'type' => 'success'
+        'title' => 'Login'
+        'message' => 'Login successful'
+    ]
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'CONTENT_LENGTH' => '174'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_DNT' => '1'
+    'HTTP_X_CSRF_TOKEN' => 'rXMbvU5-KRiVjaF25ztSX7Ai2gKtOlmxWP0qDqui_NXXKiPINCd-UP-1wwHVSGFvyUq1OugMNfJojF5C0fiypg=='
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=UTF-8'
+    'HTTP_ACCEPT' => 'application/json, text/javascript, */*; q=0.01'
+    'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'
+    'HTTP_ORIGIN' => 'https://lecturersdev.uonbi.ac.ke'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'cors'
+    'HTTP_SEC_FETCH_DEST' => 'empty'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/site/login'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => '_csrf=f7d73d30fe780d1f2e56885ab66c27f685e7b6daa6523c340f884d40fa4146e4a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22zY8uzYWHj8bw2s30yho8E6lC0qtLzZNs%22%3B%7D; PHPSESSID=sha7ump9kukt4ogk8ni73bktcl'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '49423'
+    'REDIRECT_URL' => '/site/signin'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/site/signin'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626435440.995
+    'REQUEST_TIME' => 1626435440
+]
+2021-07-16 11:37:30 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.DEPARTMENTS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/BaseController.php:55
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:33
+2021-07-16 11:37:32 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.FACULTIES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/BaseController.php:56
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:33
+2021-07-16 11:37:33 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_COURSE_ASSIGNMENT" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:34 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.MARKSHEET_DEF" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:35 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.SEMESTERS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:36 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.DEGREE_PROGRAMMES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:36 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.SEMESTER_DESCRIPTIONS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:37 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.GROUPS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:38 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.COURSES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 11:37:39 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_CW_ASSESSMENT" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/views/allocated-courses/_lecturerCoursesGrid.php:119
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/ActionColumn.php:270
+2021-07-16 11:37:39 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_ASSESSMENT_TYPES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/views/allocated-courses/_lecturerCoursesGrid.php:119
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/ActionColumn.php:270
+2021-07-16 11:37:30 [41.89.65.134][8187][-][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 'h3tf9hddeho7jmjb6q2p46js74'
+    '_identity' => 'f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a:2:{i:0;s:9:\"_identity\";i:1;s:19:\"[8187,null,2592000]\";}'
+    '_csrf' => 'bd0586cd7a746bbc4cdda818147839f3e3887ffa25d95afd0a7d35837bac404fa:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"Ts1E0-TOBhaAOiHZ_Y7HxaxBL88LbIy4\";}'
+]
+
+$_SESSION = [
+    '__flash' => []
+    'sec.session' => '£·.1*(+ø#uÉ)ª¿À¿'
+    'sec.token' => '\'1up/eM‚…š:ª`Ø'
+    'user.password' => '37526d53487575374f30516859707756684531507743334e2f544552437539307946326d6a4165552f44516131306f5873534c77517034636661325134467575427362517267654e73554a7568584b4b446c743176773d3d'
+    'user.username' => '176740'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_FAC_ADMIN'
+        2 => 'LEC_SMIS_HOD'
+        3 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 8187
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_UPGRADE_INSECURE_REQUESTS' => '1'
+    'HTTP_DNT' => '1'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'HTTP_ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'navigate'
+    'HTTP_SEC_FETCH_USER' => '?1'
+    'HTTP_SEC_FETCH_DEST' => 'document'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => 'PHPSESSID=h3tf9hddeho7jmjb6q2p46js74; _identity=f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a%3A2%3A%7Bi%3A0%3Bs%3A9%3A%22_identity%22%3Bi%3A1%3Bs%3A19%3A%22%5B8187%2Cnull%2C2592000%5D%22%3B%7D; _csrf=bd0586cd7a746bbc4cdda818147839f3e3887ffa25d95afd0a7d35837bac404fa%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22Ts1E0-TOBhaAOiHZ_Y7HxaxBL88LbIy4%22%3B%7D'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '53969'
+    'REDIRECT_URL' => '/allocated-courses'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/allocated-courses'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626435450.069
+    'REQUEST_TIME' => 1626435450
+]
+2021-07-16 11:37:55 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.MARKSHEETS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/models/search/MarksheetSearch.php:27
+    in /var/www/html/lecmodule/models/search/MarksheetSearch.php:113
+2021-07-16 11:37:55 [41.89.65.134][8187][-][info][application] $_GET = [
+    'assignmentId' => '137'
+    'type' => 'classList'
+    '_pjax' => '#current-courses-content-pjax'
+]
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 'h3tf9hddeho7jmjb6q2p46js74'
+    '_identity' => 'f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a:2:{i:0;s:9:\"_identity\";i:1;s:19:\"[8187,null,2592000]\";}'
+    '_csrf' => 'bd0586cd7a746bbc4cdda818147839f3e3887ffa25d95afd0a7d35837bac404fa:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"Ts1E0-TOBhaAOiHZ_Y7HxaxBL88LbIy4\";}'
+]
+
+$_SESSION = [
+    '__flash' => []
+    'sec.session' => '£·.1*(+ø#uÉ)ª¿À¿'
+    'sec.token' => '\'1up/eM‚…š:ª`Ø'
+    'user.password' => '37526d53487575374f30516859707756684531507743334e2f544552437539307946326d6a4165552f44516131306f5873534c77517034636661325134467575427362517267654e73554a7568584b4b446c743176773d3d'
+    'user.username' => '176740'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_FAC_ADMIN'
+        2 => 'LEC_SMIS_HOD'
+        3 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 8187
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_DNT' => '1'
+    'HTTP_X_CSRF_TOKEN' => 'K8sZz_SDH-l_fCQpZ7jfZsvjtC2fYQxUISfv0fxU1n5_uCiKxK5Lpj0URWgo0Zc8lLqDZecAdBZtH9ednh2vSg=='
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=UTF-8'
+    'HTTP_ACCEPT' => 'text/html, */*; q=0.01'
+    'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'
+    'HTTP_X_PJAX' => 'true'
+    'HTTP_X_PJAX_CONTAINER' => '#current-courses-content-pjax'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'cors'
+    'HTTP_SEC_FETCH_DEST' => 'empty'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/allocated-courses'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => 'PHPSESSID=h3tf9hddeho7jmjb6q2p46js74; _identity=f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a%3A2%3A%7Bi%3A0%3Bs%3A9%3A%22_identity%22%3Bi%3A1%3Bs%3A19%3A%22%5B8187%2Cnull%2C2592000%5D%22%3B%7D; _csrf=bd0586cd7a746bbc4cdda818147839f3e3887ffa25d95afd0a7d35837bac404fa%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22Ts1E0-TOBhaAOiHZ_Y7HxaxBL88LbIy4%22%3B%7D'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '54305'
+    'REDIRECT_QUERY_STRING' => 'assignmentId=137&type=classList&_pjax=%23current-courses-content-pjax'
+    'REDIRECT_URL' => '/marksheet-students'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => 'assignmentId=137&type=classList&_pjax=%23current-courses-content-pjax'
+    'REQUEST_URI' => '/marksheet-students?assignmentId=137&type=classList&_pjax=%23current-courses-content-pjax'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626435475.365
+    'REQUEST_TIME' => 1626435475
+]
+2021-07-16 12:39:52 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_STUDENT_COURSE_WORK" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/views/lecturer-reports/index.php:133
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/ActionColumn.php:270
+2021-07-16 12:39:51 [41.89.65.134][8187][-][info][application] $_GET = [
+    'type' => 'consolidated-marksheet'
+]
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 'np0l8qgb8h3rq1g5v5g6p2qipe'
+    '_identity' => 'f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a:2:{i:0;s:9:\"_identity\";i:1;s:19:\"[8187,null,2592000]\";}'
+    '_csrf' => '6e83a9e8db9779b83a1fdbe6a979fed798cd4cb2e4b458167278150ebff39e84a:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"iI_w2FYOBG5pcDWaDBkbk9Iub6U2rgoV\";}'
+]
+
+$_SESSION = [
+    '__flash' => []
+    'sec.session' => '</4VÊÂx$ê\0ÇÏš8'
+    'sec.token' => '·ß`’>ñ‡¿é©qª‡‚'
+    'user.password' => '56716a415a71524d4a6970476e38444a532b6c336e586b6e31714238455049673632514e67746c7949657777596b6f4f4c43736a6d4a47784d52754a615877424a337841476f536e475a6c6d30757736585a53376d773d3d'
+    'user.username' => '176740'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_FAC_ADMIN'
+        2 => 'LEC_SMIS_HOD'
+        3 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 8187
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_UPGRADE_INSECURE_REQUESTS' => '1'
+    'HTTP_DNT' => '1'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'HTTP_ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'navigate'
+    'HTTP_SEC_FETCH_USER' => '?1'
+    'HTTP_SEC_FETCH_DEST' => 'document'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => 'PHPSESSID=np0l8qgb8h3rq1g5v5g6p2qipe; _identity=f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a%3A2%3A%7Bi%3A0%3Bs%3A9%3A%22_identity%22%3Bi%3A1%3Bs%3A19%3A%22%5B8187%2Cnull%2C2592000%5D%22%3B%7D; _csrf=6e83a9e8db9779b83a1fdbe6a979fed798cd4cb2e4b458167278150ebff39e84a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22iI_w2FYOBG5pcDWaDBkbk9Iub6U2rgoV%22%3B%7D'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '58034'
+    'REDIRECT_QUERY_STRING' => 'type=consolidated-marksheet'
+    'REDIRECT_URL' => '/lecturer-reports'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => 'type=consolidated-marksheet'
+    'REQUEST_URI' => '/lecturer-reports?type=consolidated-marksheet'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626439191.625
+    'REQUEST_TIME' => 1626439191
+]
+2021-07-16 12:39:59 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.UON_STUDENTS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/GridView.php:1499
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/GridView.php:1204
+2021-07-16 12:40:01 [41.89.65.134][8187][-][error][Schema::loadTableSchema()] Table "MUTHONI.EXAM_TYPES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/GridView.php:1499
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/GridView.php:1204
+2021-07-16 12:39:58 [41.89.65.134][8187][-][info][application] $_GET = [
+    'marksheetId' => '2020/2021_P15_4_1_10_CSC414_0097'
+    '_pjax' => '#lecturer-reports-index-grid-pjax'
+]
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 'np0l8qgb8h3rq1g5v5g6p2qipe'
+    '_identity' => 'f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a:2:{i:0;s:9:\"_identity\";i:1;s:19:\"[8187,null,2592000]\";}'
+    '_csrf' => '6e83a9e8db9779b83a1fdbe6a979fed798cd4cb2e4b458167278150ebff39e84a:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"iI_w2FYOBG5pcDWaDBkbk9Iub6U2rgoV\";}'
+]
+
+$_SESSION = [
+    '__flash' => []
+    'sec.session' => '</4VÊÂx$ê\0ÇÏš8'
+    'sec.token' => '·ß`’>ñ‡¿é©qª‡‚'
+    'user.password' => '56716a415a71524d4a6970476e38444a532b6c336e586b6e31714238455049673632514e67746c7949657777596b6f4f4c43736a6d4a47784d52754a615877424a337841476f536e475a6c6d30757736585a53376d773d3d'
+    'user.username' => '176740'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_FAC_ADMIN'
+        2 => 'LEC_SMIS_HOD'
+        3 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 8187
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_DNT' => '1'
+    'HTTP_X_CSRF_TOKEN' => 'UEQU6HFqNr8GzCTvPZDJT-o80Ow9tgSVefRgV2qSmRg5DUufQyxv8ESLEZ9e1J4urn67jlaPTeAbwjVlGPX2Tg=='
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=UTF-8'
+    'HTTP_ACCEPT' => 'text/html, */*; q=0.01'
+    'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'
+    'HTTP_X_PJAX' => 'true'
+    'HTTP_X_PJAX_CONTAINER' => '#lecturer-reports-index-grid-pjax'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'cors'
+    'HTTP_SEC_FETCH_DEST' => 'empty'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/lecturer-reports?type=consolidated-marksheet'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => 'PHPSESSID=np0l8qgb8h3rq1g5v5g6p2qipe; _identity=f129db0b547fe1f4cd6dfff035bcf71ff13ce54580f3ade0a30949675a485fc1a%3A2%3A%7Bi%3A0%3Bs%3A9%3A%22_identity%22%3Bi%3A1%3Bs%3A19%3A%22%5B8187%2Cnull%2C2592000%5D%22%3B%7D; _csrf=6e83a9e8db9779b83a1fdbe6a979fed798cd4cb2e4b458167278150ebff39e84a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22iI_w2FYOBG5pcDWaDBkbk9Iub6U2rgoV%22%3B%7D'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '61067'
+    'REDIRECT_QUERY_STRING' => 'marksheetId=2020%2F2021_P15_4_1_10_CSC414_0097&_pjax=%23lecturer-reports-index-grid-pjax'
+    'REDIRECT_URL' => '/lecturer-reports/consolidated-marksheet'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => 'marksheetId=2020%2F2021_P15_4_1_10_CSC414_0097&_pjax=%23lecturer-reports-index-grid-pjax'
+    'REQUEST_URI' => '/lecturer-reports/consolidated-marksheet?marksheetId=2020%2F2021_P15_4_1_10_CSC414_0097&_pjax=%23lecturer-reports-index-grid-pjax'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626439198.68
+    'REQUEST_TIME' => 1626439198
+]
+2021-07-16 12:45:18 [41.89.65.134][12390][-][error][Schema::loadTableSchema()] Table "HRMIS.STAFFLIST_VIEW" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/models/User.php:216
+    in /var/www/html/lecmodule/models/LoginForm.php:86
+2021-07-16 12:45:18 [41.89.65.134][12390][-][info][application] $_GET = []
+
+$_POST = [
+    '_csrf' => 'VerFxGB7AhOVpPtAQz0mg8AsRkngc0BpurWy1RQ8Sno3q7WuVx4xYNKJnCQ5cnHThWAyGaM1bSv12caGXW4PEQ=='
+    'LoginForm' => [
+        'payrollNumber' => '219160'
+        'userPassword' => 'MUTISYA160'
+    ]
+]
+
+$_FILES = []
+
+$_COOKIE = [
+    '_csrf' => '3ac4518f069c6a37c23e9b1fbf70a38fd0c6495ae76914e6238bf78b6ba1facda:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"bApj7e3sG-gdzOWPELtPCF-BOltSIREk\";}'
+    'PHPSESSID' => '54mtg1qaea3b85nshvu654po08'
+]
+
+$_SESSION = [
+    '__flash' => [
+        'create' => -1
+    ]
+    'sec.session' => 'ÆŸ	DA¡êÅä{Îï¨bª'
+    'sec.token' => 'Vk&ÑcDÓ{eû[»¨'
+    'user.password' => '676a413250364333624d626a754b6c7130495a64576d74475a4d4c6e3267534a4b463755527863577250444d44573066616b3656713031754962717a6f59686d5836485146446d6d593870586d355a6d4a69653864673d3d'
+    'user.username' => '219160'
+    'roles' => [
+        0 => 'HR_DEVELOPERS'
+        1 => 'SMIS_DEVELOPER'
+    ]
+    '__id' => 12390
+    'create' => [
+        'type' => 'success'
+        'title' => 'Login'
+        'message' => 'Login successful'
+    ]
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'CONTENT_LENGTH' => '173'
+    'HTTP_SEC_CH_UA' => '\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"91\", \"Chromium\";v=\"91\"'
+    'HTTP_DNT' => '1'
+    'HTTP_X_CSRF_TOKEN' => 'VerFxGB7AhOVpPtAQz0mg8AsRkngc0BpurWy1RQ8Sno3q7WuVx4xYNKJnCQ5cnHThWAyGaM1bSv12caGXW4PEQ=='
+    'HTTP_SEC_CH_UA_MOBILE' => '?0'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=UTF-8'
+    'HTTP_ACCEPT' => 'application/json, text/javascript, */*; q=0.01'
+    'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'
+    'HTTP_ORIGIN' => 'https://lecturersdev.uonbi.ac.ke'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_MODE' => 'cors'
+    'HTTP_SEC_FETCH_DEST' => 'empty'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/site/login'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.9'
+    'HTTP_COOKIE' => '_csrf=3ac4518f069c6a37c23e9b1fbf70a38fd0c6495ae76914e6238bf78b6ba1facda%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22bApj7e3sG-gdzOWPELtPCF-BOltSIREk%22%3B%7D; PHPSESSID=54mtg1qaea3b85nshvu654po08'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.65.134'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '50126'
+    'REDIRECT_URL' => '/site/signin'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/site/signin'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626439518.969
+    'REQUEST_TIME' => 1626439518
+]
+2021-07-16 15:05:35 [139.162.145.250][-][furtppt1ou2b9u7tuer1fqordr][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "bag2". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('bag2', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 15:05:35 [139.162.145.250][-][furtppt1ou2b9u7tuer1fqordr][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73'
+    'HTTP_USER_AGENT' => 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
+    'HTTP_ACCEPT' => '*/*'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '139.162.145.250'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '49464'
+    'REDIRECT_URL' => '/bag2'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/bag2'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626447935.185
+    'REQUEST_TIME' => 1626447935
+]
+2021-07-16 17:04:22 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "HRMIS.STAFFLIST_VIEW" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/models/User.php:216
+    in /var/www/html/lecmodule/models/LoginForm.php:86
+2021-07-16 17:04:22 [41.89.95.137][7743][-][info][application] $_GET = []
+
+$_POST = [
+    '_csrf' => 'ewuYvPTXeUcy1oxIWmqufn7w3WuhjXWfH1CHgFNUorYTZPmRq58hAW2E7RADPPwHPZu_Ksn-FsZ7GPWzMDqRgA=='
+    'LoginForm' => [
+        'payrollNumber' => '172180'
+        'userPassword' => 'KENYA172180'
+    ]
+]
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 'iuia5cmsnfkoog553rdti1lblt'
+    '_csrf' => '7d63086b7a010dd08e1eb275363b349869087d4cbc1b9fbe9a308ca503404c75a:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"hoa-_HXF_RaXYVRyCkbAhscYdHr3cn36\";}'
+]
+
+$_SESSION = [
+    '__flash' => [
+        'create' => -1
+    ]
+    'sec.session' => 'TÉyß©z•PrÍ&øbÈÕ'
+    'sec.token' => '•d–Öoj×~ÕÎBTMzM'
+    'user.password' => '7647514746396e6a67436e326a74444b674d71537a494235374272327a2f4d2b4f42784b623542796e32527871436e3147797035643670797a71754f2f757551386c315a754e7264596e7949536d67354456546d43413d3d'
+    'user.username' => '172180'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_HOD'
+        2 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 7743
+    'create' => [
+        'type' => 'success'
+        'title' => 'Login'
+        'message' => 'Login successful'
+    ]
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0'
+    'HTTP_ACCEPT' => 'application/json, text/javascript, */*; q=0.01'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.5'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_X_CSRF_TOKEN' => 'ewuYvPTXeUcy1oxIWmqufn7w3WuhjXWfH1CHgFNUorYTZPmRq58hAW2E7RADPPwHPZu_Ksn-FsZ7GPWzMDqRgA=='
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded; charset=UTF-8'
+    'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest'
+    'CONTENT_LENGTH' => '174'
+    'HTTP_ORIGIN' => 'https://lecturersdev.uonbi.ac.ke'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/site/login'
+    'HTTP_COOKIE' => 'PHPSESSID=iuia5cmsnfkoog553rdti1lblt; _csrf=7d63086b7a010dd08e1eb275363b349869087d4cbc1b9fbe9a308ca503404c75a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22hoa-_HXF_RaXYVRyCkbAhscYdHr3cn36%22%3B%7D'
+    'HTTP_SEC_FETCH_DEST' => 'empty'
+    'HTTP_SEC_FETCH_MODE' => 'cors'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.95.137'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '51333'
+    'REDIRECT_URL' => '/site/signin'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/site/signin'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626455062.701
+    'REQUEST_TIME' => 1626455062
+]
+2021-07-16 17:04:27 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.DEPARTMENTS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/BaseController.php:55
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:33
+2021-07-16 17:04:31 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.FACULTIES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/BaseController.php:56
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:33
+2021-07-16 17:04:32 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_COURSE_ASSIGNMENT" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:33 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.MARKSHEET_DEF" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:33 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.SEMESTERS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:34 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.DEGREE_PROGRAMMES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:35 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.SEMESTER_DESCRIPTIONS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:36 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.GROUPS" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:36 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.COURSES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/controllers/AllocatedCoursesController.php:80
+2021-07-16 17:04:37 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_CW_ASSESSMENT" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/views/allocated-courses/_lecturerCoursesGrid.php:119
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/ActionColumn.php:270
+2021-07-16 17:04:38 [41.89.95.137][7743][-][error][Schema::loadTableSchema()] Table "MUTHONI.LEC_ASSESSMENT_TYPES" schema cache not found. You must rebuild schema cache, see Schema::buildSchemaCache().
+    in /var/www/html/lecmodule/vendor/neconix/yii2-oci8/src/CachedSchema.php:118
+    in /var/www/html/lecmodule/views/allocated-courses/_lecturerCoursesGrid.php:119
+    in /var/www/html/lecmodule/vendor/kartik-v/yii2-grid/src/ActionColumn.php:270
+2021-07-16 17:04:27 [41.89.95.137][7743][-][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = [
+    'PHPSESSID' => 's624jl54gt9448gjt5g4gnb6j4'
+    '_csrf' => 'e5ffd5fa8589e4efa3cac439b24c549d21109d0dce03283c1cde8ea9167e37e0a:2:{i:0;s:5:\"_csrf\";i:1;s:32:\"p2mWLWAo5CQaumc_po4A7NNznZcmUfeV\";}'
+    '_identity' => '03d602a27a598f539a33de7e5ddd866155be260a67a2a5adde5f9174f0f9fb20a:2:{i:0;s:9:\"_identity\";i:1;s:19:\"[7743,null,2592000]\";}'
+]
+
+$_SESSION = [
+    '__flash' => []
+    'sec.session' => 'TÉyß©z•PrÍ&øbÈÕ'
+    'sec.token' => '•d–Öoj×~ÕÎBTMzM'
+    'user.password' => '7647514746396e6a67436e326a74444b674d71537a494235374272327a2f4d2b4f42784b623542796e32527871436e3147797035643670797a71754f2f757551386c315a754e7264596e7949536d67354456546d43413d3d'
+    'user.username' => '172180'
+    'roles' => [
+        0 => 'LEC_SMIS_DEAN'
+        1 => 'LEC_SMIS_HOD'
+        2 => 'LEC_SMIS_LECTURER'
+    ]
+    '__id' => 7743
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_HOST' => 'lecturersdev.uonbi.ac.ke'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0'
+    'HTTP_ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+    'HTTP_ACCEPT_LANGUAGE' => 'en-US,en;q=0.5'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate, br'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_REFERER' => 'https://lecturersdev.uonbi.ac.ke/'
+    'HTTP_COOKIE' => 'PHPSESSID=s624jl54gt9448gjt5g4gnb6j4; _csrf=e5ffd5fa8589e4efa3cac439b24c549d21109d0dce03283c1cde8ea9167e37e0a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22p2mWLWAo5CQaumc_po4A7NNznZcmUfeV%22%3B%7D; _identity=03d602a27a598f539a33de7e5ddd866155be260a67a2a5adde5f9174f0f9fb20a%3A2%3A%7Bi%3A0%3Bs%3A9%3A%22_identity%22%3Bi%3A1%3Bs%3A19%3A%22%5B7743%2Cnull%2C2592000%5D%22%3B%7D'
+    'HTTP_UPGRADE_INSECURE_REQUESTS' => '1'
+    'HTTP_SEC_FETCH_DEST' => 'document'
+    'HTTP_SEC_FETCH_MODE' => 'navigate'
+    'HTTP_SEC_FETCH_SITE' => 'same-origin'
+    'HTTP_SEC_FETCH_USER' => '?1'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at lecturersdev.uonbi.ac.ke Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => 'lecturersdev.uonbi.ac.ke'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '41.89.95.137'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '51344'
+    'REDIRECT_URL' => '/allocated-courses'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/allocated-courses'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626455067.104
+    'REQUEST_TIME' => 1626455067
+]
+2021-07-16 22:26:56 [45.146.164.110][-][3db07hc7h34mtrh8hpm1fo1td4][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "_ignition/execute-solution". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('_ignition/execu...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:26:56 [45.146.164.110][-][3db07hc7h34mtrh8hpm1fo1td4][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'CONTENT_TYPE' => 'application/json'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '44148'
+    'REDIRECT_URL' => '/_ignition/execute-solution'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/_ignition/execute-solution'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474416.025
+    'REQUEST_TIME' => 1626474416
+]
+2021-07-16 22:26:58 [45.146.164.110][-][goairsjpm25jrnht7msh7j4phd][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "api/jsonws/invoke". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('api/jsonws/invo...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:26:58 [45.146.164.110][-][goairsjpm25jrnht7msh7j4phd][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'CONTENT_LENGTH' => '0'
+    'CONTENT_TYPE' => 'application/json'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '55438'
+    'REDIRECT_URL' => '/api/jsonws/invoke'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/api/jsonws/invoke'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474418.117
+    'REQUEST_TIME' => 1626474418
+]
+2021-07-16 22:27:00 [45.146.164.110][-][le1re46stdjog0u34665a9opnn][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "mifs/.;/services/LogService". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('mifs/.;/service...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:27:00 [45.146.164.110][-][le1re46stdjog0u34665a9opnn][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'CONTENT_LENGTH' => '6'
+    'CONTENT_TYPE' => 'x-application/hessian'
+    'HTTP_REFERER' => 'https://41.89.94.73:443'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '50946'
+    'REDIRECT_URL' => '/mifs/.;/services/LogService'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/mifs/.;/services/LogService'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474420.699
+    'REQUEST_TIME' => 1626474420
+]
+2021-07-16 22:27:06 [45.146.164.110][-][bkm1fsrq1ehvmrbaekhcq5fqvb][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "console/". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('console/', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:27:06 [45.146.164.110][-][bkm1fsrq1ehvmrbaekhcq5fqvb][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '44838'
+    'REDIRECT_URL' => '/console/'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/console/'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474426.099
+    'REQUEST_TIME' => 1626474426
+]
+2021-07-16 22:27:03 [45.146.164.110][-][jdhn521tkm87fga5bsiqvnk97s][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('vendor/phpunit/...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:27:03 [45.146.164.110][-][jdhn521tkm87fga5bsiqvnk97s][info][application] $_GET = []
+
+$_POST = [
+    '<?' => 'md5(\"phpunit\")?>'
+]
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'CONTENT_LENGTH' => '19'
+    'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '44586'
+    'REDIRECT_URL' => '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'POST'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474423.408
+    'REQUEST_TIME' => 1626474423
+]
+2021-07-16 22:27:11 [45.146.164.110][-][el8mlb4oarvktu2qdjpkn7mnuv][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "wp-content/plugins/wp-file-manager/readme.txt". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('wp-content/plug...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:27:11 [45.146.164.110][-][el8mlb4oarvktu2qdjpkn7mnuv][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73:443'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'HTTP_CONNECTION' => 'close'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '45.146.164.110'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '42792'
+    'REDIRECT_URL' => '/wp-content/plugins/wp-file-manager/readme.txt'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/wp-content/plugins/wp-file-manager/readme.txt'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474431.293
+    'REQUEST_TIME' => 1626474431
+]
+2021-07-16 22:33:22 [192.241.199.144][-][kcuk0ls3j7h6vlof0evorghnib][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('ecp/Current/exp...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-16 22:33:22 [192.241.199.144][-][kcuk0ls3j7h6vlof0evorghnib][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_SSL_TLS_SNI' => '41.89.94.73'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'SSL_TLS_SNI' => '41.89.94.73'
+    'HTTP_HOST' => '41.89.94.73'
+    'HTTP_USER_AGENT' => 'Mozilla/5.0 zgrab/0.x'
+    'HTTP_ACCEPT' => '*/*'
+    'HTTP_ACCEPT_ENCODING' => 'gzip'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '192.241.199.144'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '38134'
+    'REDIRECT_URL' => '/ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '/ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application'
+    'SCRIPT_NAME' => '/index.php'
+    'PHP_SELF' => '/index.php'
+    'REQUEST_TIME_FLOAT' => 1626474802.467
+    'REQUEST_TIME' => 1626474802
+]
+2021-07-17 00:00:16 [193.107.216.242][-][t10ru5c0pn01g84ue2jepj4cle][error][yii\web\HttpException:404] yii\base\InvalidRouteException: Unable to resolve the request "/a2billing/customer/templates/default/footer.tpl". in /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Module.php:537
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php(104): yii\base\Module->runAction('/a2billing/cust...', Array)
+#1 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#2 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#3 {main}
+
+Next yii\web\NotFoundHttpException: Page not found. in /var/www/html/lecmodule/vendor/yiisoft/yii2/web/Application.php:116
+Stack trace:
+#0 /var/www/html/lecmodule/vendor/yiisoft/yii2/base/Application.php(392): yii\web\Application->handleRequest(Object(yii\web\Request))
+#1 /var/www/html/lecmodule/web/index.php(32): yii\base\Application->run()
+#2 {main}
+2021-07-17 00:00:16 [193.107.216.242][-][t10ru5c0pn01g84ue2jepj4cle][info][application] $_GET = []
+
+$_POST = []
+
+$_FILES = []
+
+$_COOKIE = []
+
+$_SESSION = [
+    '__flash' => []
+]
+
+$_SERVER = [
+    'REDIRECT_HTTPS' => 'on'
+    'REDIRECT_STATUS' => '200'
+    'HTTPS' => 'on'
+    'HTTP_HOST' => '41.89.94.73'
+    'HTTP_CONNECTION' => 'keep-alive'
+    'HTTP_ACCEPT_ENCODING' => 'gzip, deflate'
+    'HTTP_ACCEPT' => '*/*'
+    'HTTP_USER_AGENT' => 'python-requests/2.6.0 CPython/2.7.5 Linux/3.10.0-1160.31.1.el7.x86_64'
+    'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin'
+    'SERVER_SIGNATURE' => '<address>Apache/2.2.15 (CentOS) Server at 41.89.94.73 Port 443</address>
+'
+    'SERVER_SOFTWARE' => 'Apache/2.2.15 (CentOS)'
+    'SERVER_NAME' => '41.89.94.73'
+    'SERVER_ADDR' => '41.89.94.73'
+    'SERVER_PORT' => '443'
+    'REMOTE_ADDR' => '193.107.216.242'
+    'DOCUMENT_ROOT' => '/var/www/html/lecmodule/web'
+    'SERVER_ADMIN' => 'dba@uonbi.ac.ke'
+    'SCRIPT_FILENAME' => '/var/www/html/lecmodule/web/index.php'
+    'REMOTE_PORT' => '42784'
+    'REDIRECT_URL' => '/a2billing/customer/templates/default/footer.tpl'
+    'GATEWAY_INTERFACE' => 'CGI/1.1'
+    'SERVER_PROTOCOL' => 'HTTP/1.1'
+    'REQUEST_METHOD' => 'GET'
+    'QUERY_STRING' => ''
+    'REQUEST_URI' => '//a2billing/customer/templates/default/fo

@@ -1,0 +1,10 @@
+{
+    "currency" : "KES",
+    "amount_paid" : "1.00",
+    "invoice_amount" : "1.00",
+    "status" : "settled",
+    "invoice_number" : "GWVYVX",
+    "payment_date" : "2023-08-01 16:07:41Z",
+    "token_hash" : "NTIzOTA5MWU0MWQwNDljYTI0M2ZlYzViOTkwZDA0NzVmYTM3ZmU3MTRiM2RiNWM5Y2M1MTQ3MDNlNTFmZDBkZQ==",
+    "last_payment_amount" : "1.00"
+    }

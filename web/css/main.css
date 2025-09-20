@@ -1,0 +1,198 @@
+:root {
+  --bs-primary: #008cba;
+  --bs-secondary: #eee;
+  --bs-success: #43ac6a;
+  --bs-info: #5bc0de;
+  --bs-warning: #e99002;
+  --bs-danger: #f04124;
+  --bs-light: #eee;
+  --bs-dark: #333;
+  --bs-blue: #008cba;
+  --bs-indigo: #6610f2;
+  --bs-purple: #6f42c1;
+  --bs-pink: #e83e8c;
+  --bs-red: #f04124;
+  --bs-orange: #fd7e14;
+  --bs-yellow: #e99002;
+  --bs-green: #43ac6a;
+  --bs-teal: #20c997;
+  --bs-cyan: #5bc0de;
+  --bs-white: #fff;
+  --bs-gray: #888;
+  --bs-gray-dark: #333;
+  --bs-gray-100: #f8f9fa;
+  --bs-gray-200: #eee;
+  --bs-gray-300: #dee2e6;
+  --bs-gray-400: #ccc;
+  --bs-gray-500: #adb5bd;
+  --bs-gray-600: #888;
+  --bs-gray-700: #495057;
+  --bs-gray-800: #333;
+  --bs-gray-900: #222;
+  --bs-black: #000;
+}
+
+html, body {
+    height: 100%;
+    font-size: 14px;
+}
+
+.dropdown-menu{
+    background:#fff !important;
+    border: 1px solid rgba(0,0,0,.15);
+}
+.dropdown-menu .dropdown-header{
+    padding: 10px 15px;
+    color: var(--bs-primary) !important;
+    font-size: 13px;
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 2px;
+}
+
+.site-bg-color {
+    background-color: var(--bs-primary) !important;
+}
+
+.navbar.navbar-inverse.navbar-expand-lg.navbar-dark{
+    background-color: var(--bs-primary) !important;
+}
+
+.panel-primary > .panel-heading {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+    color: #ffffff;
+    background-color: var(--bs-primary);
+}
+
+.wrap {
+    background-image: url('../img/index_bg.gif');
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+
+.wrap > .container {
+    background-color: #ffffff;
+    padding: 15px;
+}
+
+.footer {
+    height: 60px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.kv-panel-heading {
+    background-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+
+.kv-grouped-row {
+    color: #fff;
+    background-color: var(--bs-primary) !important;
+}
+
+.form-border {
+    padding: 10px; 
+    margin-bottom: 10px; 
+    border: 1px solid var(--bs-primary);
+    border-radius: .25rem;
+}
+
+.form-control {
+    border-radius: .25rem !important;
+    height: auto !important;
+}
+
+.required-control-label:after {
+    content:" *" !important;
+    color:#ff0000 !important;
+}
+
+.btn {
+    border-radius: .25rem;
+    font-size: 0.875rem;
+    padding: .25rem .5rem;
+    line-height: 1.5;
+}
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #fff;
+}
+
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+    background-color: #0079a1 !important;
+    border-color: #0079a1 !important;
+}
+
+.modal-header {
+    background-color: var(--bs-primary); 
+    color: #ffffff;
+}
+
+.accordion-button {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--bs-primary);
+    background-color: #e7f1ff;
+}
+
+.allocation-grid-container .kv-grid-table tbody tr td {
+    font-size: 0.875rem;
+    padding: 0.4rem;
+}
+
+.lecturer-badge {
+    display: inline-block;
+    padding: .35em .65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+    margin-bottom: .2rem;
+}
+
+.lecturer-badge.course-leader {
+    background-color: var(--bs-success);
+}
+
+.lecturer-badge.not-course-leader {
+    background-color: var(--bs-gray-600);
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+    width: 100%;
+    min-height: 38px;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}
