@@ -16,7 +16,7 @@ use yii\grid\ActionColumn;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
 
-dd($searchPerformed);
+// dd($searchPerformed);
 /** @var yii\web\View $this */
 /** @var app\models\search\SemesterSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
