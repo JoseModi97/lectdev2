@@ -115,6 +115,19 @@ class SemesterController extends BaseController
             'searchPerformed' => $searchPerformed,
         ]);
     }
+    public function actionAcademicYear()
+    {
+        $searchModel = new SemesterSearch();
+        $params = $this->request->queryParams;
+
+
+        $dataProvider = $searchModel->year($params);
+
+        return $this->render('academic-year', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
 
     /**
      * Get user programmes

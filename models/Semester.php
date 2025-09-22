@@ -64,6 +64,7 @@ class Semester extends ActiveRecord
             [['ADMIN_USER'], 'string', 'max' => 255],
             [['SESSION_TYPE'], 'string', 'max' => 15],
             [['SEMESTER_ID'], 'unique'],
+            [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE'], 'required'],
         ];
     }
 

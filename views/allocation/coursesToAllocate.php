@@ -4,6 +4,7 @@
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
 
+use app\components\BreadcrumbHelper;
 use app\models\Course;
 
 
@@ -34,6 +35,18 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\ServerErrorHttpException;
+
+
+echo BreadcrumbHelper::generate([
+    [
+        'label' => 'Semesters',
+        'url' => [
+            '/semester/index',
+            'filtersFor' => Yii::$app->request->get('CourseAllocationFilter')['purpose']
+        ]
+    ],
+    'Courses'
+]);
 
 $this->registerCss(
     '

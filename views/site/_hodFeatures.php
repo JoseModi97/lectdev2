@@ -61,7 +61,7 @@ $this->title = '';
 
     <header class="header-bar d-flex justify-content-between align-items-center mb-3">
         <h5 class="text-primary d-flex align-items-center">
-            <i class="bi bi-diagram-3-fill me-2"></i> Lecturer Module
+            <i class="bi bi-diagram-3-fill me-2"></i> Hod
         </h5>
         <div class="d-flex align-items-center w-50">
             <div class="input-group">
@@ -83,18 +83,6 @@ $this->title = '';
     <div class="row row-cols-1 row-cols-lg-3 g-3 menu-container">
         <?php
         $jsonMenu = [
-            Menu::build([
-                Menu::parent('LECTURER', [
-                    Menu::link('My course allocations', '/gr', 'fa fa-tasks'),
-                    Menu::link('Student marksheet', '/gr', 'fa fa-file-alt'),
-                    Menu::link('HoD approval', '/gr', 'fa fa-check-circle'),
-                    Menu::link('Dean approval', '/gr', 'fa fa-user-check'),
-                    Menu::parent('Reports', [
-                        Menu::link('Marks submission status', '/gr', 'fa fa-clipboard-check'),
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-bar'),
-                    ]),
-                ]),
-            ]),
             Menu::build([
                 Menu::parent('HOD', [
                     Menu::link('View uploaded results (interface 1)', '/gr', 'fa fa-file-upload'),
@@ -124,42 +112,6 @@ $this->title = '';
                         Menu::link('Course analysis (Submitted)', '/gr', 'fa fa-chart-line'),
                         Menu::link('Consolidated marksheet (level based)', '/gr', 'fa fa-layer-group'),
                         Menu::link('Received/Missing marks', '/gr', 'fa fa-exclamation-triangle'),
-                    ]),
-                ]),
-            ]),
-            Menu::build([
-                Menu::parent('Dean', [
-                    Menu::link('View uploaded results (interface 1)', '/gr', 'fa fa-file-upload'),
-                    Menu::link('View uploaded results (interface 2)', '/gr', 'fa fa-file-upload'),
-                    Menu::parent('Reports', [
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-pie'),
-                        Menu::link('Course analysis (Submitted)', '/gr', 'fa fa-chart-line'),
-                        Menu::link('Consolidated marksheet (level based)', '/gr', 'fa fa-layer-group'),
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-chalkboard'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-ruler'),
-                        Menu::link('Received/Missing marks', '/gr', 'fa fa-exclamation-triangle'),
-                    ]),
-                ]),
-            ]),
-            Menu::build([
-                Menu::parent('Faculty administrator', [
-                    Menu::link('Records returned scripts', '/gr', 'fa fa-archive'),
-                    Menu::parent('Reports', [
-                        Menu::link('Returned scripts', '/gr', 'fa fa-file-contract'),
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-chalkboard'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-briefcase'),
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-bar'),
-                    ]),
-                ]),
-            ]),
-            Menu::build([
-                Menu::parent('System administrator', [
-                    Menu::parent('Reports', [
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-user-cog'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-cogs'),
                     ]),
                 ]),
             ]),

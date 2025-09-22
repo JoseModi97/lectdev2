@@ -672,7 +672,7 @@ class AllocationController extends BaseController
             $marksheetId = $post['marksheetId'];
             $lecturers = $post['lecturers'];
             foreach ($lecturers as $lec) {
-                $courseAssignment = CourseAssignment::find() 
+                $courseAssignment = CourseAssignment::find()
                     ->where(['PAYROLL_NO' => $lec, 'MRKSHEET_ID' => $marksheetId])->one();
 
                 if (!$courseAssignment->delete()) {
@@ -719,7 +719,7 @@ class AllocationController extends BaseController
                 'Remove allocated lecturers',
                 'The selected lecturer(s) have been removed from the course successfully.'
             );
-            return $this->refresh();
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         } catch (Exception $ex) {
             $transaction->rollBack();
             $message = $ex->getMessage();
@@ -727,7 +727,7 @@ class AllocationController extends BaseController
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             Yii::$app->session->setFlash('danger', 'Failed to remove lecturer', $message);
-            return $this->refresh();
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         }
     }
 
@@ -742,7 +742,7 @@ class AllocationController extends BaseController
     {
         foreach ($lecturers as $payrollNo) {
             $marksheetDef = MarksheetDef::findOne($marksheetId);
-            $courseAssignment = CourseAssignment::find() 
+            $courseAssignment = CourseAssignment::find()
                 ->where(['PAYROLL_NO' => $payrollNo, 'MRKSHEET_ID' => $marksheetId])
                 ->one();
 
@@ -770,7 +770,7 @@ class AllocationController extends BaseController
      */
     private function sendAllocationAlert(MarksheetDef $marksheetDef, string $payrollNo, string $reason): void
     {
-        $staff = EmpVerifyView::find() 
+        $staff = EmpVerifyView::find()
             ->select(['EMP_TITLE', 'SURNAME', 'OTHER_NAMES', 'FAC_CODE', 'EMAIL'])
             ->where(['PAYROLL_NO' => $payrollNo])->asArray()->one();
 

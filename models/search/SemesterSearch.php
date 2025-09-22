@@ -22,7 +22,7 @@ class SemesterSearch extends Semester
         return [
             [['SEMESTER_ID', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'INTAKE_CODE', 'START_DATE', 'END_DATE', 'FIRST_SEMESTER', 'SEMESTER_NAME', 'CLOSING_DATE', 'ADMIN_USER', 'GROUP_CODE', 'REGISTRATION_DEADLINE', 'DESCRIPTION_CODE', 'SESSION_TYPE', 'DISPLAY_DATE', 'REGISTRATION_DATE', 'SEMESTER_TYPE', 'purpose'], 'safe'],
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
-            [['purpose'], 'required'],
+            [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE'], 'required'],
         ];
     }
 
@@ -58,6 +58,7 @@ class SemesterSearch extends Semester
                 'MUTHONI.GROUPS.GROUP_NAME AS GROUP_NAME',
             ])
             ->distinct()
+            ->joinWith(['semesterDescription'])
             ->joinWith(['levelOfStudy' => function ($q) {
                 $q->select([
                     'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
@@ -97,8 +98,8 @@ class SemesterSearch extends Semester
         ]);
 
         $query->andFilterWhere(['like', 'MUTHONI.SEMESTERS.SEMESTER_ID', $this->SEMESTER_ID])
-            ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.ACADEMIC_YEAR', $this->ACADEMIC_YEAR])
-            ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.DEGREE_CODE', $this->DEGREE_CODE])
+            // ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.ACADEMIC_YEAR', $this->ACADEMIC_YEAR])
+            // ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.DEGREE_CODE', $this->DEGREE_CODE])
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.INTAKE_CODE', $this->INTAKE_CODE])
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.START_DATE', $this->START_DATE])
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.END_DATE', $this->END_DATE])
@@ -113,6 +114,53 @@ class SemesterSearch extends Semester
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.DISPLAY_DATE', $this->DISPLAY_DATE])
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.REGISTRATION_DATE', $this->REGISTRATION_DATE])
             ->andFilterWhere(['like', 'MUTHONI.SEMESTERS.SEMESTER_TYPE', $this->SEMESTER_TYPE]);
+
+
+        $query->andWhere(['MUTHONI.SEMESTERS.DEGREE_CODE' => $this->DEGREE_CODE]);
+        $query->andWhere(['MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $this->ACADEMIC_YEAR]);
+
+        return $dataProvider;
+    }
+    public function year($params, $formName = null)
+    {
+
+        $academicYear =  [
+            '2024/2025',
+            '2023/2024',
+            '2022/2023',
+            '2021/2022',
+            '2020/2021',
+            '2019/2020'
+        ];
+        $query = Semester::find()
+            ->select([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR',
+            ])
+            ->distinct()
+            ->where(['MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $academicYear]);
+        if (!empty(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'])) {
+            $query->andWhere([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '',
+            ]);
+        }
+        $query->orderBy([
+            'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => SORT_DESC,
+        ]);
+
+
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params, $formName);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
 
         return $dataProvider;
     }

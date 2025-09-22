@@ -15,19 +15,15 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
-use app\components\BreadcrumbHelper;
 
-
+// dd($searchPerformed);
 /** @var yii\web\View $this */
 /** @var app\models\search\SemesterSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 /** @var bool $searchPerformed */
 // dd(array_column($dataProvider->getModels(), 'ACADEMIC_YEAR'));
-$code = $deptCode;
 
-echo BreadcrumbHelper::generate([
-    ['label' => 'Programme Timetables']
-]);
+
 $data = $dataProvider->getModels();
 
 
@@ -38,38 +34,21 @@ $filtertype = [
     'serviceCourses' => 'Service Courses',
 ];
 
-$filterSemester = [];
-foreach ($data as $model) {
-    $filterSemester[$model['SEMESTER_CODE']] = $model['SEMESTER_CODE'] . ' - ' . $model['semesterDescription']['SEMESTER_DESC'];
-}
+// $filterSemester = [];
+// foreach ($data as $model) {
+//     $filterSemester[$model['SEMESTER_CODE']] = $model['SEMESTER_CODE'] . ' - ' . $model['semesterDescription']['SEMESTER_DESC'];
+// }
 
 
 $this->title = 'Semesters';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="semester-index">
-    <div class="card shadow-sm rounded-0 w-100">
-        <div class="card-header text-white fw-bold" style="background-image: linear-gradient(#455492, #304186, #455492);">
-            Academic Filters
-        </div>
-        <div class=" card-body row g-3">
-            <?php echo $this->render('_search', [
-                'model' => $searchModel,
-                'facCode' => $facCode
-            ]); ?>
-        </div>
 
-    </div>
     <div class="card shadow-sm rounded-0 w-100">
         <div class="card-body row g-3">
             <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
-            <?php
-            if (!empty(Yii::$app->request->get('SemesterSearch'))) {
-            ?>
-                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
-            <?php
-            }
-            ?>
+
 
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -83,81 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'bordered' => true,
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
-
-                    // 'SEMESTER_ID',
-                    // 'ACADEMIC_YEAR',
-                    // 'DEGREE_CODE',
-                    [
-                        'attribute' => 'LEVEL_OF_STUDY',
-                        'header' => '<b>LEVEL OF STUDY</b>',
-                        'format' => 'raw',
-                        'value' => function ($model) {
-                            $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $model->LEVEL_OF_STUDY]);
-                            return $level ? $level->NAME : null;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? ArrayHelper::map(
-                            LevelOfStudy::find()->where(['LEVEL_OF_STUDY' => array_unique(array_column($dataProvider->query->all(), 'LEVEL_OF_STUDY'))])->all(),
-                            'LEVEL_OF_STUDY',
-                            'NAME'
-                        ) : false,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => [
-                            'placeholder' => 'Select level...',
-                        ],
-                        'group' => true,
-                        'groupedRow' => true,
-                    ],
-                    [
-                        // SEMESTER_CODE column
-                        'attribute' => 'SEMESTER_CODE',
-                        'header' => '<b>SEMESTER CODE</b>',
-                        'format' => 'raw',
-                        'width' => '50%',
-                        'value' => function ($model) {
-                            if ($model->SEMESTER_CODE === null) {
-                                return ucfirst('(not set)');
-                            }
-
-                            $semDesc = SemesterDescription::findOne(['DESCRIPTION_CODE' => $model->DESCRIPTION_CODE]);
-
-                            $words = $model->SEMESTER_CODE . ' - ' . $semDesc['SEMESTER_DESC'];
-                            return $words;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? $filterSemester : false,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => ['placeholder' => 'Any Semester'],
-
-                    ],
-                    [
-                        'attribute' => 'GROUP_CODE',
-                        'header' => '<b>GROUP CODE</b>',
-                        'format' => 'raw',
-                        'width' => '40%',
-                        'group' => true,
-                        'subGroupOf' => 1,
-                        'value' => function ($model) {
-                            $group = Group::findOne(['GROUP_CODE' => $model->GROUP_CODE]);
-                            return $group ? $group->GROUP_NAME : null;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? ArrayHelper::map(
-                            Group::find()->where(['GROUP_CODE' => array_unique(array_column($dataProvider->query->all(), 'GROUP_CODE'))])->all(),  // all groups
-                            'GROUP_CODE',
-                            'GROUP_NAME'
-                        ) : false,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => [
-                            'placeholder' => 'Select a group...',
-                        ],
-                    ],
+                    'ACADEMIC_YEAR',
 
                     //'INTAKE_CODE',
                     //'START_DATE',
@@ -185,15 +90,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'width' => '10%',
                         'contentOptions' => ['class' => 'w-auto text-center', 'style' => 'white-space: nowrap;'], // ? let td size fit button
                         'headerOptions' => ['class' => 'w-auto text-center', 'style' => 'white-space: nowrap;'],
-                        'visible' => !empty(Yii::$app->request->get('SemesterSearch')['purpose']),
-                        'value' => function ($model) use ($deptCode) {
+                        'visible' => !empty(Yii::$app->request->get('filtersFor')),
+                        'value' => function ($model) {
                             $filterParameters = [
-                                'purpose'      => Yii::$app->request->get('SemesterSearch')['purpose'],
+                                'purpose'      => Yii::$app->request->get('filtersFor'),
                                 'academicYear' => $model->ACADEMIC_YEAR,
-                                'degreeCode'   => $model->DEGREE_CODE,
-                                'levelOfStudy' => $model->LEVEL_OF_STUDY,
-                                'group'        => $model->GROUP_CODE,
-                                'semester'     => $model->SEMESTER_CODE,
                             ];
 
                             $url = Url::to([
@@ -202,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 '_csrf' => Yii::$app->request->csrfToken,
                             ]);
                             return Html::a(
-                                '<b> Courses (' . fetchMarkSheets($filterParameters, $deptCode, Yii::$app->request->get('SemesterSearch')['purpose']) . ')</b>',
+                                '<b> Courses</b>',
                                 $url,
                                 [
                                     'title' => 'Click to apply No Supplementary filter',

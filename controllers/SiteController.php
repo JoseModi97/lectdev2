@@ -117,6 +117,49 @@ class SiteController extends Controller
             ]);
         }
     }
+    /**
+     * Display home page
+     *
+     * @return string|Response
+     */
+    public function actionHod()
+    {
+
+        /**
+         * We use the username, password and secretKey stored in the session to make a db connection.
+         * If either is missing logout user.
+         */
+        $session = Yii::$app->session;
+        if (
+            empty($session->get('username')) || empty($session->get('password'))
+            || empty($session->get('secretKey'))
+        ) {
+            Yii::$app->user->switchIdentity(null);
+        }
+
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect('site/login');
+        } else {
+            $staff = EmpVerifyView::find()
+                ->select([
+                    'DEPT_CODE',
+                    'DEPT_NAME',
+                    'FAC_CODE',
+                    'FACULTY_NAME'
+                ])
+                ->where(['PAYROLL_NO' => Yii::$app->user->identity->PAYROLL_NO])
+                ->asArray()
+                ->one();
+            $deptCode = $staff['DEPT_CODE'];
+            $facCode = $staff['FAC_CODE'];
+
+
+            return $this->render('hod', [
+                'deptCode' => $deptCode,
+                'facCode' => $facCode
+            ]);
+        }
+    }
 
     /**
      * Display login page

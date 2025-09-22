@@ -14,12 +14,19 @@ use yii\db\Expression;
  * @var yii\widgets\ActiveForm $form
  */
 
-$semester = Semester::find()->where(['ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? ''])->all();
+$semester = Semester::find()
+    ->where([
+        'ACADEMIC_YEAR' => (Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '')
+    ])
+    ->all();
+
 
 $searchDegreeCodes = array_unique(array_column($semester, 'DEGREE_CODE'));
 
+$filter = Yii::$app->request->get('filtersFor') ?? Yii::$app->request->get('SemesterSearch')['purpose'] ?? '';
 
-
+$model->purpose = $filter;
+$model->DEGREE_CODE = Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? '';
 $degreeCodes = ArrayHelper::map(
     DegreeProgramme::find()
         ->select([
@@ -78,12 +85,12 @@ $academicYears = ArrayHelper::map(
     'ACADEMIC_YEAR',
     'ACADEMIC_YEAR'
 );
-$model->purpose = 'nonSuppCourses';
+
 ?>
 
 <div class="semester-search container-fluid px-0">
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        'action' => ['index', 'filtersFor' => $filter],
         'method' => 'get',
     ]); ?>
 
@@ -113,7 +120,7 @@ $model->purpose = 'nonSuppCourses';
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-        <div class="col-md-6" style="display:none;">
+        <div class="col-md-6" style="display: none;">
             <?= $form->field($model, 'purpose')->widget(Select2::class, [
                 'data' => [
                     'nonSuppCourses' => 'Non Supplementary Courses',
@@ -122,7 +129,7 @@ $model->purpose = 'nonSuppCourses';
                     'serviceCourses' => 'Service Courses',
                 ],
                 'options' => [
-                    'placeholder' => 'Select Purpose...',
+                    'placeholder' => 'Select se...',
                 ],
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
@@ -135,7 +142,7 @@ $model->purpose = 'nonSuppCourses';
         ]) ?>
         <?= Html::button('Reset', [
             'class' => 'btn btn-outline-secondary px-4',
-            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to(['index']) . '";'
+            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to(['index?filtersFor=' . $filter]) . '";'
         ]) ?>
     </div>
 
