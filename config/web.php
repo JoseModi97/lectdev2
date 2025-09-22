@@ -13,6 +13,7 @@ $config = [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+        '@views' => '@app/views'
     ],
     'name' => 'Lecturer Module',
     'components' => [
@@ -38,28 +39,9 @@ $config = [
             'viewPath' => '@app/mail',
             'useFileTransport' => false,
             'transport' => [
-                'dsn' => 'smtp://test@uonbi.ac.ke:dpopaasghbnoxgel@smtp.gmail.com:587?encryption=tls',
+                'dsn' => 'smtp://test@uonbi.ac.ke:dpopaasghbnoxgel@smtp.gmail.com:25',
             ],
         ],
-
-
-        // 'mailer' => [
-        //     'class' => 'yii\swiftmailer\Mailer',
-        //     'transport' => [
-        //         'class' => 'Swift_SmtpTransport',
-        //         'host' => 'smtp.gmail.com',
-        //         'username' => "examadmin@uonbi.ac.ke",
-        //         'password' => "@719053_nyake#.",
-        //         'port' => '587',
-        //         'encryption' => 'tls',
-        //         // 'host' => 'smtp.mailtrap.io',
-        //         // 'username' => 'd38acd23973124',
-        //         // 'password' => '4badb45ed6fd76',
-        //         // 'port' => '2525',
-        //         // 'encryption' => 'tls',
-        //     ],
-        //     'enableSwiftMailerLogging' => true,
-        // ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -77,6 +59,7 @@ $config = [
                 'home' => '/site/index',
                 'login' => 'site/login',
                 'logout' => 'site/logout',
+                'dashboard' => 'site/dashboard'
 
             ],
 

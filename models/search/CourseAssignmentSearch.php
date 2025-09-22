@@ -1,11 +1,10 @@
 <?php
 
 /**
- * @author Rufusy Idachi
- * @email idachirufus@gmail.com
- * @create date 20-01-2021 09:35:23 
- * @modify date 20-01-2021 09:35:23 
- * @desc [description]
+ * @author Jack Jmm
+ * @email jackmutiso37@gmail.com
+ * @create date 12-9-2025 20:50:22 
+ * @desc 
  */
 
 namespace app\models\search;
@@ -17,6 +16,9 @@ use yii\db\ActiveQuery;
 
 class CourseAssignmentSearch extends CourseAssignment
 {
+    public $academicYear;
+    public $programme;
+
     /**
      * {@inheritdoc}
      * 
@@ -24,9 +26,13 @@ class CourseAssignmentSearch extends CourseAssignment
      */
     public function attributes(): array
     {
-        return array_merge(parent::attributes(), [ 
+        return array_merge(parent::attributes(), [
             'marksheetDef.course.COURSE_CODE',
             'marksheetDef.course.COURSE_NAME',
+            'marksheetDef.semester.ACADEMIC_YEAR',
+            'academicYear',
+            'marksheetDef.semester.LEVEL_OF_STUDY',
+            'marksheetDef.group.GROUP_NAME',
         ]);
     }
 
@@ -40,8 +46,14 @@ class CourseAssignmentSearch extends CourseAssignment
                 [
                     'marksheetDef.course.COURSE_CODE',
                     'marksheetDef.course.COURSE_NAME',
-                ], 
-            'safe'],
+                    'marksheetDef.semester.ACADEMIC_YEAR',
+                    'academicYear',
+                    'marksheetDef.semester.LEVEL_OF_STUDY',
+                    'marksheetDef.group.GROUP_NAME',
+                    'programme',
+                ],
+                'safe'
+            ],
         ];
     }
 
@@ -50,7 +62,6 @@ class CourseAssignmentSearch extends CourseAssignment
      */
     public function scenarios(): array
     {
-        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
@@ -70,8 +81,9 @@ class CourseAssignmentSearch extends CourseAssignment
                 'CA.ASSIGNMENT_DATE'
             ])
             ->where(['CA.PAYROLL_NO' => $additionalParams['payrollNo']])
-            ->joinWith(['marksheetDef MD' => function(ActiveQuery $q){ 
-                    $q->select([ 
+            ->joinWith([
+                'marksheetDef MD' => function (ActiveQuery $q) {
+                    $q->select([
                         'MD.MRKSHEET_ID',
                         'MD.EXAM_ROOM',
                         'MD.SEMESTER_ID',
@@ -84,8 +96,9 @@ class CourseAssignmentSearch extends CourseAssignment
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->joinWith(['marksheetDef.semester SM' => function(ActiveQuery $q){
-                    $q->select([ 
+            ->joinWith([
+                'marksheetDef.semester SM' => function (ActiveQuery $q) {
+                    $q->select([
                         'SM.SEMESTER_ID',
                         'SM.ACADEMIC_YEAR',
                         'SM.LEVEL_OF_STUDY',
@@ -98,67 +111,79 @@ class CourseAssignmentSearch extends CourseAssignment
                 }
             ], true, 'INNER JOIN');
 
-        /**
-         * @todo On course allocation, also indicate in which academic year was the course given.
-         * This will work to avoid just pulling all courses for each academic years.
-         * We only want courses that have been assigned in the current academic year, even if they belong to other
-         * academic years.
-         */
-//        $academicYear = $additionalParams['academicYear'];
-//        if(!is_null($academicYear)){
-//            $query->andWhere(['SM.ACADEMIC_YEAR' => $academicYear]);
-//        }
-
         $semesterType = $additionalParams['semesterType'];
-        if($semesterType === 'other'){
+        if ($semesterType === 'other') {
             $query->andWhere(['NOT', ['SM.SEMESTER_TYPE' => 'SUPPLEMENTARY']]);
-        }elseif($semesterType === 'supplementary'){
+        } elseif ($semesterType === 'supplementary') {
             $query->andWhere(['SM.SEMESTER_TYPE' => 'SUPPLEMENTARY']);
         }
 
-        $query->joinWith(['marksheetDef.group GR' => function(ActiveQuery $q){
-                    $q->select([ 
-                        'GR.GROUP_CODE',
-                        'GR.GROUP_NAME'
-                    ]);
-                }
-            ], true, 'INNER JOIN')
-            ->joinWith(['marksheetDef.course CS' => function(ActiveQuery $q){
-                    $q->select([ 
+        $query->joinWith([
+            'marksheetDef.group GR' => function (ActiveQuery $q) {
+                $q->select([
+                    'GR.GROUP_CODE',
+                    'GR.GROUP_NAME'
+                ]);
+            }
+        ], true, 'INNER JOIN')
+            ->joinWith([
+                'marksheetDef.course CS' => function (ActiveQuery $q) {
+                    $q->select([
                         'CS.COURSE_ID',
                         'CS.COURSE_CODE',
                         'CS.COURSE_NAME'
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->joinWith(['marksheetDef.semester.degreeProgramme DEG' => function(ActiveQuery $q){
-                    $q->select([ 
+            ->joinWith([
+                'marksheetDef.semester.degreeProgramme DEG' => function (ActiveQuery $q) {
+                    $q->select([
                         'DEG.DEGREE_CODE',
                         'DEG.DEGREE_NAME'
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->joinWith(['marksheetDef.semester.semesterDescription DESC' => function(ActiveQuery $q){
-                    $q->select([ 
+            ->joinWith([
+                'marksheetDef.semester.semesterDescription DESC' => function (ActiveQuery $q) {
+                    $q->select([
                         'DESC.DESCRIPTION_CODE',
                         'DESC.SEMESTER_DESC'
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->orderBy(['SM.ACADEMIC_YEAR' => SORT_DESC]);
+
+            ->orderBy([
+                'SM.ACADEMIC_YEAR' => SORT_DESC,
+                'SM.SEMESTER_CODE' => SORT_ASC,
+                'DEG.DEGREE_NAME' => SORT_ASC,
+                'DEG.DEGREE_CODE' => SORT_ASC,
+                'SM.LEVEL_OF_STUDY' => SORT_ASC,
+                'CS.COURSE_CODE' => SORT_ASC,
+            ]);
+
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => false,
             'pagination' => [
-                'pagesize' => 20,
+                'pagesize' => 50,
             ],
         ]);
 
         $this->load($params);
+
         $query->andFilterWhere(['like', 'CS.COURSE_CODE', $this->getAttribute('marksheetDef.course.COURSE_CODE')]);
         $query->andFilterWhere(['like', 'CS.COURSE_NAME', $this->getAttribute('marksheetDef.course.COURSE_NAME')]);
+        $query->andFilterWhere(['like', 'SM.LEVEL_OF_STUDY', $this->getAttribute('marksheetDef.semester.LEVEL_OF_STUDY')]);
+        $query->andFilterWhere(['like', 'GR.GROUP_NAME', $this->getAttribute('marksheetDef.group.GROUP_NAME')]);
 
+
+        if (!empty($this->academicYear)) {
+            $query->andWhere(['SM.ACADEMIC_YEAR' => $this->academicYear]);
+        }
+        if (!empty($this->programme)) {
+            $query->andWhere(['DEG.DEGREE_CODE' => $this->programme]);
+        }
         return $dataProvider;
     }
 }

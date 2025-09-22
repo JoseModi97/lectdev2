@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -36,7 +35,7 @@ use yii\db\ActiveRecord;
 class Marksheet extends ActiveRecord
 {
     public $cnt;
-
+    
     /**
      * {@inheritdoc}
      */
@@ -51,7 +50,7 @@ class Marksheet extends ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+ * {@inheritdoc}
      */
     public function rules(): array
     {
@@ -114,23 +113,5 @@ class Marksheet extends ActiveRecord
     public function getExamType(): ActiveQuery
     {
         return $this->hasOne(ExamType::class, ['EXAMTYPE_CODE' => 'EXAM_TYPE']);
-    }
-
-    public function getMarksheetDef()
-    {
-        return $this->hasOne(MarksheetDef::class, ['MRKSHEET_ID' => 'MRKSHEET_ID']);
-    }
-
-    public function getCourseDescription()
-    {
-        return $this->marksheetDef && $this->marksheetDef->course
-            ? "{$this->marksheetDef->course->COURSE_CODE} - {$this->marksheetDef->course->COURSE_NAME}"
-            : 'N/A';
-    }
-    public function getSemesterCode()
-    {
-        return $this->marksheetDef && $this->marksheetDef->semester
-            ? $this->marksheetDef->semester->SEMESTER_CODE ?? 'N/A'
-            : 'N/A';
     }
 }

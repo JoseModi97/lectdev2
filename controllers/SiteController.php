@@ -117,11 +117,6 @@ class SiteController extends Controller
             ]);
         }
     }
-    /**
-     * Display home page
-     *
-     * @return string|Response
-     */
     public function actionHod()
     {
 
@@ -161,6 +156,10 @@ class SiteController extends Controller
         }
     }
 
+    public function actionDashboard()
+    {
+        return $this->render('dashboard');
+    }
     /**
      * Display login page
      *

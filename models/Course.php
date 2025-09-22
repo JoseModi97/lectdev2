@@ -1,7 +1,10 @@
 <?php
+
 /**
- * @author Rufusy Idachi
- * @email idachirufus@gmail.com
+ * @author Jack Jmm
+ * @email jackmutiso37@gmail.com
+ * @create date 12-9-2025 20:50:22 
+ * @desc 
  */
 
 namespace app\models;
