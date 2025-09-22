@@ -249,54 +249,9 @@ class AllocationController extends BaseController
     public function actionGive(): string
     {
         try {
-            $courseFilter = new CourseAllocationFilter();
+            $allocationContext = $this->prepareAllocationViewData();
 
-            $session = Yii::$app->session;
-
-            // Save course filters in the session for retrieval on page redirects
-            if (!empty(Yii::$app->request->get()['CourseAllocationFilter'])) {
-                $session['CourseAllocationFilter'] = Yii::$app->request->get();
-            }
-
-            if (!$courseFilter->load($session->get('CourseAllocationFilter')) || !$courseFilter->validate()) {
-                throw new Exception('Failed to load filters for course allocations.');
-            }
-
-            $purpose = $courseFilter->purpose;
-
-            $coursesSearch = null;
-            if ($purpose === 'nonSuppCourses' || $purpose === 'suppCourses') {
-                $coursesSearch = new MarksheetDefAllocationSearchNew();
-            }
-
-            if ($purpose === 'requestedCourses' || $purpose === 'serviceCourses') {
-                $coursesSearch = new AllocationRequestsSearchNew();
-            }
-            $coursesProvider = $coursesSearch->search($this->deptCode, $courseFilter);
-
-            $viewFile = 'coursesToAllocate';
-            if ($purpose === 'requestedCourses' || $purpose === 'serviceCourses') {
-                $viewFile = 'requestedCourses';
-            }
-
-            $panelHeading = 'Programme timetables';
-            if ($purpose === 'suppCourses') {
-                $panelHeading = 'Supplementary timetables';
-            } elseif ($purpose === 'requestedCourses') {
-                $panelHeading = 'Lecturer requests';
-            } elseif ($purpose === 'serviceCourses') {
-                $panelHeading = 'Service courses';
-            }
-
-            return $this->render($viewFile, [
-                'title' => 'Allocate courses to lecturers',
-                'coursesProvider' => $coursesProvider,
-                'coursesSearch' => $coursesSearch,
-                'filter' => $courseFilter,
-                'deptCode' => $this->deptCode,
-                'deptName' => $this->deptName,
-                'panelHeading' => $panelHeading
-            ]);
+            return $this->render($allocationContext['view'], $allocationContext['params']);
         } catch (Exception $ex) {
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
@@ -304,6 +259,105 @@ class AllocationController extends BaseController
             }
             throw new ServerErrorHttpException($message, 500);
         }
+    }
+
+    /**
+     * Render allocation grid content without layout wrappers for AJAX detail rows.
+     *
+     * @return string
+     * @throws ServerErrorHttpException
+     */
+    public function actionGivePartial(): string
+    {
+        try {
+            $allocationContext = $this->prepareAllocationViewData();
+            $gridId = Yii::$app->request->get('gridId', $allocationContext['params']['gridId']);
+            $showNotes = filter_var(Yii::$app->request->get('showNotes', false), FILTER_VALIDATE_BOOLEAN);
+            $wrap = filter_var(Yii::$app->request->get('wrap', false), FILTER_VALIDATE_BOOLEAN);
+
+            $params = array_merge($allocationContext['params'], [
+                'gridId' => $gridId,
+                'renderBreadcrumbs' => false,
+                'includeHelpers' => false,
+                'showNotes' => $showNotes,
+                'wrap' => $wrap,
+            ]);
+
+            return $this->renderAjax($allocationContext['view'], $params);
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+
+    /**
+     * Prepare shared context for allocation views.
+     *
+     * @return array{view:string,params:array}
+     * @throws Exception
+     */
+    private function prepareAllocationViewData(): array
+    {
+        $courseFilter = new CourseAllocationFilter();
+        $session = Yii::$app->session;
+
+        $requestFilters = Yii::$app->request->get('CourseAllocationFilter');
+        if (!empty($requestFilters)) {
+            $session['CourseAllocationFilter'] = Yii::$app->request->get();
+        }
+
+        if (!$courseFilter->load($session->get('CourseAllocationFilter')) || !$courseFilter->validate()) {
+            throw new Exception('Failed to load filters for course allocations.');
+        }
+
+        $purpose = $courseFilter->purpose;
+        if ($purpose === 'nonSuppCourses' || $purpose === 'suppCourses') {
+            $coursesSearch = new MarksheetDefAllocationSearchNew();
+        } else {
+            $coursesSearch = new AllocationRequestsSearchNew();
+        }
+
+        $coursesProvider = $coursesSearch->search($this->deptCode, $courseFilter);
+
+        $viewFile = 'coursesToAllocate';
+        if ($purpose === 'requestedCourses' || $purpose === 'serviceCourses') {
+            $viewFile = 'requestedCourses';
+        }
+
+        $panelHeading = 'Programme timetables';
+        if ($purpose === 'suppCourses') {
+            $panelHeading = 'Supplementary timetables';
+        } elseif ($purpose === 'requestedCourses') {
+            $panelHeading = 'Lecturer requests';
+        } elseif ($purpose === 'serviceCourses') {
+            $panelHeading = 'Service courses';
+        }
+
+        $gridId = 'non-supp-courses-grid';
+        if ($purpose === 'suppCourses') {
+            $gridId = 'supp-courses-grid';
+        } elseif ($purpose === 'requestedCourses') {
+            $gridId = 'requested-courses-grid';
+        } elseif ($purpose === 'serviceCourses') {
+            $gridId = 'service-courses-grid';
+        }
+
+        return [
+            'view' => $viewFile,
+            'params' => [
+                'title' => 'Allocate courses to lecturers',
+                'coursesProvider' => $coursesProvider,
+                'coursesSearch' => $coursesSearch,
+                'filter' => $courseFilter,
+                'deptCode' => $this->deptCode,
+                'deptName' => $this->deptName,
+                'panelHeading' => $panelHeading,
+                'gridId' => $gridId,
+            ],
+        ];
     }
 
     /**
