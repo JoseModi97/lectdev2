@@ -25,6 +25,7 @@ use Yii;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
@@ -285,10 +286,17 @@ class AllocationController extends BaseController
 
             return $this->renderAjax($allocationContext['view'], $params);
         } catch (Exception $ex) {
-            $message = $ex->getMessage();
+            $message = 'Failed to load course allocation details.';
             if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
+
+            Yii::error($ex->getMessage(), __METHOD__);
+
+            if (Yii::$app->request->isAjax) {
+                return '<div class="alert alert-danger mb-0">' . Html::encode($message) . '</div>';
+            }
+
             throw new ServerErrorHttpException($message, 500);
         }
     }
@@ -304,13 +312,20 @@ class AllocationController extends BaseController
         $courseFilter = new CourseAllocationFilter();
         $session = Yii::$app->session;
 
-        $requestFilters = Yii::$app->request->get('CourseAllocationFilter');
-        if (!empty($requestFilters)) {
-            $session['CourseAllocationFilter'] = Yii::$app->request->get();
-        }
+        $queryParams = Yii::$app->request->get();
+        $requestFilters = $queryParams['CourseAllocationFilter'] ?? [];
 
-        if (!$courseFilter->load($session->get('CourseAllocationFilter')) || !$courseFilter->validate()) {
-            throw new Exception('Failed to load filters for course allocations.');
+        if (!empty($requestFilters)) {
+            if (!$courseFilter->load($queryParams) || !$courseFilter->validate()) {
+                throw new Exception('Failed to load filters for course allocations.');
+            }
+
+            $session->set('CourseAllocationFilter', $queryParams);
+        } else {
+            $savedFilters = $session->get('CourseAllocationFilter');
+            if (empty($savedFilters) || !$courseFilter->load($savedFilters) || !$courseFilter->validate()) {
+                throw new Exception('Failed to load filters for course allocations.');
+            }
         }
 
         $purpose = $courseFilter->purpose;

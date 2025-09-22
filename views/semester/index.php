@@ -22,6 +22,9 @@ echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
 $data = $dataProvider->getModels();
+$semesterSearchParams = Yii::$app->request->get('SemesterSearch', []);
+$filtersForParam = Yii::$app->request->get('filtersFor');
+$purpose = $semesterSearchParams['purpose'] ?? $filtersForParam ?? '';
 
 
 $filtertype = [
@@ -55,11 +58,22 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="card shadow-sm rounded-0 w-100">
         <div class="card-body row g-3">
-            <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
+            <h5><?= $filtertype[$filtersForParam] ?? $filtertype[$purpose] ?? '' ?></h5>
             <?php
-            if (!empty(Yii::$app->request->get('SemesterSearch'))) {
+            if (!empty($semesterSearchParams)) {
+                $academicYear = $semesterSearchParams['ACADEMIC_YEAR'] ?? '';
+                $degreeCode = $semesterSearchParams['DEGREE_CODE'] ?? '';
+                $degree = $degreeCode !== '' ? DegreeProgramme::findOne(['DEGREE_CODE' => $degreeCode]) : null;
             ?>
-                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
+                <h5>
+                    <?= Html::encode($academicYear) ?>
+                    <?php if ($degreeCode !== '') : ?>
+                        | <?= Html::encode($degreeCode) ?>
+                        <?php if ($degree) : ?>
+                            | <?= Html::encode($degree->DEGREE_NAME) ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </h5>
             <?php
             }
             ?>
@@ -71,9 +85,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function () {
                     return GridView::ROW_COLLAPSED;
                 },
-                'detailUrl' => function ($model) use ($deptCode) {
+                'detailUrl' => function ($model) use ($purpose) {
+                    if (empty($purpose)) {
+                        return '#';
+                    }
+
                     $filterParameters = [
-                        'purpose'      => Yii::$app->request->get('SemesterSearch')['purpose'],
+                        'purpose'      => $purpose,
                         'academicYear' => $model->ACADEMIC_YEAR,
                         'degreeCode'   => $model->DEGREE_CODE,
                         'levelOfStudy' => $model->LEVEL_OF_STUDY,
@@ -97,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'collapseIcon' => '<i class="fas fa-chevron-up"></i>',
                 'contentOptions' => ['class' => 'text-center align-middle'],
                 'headerOptions' => ['class' => 'text-center align-middle'],
-                'visible' => !empty(Yii::$app->request->get('SemesterSearch')['purpose']),
+                'visible' => !empty($purpose),
             ];
 
             $columns = array_merge([
