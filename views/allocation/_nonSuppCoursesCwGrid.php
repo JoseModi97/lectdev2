@@ -33,6 +33,97 @@ use app\models\CourseWorkAssessment;
 use yii\web\ServerErrorHttpException;
 use app\models\EmpVerifyView;
 use app\models\MarksheetDef;
+use yii\helpers\ArrayHelper;
+use app\models\CourseAssignment;
+
+$this->registerCss('
+    .lecturer-badge {
+        display: block;
+        padding: 2px 0;
+        margin-bottom: 2px;
+        font-size: 12px;
+        background-color: #fff;
+        border: none;
+    }
+    .course-leader {
+        /* No specific styles needed */
+    }
+    .not-course-leader {
+        /* No specific styles needed */
+    }
+');
+
+$deptCode = Yii::$app->session->get('user.dept_code');
+
+// Data for lecturer filter
+$lecturersList = ArrayHelper::map(
+    EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
+    'PAYROLL_NO',
+    function ($model) {
+        return $model->SURNAME . ' ' . $model->OTHER_NAMES;
+    }
+);
+
+$lecturerColumn = [
+    'attribute' => 'PAYROLL_NO', // Attribute to filter on
+    'label' => 'Assigned Lecturer(s)',
+    'format' => 'raw',
+    'vAlign' => 'middle',
+    'width' => '25%',
+    'value' => function ($d) {
+        $assignments = CourseAssignment::find()->select(['PAYROLL_NO'])
+            ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])->all();
+        $leadLecturer = '';
+        $otherLecturers = '';
+        $courseLeaderFound = false;
+        $courseLeader = null;
+        if (!empty($assignments)) {
+            foreach ($assignments as $assignment) {
+                $lecturer = EmpVerifyView::find()
+                    ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
+                    ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
+                    ->one();
+
+                if (is_null($lecturer)) {
+                    continue;
+                }
+
+                $lecturerName = '';
+                if (!empty($lecturer->EMP_TITLE)) {
+                    $lecturerName .= $lecturer->EMP_TITLE;
+                }
+
+                if (!empty($lecturer->OTHER_NAMES)) {
+                    $lecturerName .= ' ' . $lecturer->OTHER_NAMES;
+                }
+
+                if (empty($lecturerName)) {
+                    continue;
+                }
+
+                if (!$courseLeaderFound) {
+                    $courseLeader = MarksheetDef::find()
+                        ->select(['PAYROLL_NO'])
+                        ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID, 'PAYROLL_NO' => $lecturer->PAYROLL_NO])->one();
+                }
+
+                if (!$courseLeaderFound && $courseLeader) {
+                    $courseLeaderFound = true;
+                    $leadLecturer = '<div class="lecturer-badge course-leader">' . Html::encode($lecturerName) . ' <span class="badge bg-success">Leader</span></div>';
+                } else {
+                    $otherLecturers .= '<div class="lecturer-badge not-course-leader">' . Html::encode($lecturerName) . '</div>';
+                }
+            }
+        }
+        return $leadLecturer . $otherLecturers;
+    },
+    'filterType' => GridView::FILTER_SELECT2,
+    'filter' => $lecturersList,
+    'filterWidgetOptions' => [
+        'pluginOptions' => ['allowClear' => true],
+    ],
+    'filterInputOptions' => ['placeholder' => 'Any lecturer'],
+];
 
 $actionColumn = [
     'class' => 'kartik\grid\ActionColumn',
@@ -287,6 +378,7 @@ try {
             $groupNameColumn,
             $courseCodeColumn,
             $courseNameColumn,
+            $lecturerColumn,
             $actionColumn
 
         ]

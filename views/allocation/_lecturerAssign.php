@@ -11,7 +11,7 @@
 /* @var string $deptCode */
 
 use app\models\Department;
-use app\models\StaffListView;
+use app\models\EmpVerifyView;
 use yii\helpers\Html;
 use yii\bootstrap5\Modal;
 use yii\widgets\ActiveForm;
@@ -20,10 +20,10 @@ use yii\helpers\ArrayHelper;
 
 $facultyCodes = Yii::$app->params['newFaculties'];
 
-$lecturers = StaffListView::find()
+$lecturers = EmpVerifyView::find()
     ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
-    ->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])
-    ->andWhere(['IN', 'FAC_CODE', $facultyCodes])
+    ->where(['STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])
+    ->orderBy('SURNAME')
     ->all();
 
 $lecturers = ArrayHelper::map($lecturers, 'PAYROLL_NO', function ($lecturer) {
