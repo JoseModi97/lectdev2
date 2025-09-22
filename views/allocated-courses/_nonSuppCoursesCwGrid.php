@@ -276,10 +276,10 @@ $courseworkActionColumn = [
                 if (is_null($cwModel)) {
                     if ($count <= 0) {
                         $linkClass = 'btn btn-xs btn-spacer text-success disabled ';
-                    }else{
+                    } else {
                         $linkClass = 'btn btn-xs btn-spacer btn-create text-success';
                     }
-                    
+
 
                     $linkName = '<i class="fas fa-plus text-success"></i> Coursework';
                     $linkTitle = 'Create coursework';
@@ -313,8 +313,7 @@ $courseworkActionColumn = [
 ];
 
 try {
-    echo "<div class='scrollable-content'>";
-    echo '<div class="filter-section bg-info">';
+    echo '<div class="filter-section">';
     echo Html::beginForm(Url::current([]), 'get', [
         'id' => 'academic-year-filter-form',
         'class' => 'form-inline',
@@ -434,18 +433,13 @@ try {
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             $programmeGroupColumn,
-            $levelOfStudyColumn,
-            $groupNameColumn,
             $courseCodeColumn,
             $courseNameColumn,
-           
-            
+            $levelOfStudyColumn,
+            $groupNameColumn,
             $courseworkActionColumn,
         ]
     ]);
-
-    echo '</div>';
-
 
 
     $this->registerJs("

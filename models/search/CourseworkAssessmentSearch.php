@@ -1,8 +1,9 @@
 <?php
 /**
- * @author Jack Jmm
- * @email jackmutiso37@gmail.com
- * @create date 15-09-2025 17:12:49 
+ * @author Rufusy Idachi
+ * @email idachirufus@gmail.com
+ * @create date 17-12-2020 17:12:49 
+ * @modify date 17-12-2020 17:12:49 
  * @desc Get created course works / exam components
  */
 

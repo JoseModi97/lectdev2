@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  * @desc This file gets students marks for an exam or assessment amrks
@@ -17,20 +16,15 @@ class StudentCourseworkSearch extends StudentCoursework
     /**
      * {@inheritdoc}
      */
-    public $SURNAME;
-    public $OTHER_NAMES;
     public function rules(): array
     {
         return [
             [
                 [
                     'REGISTRATION_NUMBER',
-                    'DATE_ENTERED',
-                    'SURNAME',
-                    'OTHER_NAMES'
-                ],
-                'safe'
-            ],
+                    'DATE_ENTERED'
+                ], 
+            'safe'],
         ];
     }
 
@@ -65,28 +59,22 @@ class StudentCourseworkSearch extends StudentCoursework
                 'SC.LECTURER_APPROVAL_STATUS'
             ])
             ->where(['SC.ASSESSMENT_ID' => $additionalParams['assessmentId']])
-            ->joinWith([
-                'student ST' => function (ActiveQuery $q) {
-                    $q->select([
+            ->joinWith(['student ST' => function(ActiveQuery $q){
+                    $q->select([ 
                         'ST.REGISTRATION_NUMBER',
                         'ST.SURNAME',
                         'ST.OTHER_NAMES'
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->joinWith([
-                'assessment AS' => function (ActiveQuery $q) {
-                    $q->select([
+            ->joinWith(['assessment AS' => function(ActiveQuery $q){
+                    $q->select([ 
                         'AS.ASSESSMENT_ID',
                         'AS.MARKSHEET_ID'
                     ]);
                 }
             ], true, 'INNER JOIN')
-            ->orderBy([
-                'SC.LECTURER_APPROVAL_STATUS' => SORT_DESC,
-                'SC.REGISTRATION_NUMBER' => SORT_ASC,
-
-            ])
+            ->orderBy(['SC.REGISTRATION_NUMBER' => SORT_ASC])
             ->asArray();
 
         $dataProvider = new ActiveDataProvider([
@@ -101,9 +89,7 @@ class StudentCourseworkSearch extends StudentCoursework
 
         $query->andFilterWhere(['LIKE', 'SC.REGISTRATION_NUMBER', $this->REGISTRATION_NUMBER,]);
         $query->andFilterWhere(["TO_CHAR(SC.DATE_ENTERED, 'DD-MON-YYYY')" => strtoupper($this->DATE_ENTERED)]);
-        $query->andFilterWhere(['LIKE', 'ST.SURNAME', $this->SURNAME]);
-        $query->andFilterWhere(['LIKE', 'ST.OTHER_NAMES', $this->OTHER_NAMES]);
-        
+
         return $dataProvider;
     }
 }

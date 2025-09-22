@@ -1,10 +1,6 @@
 <?php
-
 /**
- * @author Jack Jmm
- * @email jackmutiso37@gmail.com
- * @create date 12-9-2025 20:50:22 
- * @desc 
+ * @author Rufusy Idachi <idachirufus@gmail.com>
  */
 namespace app\models;
 

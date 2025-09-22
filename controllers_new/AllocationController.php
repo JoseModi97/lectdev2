@@ -20,6 +20,7 @@ use app\models\search\AllocationRequestsSearchNew;
 use app\models\search\MarksheetDefAllocationSearchNew;
 use app\models\Semester;
 use app\models\EmpVerifyView;
+use app\models\search\CourseAssignmentSearch;
 use Exception;
 use Yii;
 use yii\db\ActiveQuery;
@@ -109,6 +110,68 @@ class AllocationController extends BaseController
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
     }
+
+
+    public function actionAllocation()
+    {
+        try {
+            $courseAssignmentSearch = new CourseAssignmentSearch();
+
+            // Non-supplementary courses
+            $nonSuppCoursesProvider = $courseAssignmentSearch->search(Yii::$app->request->queryParams, [
+                'payrollNo' => $this->payrollNo,
+                'academicYear' => $this->academicYear,
+                'semesterType' => 'other'
+            ]);
+
+
+            // Supplementary courses
+            $suppCoursesProvider = $courseAssignmentSearch->search(Yii::$app->request->queryParams, [
+                'payrollNo' => $this->payrollNo,
+                'academicYear' => $this->academicYear,
+                'semesterType' => 'supplementary'
+            ]);
+
+            if (empty(Yii::$app->request->queryParams) && empty($nonSuppCoursesProvider->getModels())) {
+                $this->setFlash(
+                    'danger',
+                    'Allocated courses',
+                    'You don\'t have any courses in the system for this academic year.
+                        Kindly liase with your HOD to allocate the same to you'
+                );
+                return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+            }
+
+            // All courses
+            $allCoursesProvider = $courseAssignmentSearch->search(Yii::$app->request->queryParams, [
+                'payrollNo' => $this->payrollNo,
+                'academicYear' => null,
+                'semesterType' => 'all'
+            ]);
+
+            //get user programmes
+            $programmes = $this->getUserProgrammes($this->payrollNo, $nonSuppCoursesProvider);
+
+
+            return $this->render('allocation', [
+                'title' => 'My course allocations',
+                'courseAssignmentSearch' => $courseAssignmentSearch,
+                'nonSuppCoursesProvider' => $nonSuppCoursesProvider,
+                // 'suppCoursesProvider' => $suppCoursesProvider,
+                // 'allCoursesProvider' => $allCoursesProvider,
+                'academicYear' => $this->academicYear,
+                'facCode' => $this->facCode,
+                'programmes' => $programmes
+            ]);
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+
 
     /**
      * Get available programmes in a user\'s faculty filtered by academic year
@@ -892,5 +955,43 @@ class AllocationController extends BaseController
         $layout = '@app/mail/layouts/html';
         $view = '@app/mail/views/' . $viewName;
         SmisHelper::sendEmails($emails, $layout, $view);
+    }
+
+    public function getUserProgrammes($payrollNo, $dataProvider = null)
+    {
+        $programmes = [];
+
+        if ($dataProvider) {
+            $models = $dataProvider->getModels();
+            $uniqueProgrammes = [];
+
+            foreach ($models as $model) {
+                $degreeCode = $model->marksheetDef->semester->degreeProgramme->DEGREE_CODE;
+                $degreeName = $model->marksheetDef->semester->degreeProgramme->DEGREE_NAME;
+
+                if (!isset($uniqueProgrammes[$degreeCode])) {
+                    $uniqueProgrammes[$degreeCode] = [
+                        'DEGREE_CODE' => $degreeCode,
+                        'DEGREE_NAME' => $degreeName
+                    ];
+                }
+            }
+
+            $programmes = array_values($uniqueProgrammes);
+        } else {
+            // $programmes = CourseAssignment::find()
+            //     ->select(['DISTINCT DEG.DEGREE_CODE', 'DEG.DEGREE_NAME'])
+            //     ->alias('CA')
+            //     ->innerJoin(['MD' => 'marksheet_def'], 'CA.MRKSHEET_ID = MD.MRKSHEET_ID')
+            //     ->innerJoin(['SM' => 'semester'], 'MD.SEMESTER_ID = SM.SEMESTER_ID')
+            //     ->innerJoin(['DEG' => 'degree_programme'], 'SM.DEGREE_CODE = DEG.DEGREE_CODE')
+            //     ->where(['CA.PAYROLL_NO' => $payrollNo])
+            //     ->orderBy(['DEG.DEGREE_NAME' => SORT_ASC])
+            //     ->asArray()
+            //     ->all();
+
+            $programmes = [];
+        }
+        return $programmes;
     }
 }

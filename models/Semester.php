@@ -67,6 +67,7 @@ class Semester extends ActiveRecord
             [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE'], 'required'],
         ];
     }
+
     /**
      * {@inheritdoc}
      */
@@ -130,17 +131,4 @@ class Semester extends ActiveRecord
     {
         return $this->hasOne(Group::class, ['GROUP_CODE' => 'GROUP_CODE']);
     }
-
-    /**
-     * Gets query for groups
-     * @return ActiveQuery
-     */
-    public function getMarksheetDef(): ActiveQuery
-    {
-        return $this->hasOne(MarksheetDef::class, ['SEMESTER_ID' => 'SEMESTER_ID']);
-    }
-    /**
-     * Gets query for groups
-     * @return ActiveQuery
-     */
 }

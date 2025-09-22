@@ -1,11 +1,12 @@
 <?php
 
 /**
- * @author Jack Jmm
- * @email jackmutiso37@gmail.com
- * @create date 12-9-2025 20:50:22 
- * @desc 
- */
+ * @author Rufusy Idachi
+ * @email idachirufus@gmail.com
+ * @create date 15-12-2020 20:50:22 
+ * @modify date 15-12-2020 20:50:22 
+ * @desc [description]
+ */ 
 
 namespace app\models;
 

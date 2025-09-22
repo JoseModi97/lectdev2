@@ -1,10 +1,11 @@
 <?php
 
 /**
- * @author Jack Jmm
- * @email jackmutiso37@gmail.com
- * @create date 12-9-2025 20:50:22 
- * @desc 
+ * @author Rufusy Idachi
+ * @email idachirufus@gmail.com
+ * @create date 15-12-2020 20:50:22 
+ * @modify date 15-12-2020 20:50:22 
+ * @desc [description]
  */
 
 namespace app\models;
@@ -128,7 +129,7 @@ class MarksheetDef extends ActiveRecord
      */
     public function getMarksheet(): ActiveQuery
     {
-        return $this->hasOne(Marksheet::class, ['MRKSHEET_ID' => 'MRKSHEET_ID']);
+        return $this->hasOne(Marksheet::class,['MRKSHEET_ID' => 'MRKSHEET_ID']);
     }
 
     /**
@@ -137,10 +138,5 @@ class MarksheetDef extends ActiveRecord
     public function getTimetable(): ActiveQuery
     {
         return $this->hasOne(Timetable::class, ['MRKSHEET_ID' => 'MRKSHEET_ID']);
-    }
-
-    public function getCourseAssignment(): ActiveQuery
-    {
-        return $this->hasOne(CourseAssignment::class, ['MRKSHEET_ID' => 'MRKSHEET_ID']);
     }
 }

@@ -121,4 +121,47 @@ class SemesterSearch extends Semester
 
         return $dataProvider;
     }
+    public function year($params, $formName = null)
+    {
+
+        $academicYear =  [
+            '2024/2025',
+            '2023/2024',
+            '2022/2023',
+            '2021/2022',
+            '2020/2021',
+            '2019/2020'
+        ];
+        $query = Semester::find()
+            ->select([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR',
+            ])
+            ->distinct()
+            ->where(['MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $academicYear]);
+        if (!empty(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'])) {
+            $query->andWhere([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '',
+            ]);
+        }
+        $query->orderBy([
+            'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => SORT_DESC,
+        ]);
+
+
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params, $formName);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+
+        return $dataProvider;
+    }
 }

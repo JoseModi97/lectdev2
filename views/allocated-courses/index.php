@@ -19,17 +19,11 @@
 /* @var string $facCode */
 
 use kartik\tabs\TabsX;
-use app\components\BreadcrumbHelper;
 use yii\web\ServerErrorHttpException;
 
 
 $this->title = $title;
 $this->params['breadcrumbs'][] = $this->title;
-
-echo BreadcrumbHelper::generate([
-    ['label' => 'My Course Allocations'] 
-]);
-
 $nonSuppCoursesCw = $this->render('_nonSuppCoursesCwGrid', [
     'gridId' => 'non-supp-courses-cw-grid',
     'dataProvider' => $nonSuppCoursesProvider,
