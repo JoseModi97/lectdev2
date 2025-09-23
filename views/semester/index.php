@@ -221,6 +221,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
+<?php echo $this->render('@app/views/allocation/allocationHelpers', ['deptCode' => $deptCode]); ?>
+
 <?php
 
 

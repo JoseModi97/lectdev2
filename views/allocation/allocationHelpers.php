@@ -111,13 +111,8 @@ $deptCoursesScript = <<< JS
         });
     }
 
-    $('#non-supp-courses-grid-pjax').on('click', '.assign-lecturer', function(e){
-        e.preventDefault();     
-        assignLecturer.call(this);
-    });
-
-    $('#supp-courses-grid-pjax').on('click', '.assign-lecturer', function(e){
-        e.preventDefault();     
+    $(document).on('click', '.assign-lecturer', function(e){
+        e.preventDefault();
         assignLecturer.call(this);
     });
 
@@ -297,34 +292,14 @@ $deptCoursesScript = <<< JS
     });
 
     // Manage lecturers assigned to a course
-    $('#non-supp-courses-grid-pjax').on('click', '.manage-lecturer', function(e){
+    $(document).on('click', '.manage-lecturer', function(e){
         loadModal.call(this, e);
     });
 
-    $('#supp-courses-grid-pjax').on('click', '.manage-lecturer', function(e){
+    // Remove lecturers assigned to a course
+    $(document).on('click', '.remove-lecturer', function(e){
         loadModal.call(this, e);
     });
 
-    // Remove lecturers assigned to a course 
-    $('#non-supp-courses-grid-pjax').on('click', '.remove-lecturer', function(e){
-        loadModal.call(this, e);
-    });
-
-    $('#supp-courses-grid-pjax').on('click', '.remove-lecturer', function(e){
-        loadModal.call(this, e);
-    });
-
-    $('#non-supp-courses-cw-grid-pjax').on('click', '.assign-lecturer', function(e){
-        e.preventDefault();     
-        assignLecturer.call(this);
-    });
-
-    $('#non-supp-courses-cw-grid-pjax').on('click', '.manage-lecturer', function(e){
-        loadModal.call(this, e);
-    });
-
-    $('#non-supp-courses-cw-grid-pjax').on('click', '.remove-lecturer', function(e){
-        loadModal.call(this, e);
-    });
 JS;
 $this->registerJs($deptCoursesScript, \yii\web\View::POS_READY);
