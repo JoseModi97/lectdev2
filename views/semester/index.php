@@ -15,14 +15,73 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use kartik\grid\GridView;
 use yii\helpers\ArrayHelper;
+use app\components\BreadcrumbHelper;
+use app\models\CourseAssignment;
+use app\models\EmpVerifyView;
 
-dd($searchPerformed);
 /** @var yii\web\View $this */
 /** @var app\models\search\SemesterSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 /** @var bool $searchPerformed */
 // dd(array_column($dataProvider->getModels(), 'ACADEMIC_YEAR'));
 $code = $deptCode;
+
+echo BreadcrumbHelper::generate([
+    ['label' => 'Programme Timetables']
+]);
+$data = $dataProvider->getModels();
+
+$lecturersList = ArrayHelper::map(
+    EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
+    'PAYROLL_NO',
+    function ($model) {
+        return $model->SURNAME . ' ' . $model->OTHER_NAMES;
+    }
+);
+$filtertype = [
+    'nonSuppCourses' => 'Non Supplementary Courses',
+    'suppCourses' => 'Supplementary Courses',
+    'requestedCourses' => 'Requested Courses',
+    'serviceCourses' => 'Service Courses',
+];
+
+$actionColumn = [
+    'class' => 'kartik\grid\ActionColumn',
+    'width' => '25%',
+    'template' => '{allocate} {manage} {remove}',
+    'contentOptions' => [
+        'style' => 'white-space: nowrap; width: 30%;',
+        'class' => 'text-center align-middle'
+    ],
+
+    'buttons' => [
+        'allocate' => function ($url, $model, $key) {
+            return Html::a('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate</span>', '#', [
+                'title' => 'Allocate lecturer',
+                'class' => 'assign-lecturer text-decoration-none',
+                'data-id' => 'NULL',
+                'data-marksheetid' => $model->MRKSHEET_ID,
+                'data-type' => 'departmental',
+            ]);
+        },
+        'manage' => function ($url, $model, $key) {
+            return Html::a(
+                '<i class="fas fa-tasks text-primary"></i> <span class="text-dark">Manage</span>',
+                Url::to(['/allocation/allocated-lecturer-render', 'marksheetId' => $model->MRKSHEET_ID, 'purpose' => 'manage']),
+                [
+                    'title' => 'Manage allocated lecturer(s)',
+                    'class' => 'manage-lecturer text-decoration-none',
+                ]
+            );
+        },
+        'remove' => function ($url, $model, $key) {
+            return Html::a('<i class="fas fa-trash text-danger"></i> <span class="text-dark">Remove</span>', Url::to(['/allocation/allocated-lecturer-render', 'marksheetId' => $model->MRKSHEET_ID, 'purpose' => 'remove']), [
+                'title' => 'Remove allocated lecturer(s)',
+                'class' => 'remove-lecturer text-decoration-none',
+            ]);
+        },
+    ]
+];
 
 $this->title = 'Semesters';
 $this->params['breadcrumbs'][] = $this->title;
@@ -42,7 +101,15 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="card shadow-sm rounded-0 w-100">
         <div class="card-body row g-3">
-            <h5><?= Html::encode($this->title) ?></h5>
+            <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
+            <?php
+            if (!empty(Yii::$app->request->get('SemesterSearch'))) {
+            ?>
+                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
+            <?php
+            }
+            ?>
+
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
@@ -56,144 +123,96 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
-                    // 'SEMESTER_ID',
-                    // 'ACADEMIC_YEAR',
-                    // 'DEGREE_CODE',
                     [
-                        'attribute' => 'LEVEL_OF_STUDY',
-                        'header' => '<b>LEVEL OF STUDY</b>',
-                        'format' => 'raw',
+                        'label' => 'Level of Study',
                         'value' => function ($model) {
-                            $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $model->LEVEL_OF_STUDY]);
-                            return $level ? $level->NAME : null;
+                            $semDesc = $model->semester->semesterDescription;
+                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC . ' - ' . $model->semester->group->GROUP_NAME;
                         },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? ArrayHelper::map(
-                            LevelOfStudy::find()->all(),
-                            'LEVEL_OF_STUDY',
-                            'NAME'
-                        ) : false,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => [
-                            'placeholder' => 'Select level...',
-                        ],
+
+                        // 'value' => function ($model) {
+                        //     if ($model->SEMESTER_CODE === null) {
+                        //         return ucfirst('(not set)');
+                        //     }
+
+                        //     $semDesc = SemesterDescription::findOne(['DESCRIPTION_CODE' => $model->semester->DESCRIPTION_CODE]);
+
+                        //     $words = $model->SEMESTER_CODE . ' - ' . $semDesc['SEMESTER_DESC'];
+                        //     return $words;
+                        // },
                         'group' => true,
                         'groupedRow' => true,
+                        'contentOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;'],
                     ],
                     [
-                        // SEMESTER_CODE column
-                        'attribute' => 'SEMESTER_CODE',
-                        'header' => '<b>SEMESTER CODE</b>',
+                        'attribute' => 'course.COURSE_CODE',
+                        'label' => 'Course Code',
+                    ],
+                    [
+                        'attribute' => 'course.COURSE_NAME',
+                        'label' => 'Course Name',
+                    ],
+                    [
+                        'attribute' => 'PAYROLL_NO', // Attribute to filter on
+                        'label' => 'Assigned Lecturer(s)',
                         'format' => 'raw',
-                        'width' => '50%',
-                        'value' => function ($model) {
-                            if ($model->SEMESTER_CODE === null) {
-                                return ucfirst('(not set)');
-                            }
+                        'vAlign' => 'middle',
+                        'width' => '25%',
+                        'value' => function ($d) {
+                            $assignments = CourseAssignment::find()->select(['PAYROLL_NO'])
+                                ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])->all();
+                            $leadLecturer = '';
+                            $otherLecturers = '';
+                            $courseLeaderFound = false;
+                            $courseLeader = null;
+                            if (!empty($assignments)) {
+                                foreach ($assignments as $assignment) {
+                                    $lecturer = EmpVerifyView::find()
+                                        ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
+                                        ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
+                                        ->one();
 
-                            $formatter = new NumberFormatter("en", NumberFormatter::SPELLOUT);
-                            $words = $formatter->format($model->SEMESTER_CODE);
-                            return ucfirst(strtolower($words));
+                                    if (is_null($lecturer)) {
+                                        continue;
+                                    }
+
+                                    $lecturerName = '';
+                                    if (!empty($lecturer->EMP_TITLE)) {
+                                        $lecturerName .= $lecturer->EMP_TITLE;
+                                    }
+
+                                    if (!empty($lecturer->OTHER_NAMES)) {
+                                        $lecturerName .= ' ' . $lecturer->OTHER_NAMES;
+                                    }
+
+                                    if (empty($lecturerName)) {
+                                        continue;
+                                    }
+
+                                    if (!$courseLeaderFound) {
+                                        $courseLeader = MarksheetDef::find()
+                                            ->select(['PAYROLL_NO'])
+                                            ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID, 'PAYROLL_NO' => $lecturer->PAYROLL_NO])->one();
+                                    }
+
+                                    if (!$courseLeaderFound && $courseLeader) {
+                                        $courseLeaderFound = true;
+                                        $leadLecturer = '<div class="lecturer-badge course-leader">' . Html::encode($lecturerName) . ' <span class="badge bg-success">Leader</span></div>';
+                                    } else {
+                                        $otherLecturers .= '<div class="lecturer-badge not-course-leader">' . Html::encode($lecturerName) . '</div>';
+                                    }
+                                }
+                            }
+                            return $leadLecturer . $otherLecturers;
                         },
                         'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? ArrayHelper::map(
-                            Semester::find()->select(['SEMESTER_CODE'])->distinct()->all(),
-                            'SEMESTER_CODE', // actual value
-                            function ($semester) {
-                                $formatter = new NumberFormatter("en", NumberFormatter::SPELLOUT);
-                                return ucfirst(strtolower($formatter->format($semester->SEMESTER_CODE)));
-                            }
-                        ) : false,
+                        'filter' => $lecturersList,
                         'filterWidgetOptions' => [
                             'pluginOptions' => ['allowClear' => true],
                         ],
-                        'filterInputOptions' => [
-                            'placeholder' => 'Select semester...',
-                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any lecturer'],
                     ],
-                    [
-                        'attribute' => 'GROUP_CODE',
-                        'header' => '<b>GROUP CODE</b>',
-                        'format' => 'raw',
-                        'width' => '40%',
-                        'group' => true,
-                        'subGroupOf' => 1,
-                        'value' => function ($model) {
-                            $group = Group::findOne(['GROUP_CODE' => $model->GROUP_CODE]);
-                            return $group ? $group->GROUP_NAME : null;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $searchPerformed ? ArrayHelper::map(
-                            Group::find()->all(),  // all groups
-                            'GROUP_CODE',          // the value
-                            'GROUP_NAME'           // the label shown
-                        ) : false,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => [
-                            'placeholder' => 'Select a group...',
-                        ],
-                    ],
-
-                    //'INTAKE_CODE',
-                    //'START_DATE',
-                    //'END_DATE',
-                    //'FIRST_SEMESTER',
-                    //'SEMESTER_NAME',
-                    //'CLOSING_DATE',
-                    //'ADMIN_USER',
-                    //'REGISTRATION_DEADLINE',
-                    //'DESCRIPTION_CODE',
-                    //'SESSION_TYPE',
-                    //'DISPLAY_DATE',
-                    //'REGISTRATION_DATE',
-                    //'SEMESTER_TYPE',
-                    // [
-                    //     'class' => ActionColumn::className(),
-                    //     'urlCreator' => function ($action, Semester $model, $key, $index, $column) {
-                    //         return Url::toRoute([$action, 'SEMESTER_ID' => $model->SEMESTER_ID]);
-                    //     }
-                    // ],
-
-                    [
-                        'label' => 'Action',
-                        'format' => 'raw',
-                        'width' => '10%',
-                        'contentOptions' => ['class' => 'w-auto text-center', 'style' => 'white-space: nowrap;'], // ? let td size fit button
-                        'headerOptions' => ['class' => 'w-auto text-center', 'style' => 'white-space: nowrap;'],
-                        'visible' => !empty(Yii::$app->request->get('SemesterSearch')['purpose']),
-                        'value' => function ($model) {
-                            $filterParameters = [
-                                'purpose'      => Yii::$app->request->get('SemesterSearch')['purpose'],
-                                'academicYear' => $model->ACADEMIC_YEAR,
-                                'degreeCode'   => $model->DEGREE_CODE,
-                                'levelOfStudy' => $model->LEVEL_OF_STUDY,
-                                'group'        => $model->GROUP_CODE,
-                                'semester'     => $model->SEMESTER_CODE,
-                            ];
-
-                            $url = Url::to([
-                                'allocation/give',
-                                'CourseAllocationFilter' => $filterParameters,
-                                '_csrf' => Yii::$app->request->csrfToken,
-                            ]);
-                            return Html::a(
-                                '<b> Courses</b>',
-                                $url,
-                                [
-                                    'title' => 'Click to apply No Supplementary filter',
-                                    'class' => 'btn btn-sm text-white',
-                                    'style' => "background-image: linear-gradient(#455492, #304186, #455492)",
-                                ]
-                            );
-                        },
-                    ],
-
-
-
+                    $actionColumn,
                 ],
             ]); ?>
         </div>
@@ -203,113 +222,61 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php
-// $filter = new CourseAllocationFilter();
-// $filter->academicYear = '734';
 
-// dd($filter->getAttributes());
-function fetchMarkSheets($filterParameters, $deptCode, $purpose)
-{
-    $filter = new CourseAllocationFilter();
-    $filter->academicYear = $filterParameters['academicYear'];
-    $filter->degreeCode = $filterParameters['degreeCode'];
-    $filter->group = $filterParameters['group'];
-    $filter->levelOfStudy = $filterParameters['levelOfStudy'];
-    $filter->semester = $filterParameters['semester'];
-    $filter->purpose = $purpose;
-    $semesterId = $filter->academicYear . '_' . $filter->degreeCode . '_' . $filter->levelOfStudy
-        . '_' . $filter->semester . '_' . $filter->group;
 
-    $marksheets = app\models\MarksheetDef::find()->select(['MRKSHEET_ID', 'COURSE_ID'])
-        ->where(['SEMESTER_ID' => $semesterId])->asArray()->all();
 
-    $timetableCourses = [];
-    foreach ($marksheets as $marksheet) {
-        $courseId = $marksheet['COURSE_ID'];
-        $course = Course::find()->select(['DEPT_CODE', 'IS_COMMON'])->where(['COURSE_ID' => $courseId])->asArray()->one();
-
-        if ($course['DEPT_CODE'] === $deptCode) {
-            $timetableCourses[] = $courseId;
+$this->registerJs("
+$(document).ready(function() {
+    $('#academic-year-filter').on('change', function() {
+        var form = $('#academic-year-filter-form');
+        var selectedValue = $(this).val();
+        
+        var baseUrl = '" . Url::current([]) . "';
+        var newUrl = baseUrl;
+        
+        if (selectedValue && selectedValue !== '') {
+            var separator = baseUrl.indexOf('?') !== -1 ? '&' : '?';
+            newUrl = baseUrl + separator + 'CourseAssignmentSearch%5BacademicYear%5D=' + encodeURIComponent(selectedValue);
         }
-
-        if (intval($course['IS_COMMON']) === 1) {
-            $timetableCourses[] = $courseId;
+        
+        window.location.href = newUrl;
+    });
+    
+    $('#programme-filter').on('change', function() {
+        var selectedProgramme = $(this).val();
+        var currentUrl = new URL(window.location.href);
+        var params = new URLSearchParams(currentUrl.search);
+        
+        params.delete('CourseAssignmentSearch[programme]');
+        
+        if (selectedProgramme && selectedProgramme !== '') {
+            params.set('CourseAssignmentSearch[programme]', selectedProgramme);
         }
-    }
-
-    $timetableCourses = array_unique($timetableCourses);
-
-    $query = app\models\MarksheetDef::find()
-        ->select([
-            'MUTHONI.MARKSHEET_DEF.MRKSHEET_ID',
-            'MUTHONI.MARKSHEET_DEF.SEMESTER_ID',
-            'MUTHONI.MARKSHEET_DEF.COURSE_ID',
-            'MUTHONI.MARKSHEET_DEF.GROUP_CODE',
-            'MUTHONI.MARKSHEET_DEF.PAYROLL_NO'
-        ])
-        ->where(['MUTHONI.MARKSHEET_DEF.SEMESTER_ID' => $semesterId])
-        ->andWhere(['IN', 'MUTHONI.MARKSHEET_DEF.COURSE_ID', $timetableCourses])
-        ->joinWith(['semester' => function ($q) {
-            $q->select([
-                'MUTHONI.SEMESTERS.SEMESTER_ID',
-                'MUTHONI.SEMESTERS.SEMESTER_CODE',
-                'MUTHONI.SEMESTERS.DEGREE_CODE',
-                'MUTHONI.SEMESTERS.ACADEMIC_YEAR',
-                'MUTHONI.SEMESTERS.LEVEL_OF_STUDY',
-                'MUTHONI.SEMESTERS.DESCRIPTION_CODE',
-                'MUTHONI.SEMESTERS.SEMESTER_TYPE'
-            ]);
-        }], true, 'INNER JOIN');
-    if ($filter->purpose === 'nonSuppCourses') {
-        $query->andWhere(['NOT', ['MUTHONI.SEMESTERS.SEMESTER_TYPE' => 'SUPPLEMENTARY']]);
-    } elseif ($filter->purpose === 'suppCourses') {
-        $query->andWhere(['MUTHONI.SEMESTERS.SEMESTER_TYPE' => 'SUPPLEMENTARY']);
-    }
-
-    $query->joinWith(['semester.degreeProgramme' => function ($q) {
-        $q->select([
-            'MUTHONI.DEGREE_PROGRAMMES.DEGREE_CODE',
-            'MUTHONI.DEGREE_PROGRAMMES.DEGREE_NAME'
-        ]);
-    }], true, 'INNER JOIN')
-        ->joinWith(['semester.semesterDescription DESC' => function ($q) {
-            $q->select([
-                'DESC.DESCRIPTION_CODE',
-                'DESC.SEMESTER_DESC'
-            ]);
-        }], true, 'INNER JOIN')
-        ->joinWith(['group GR' => function ($q) {
-            $q->select([
-                'GR.GROUP_CODE',
-                'GR.GROUP_NAME'
-            ]);
-        }], true, 'INNER JOIN')
-        ->joinWith(['course' => function ($q) {
-            $q->select([
-                'MUTHONI.COURSES.COURSE_ID',
-                'MUTHONI.COURSES.COURSE_CODE',
-                'MUTHONI.COURSES.COURSE_NAME',
-                'MUTHONI.COURSES.DEPT_CODE'
-            ]);
-        }], true, 'INNER JOIN');
-
-    if (!empty($courseFilter->courseCode)) {
-        $query->andWhere(['like', 'MUTHONI.COURSES.COURSE_CODE', $filter->courseCode]);
-    }
-
-    if (!empty($courseFilter->courseName)) {
-        $query->andWhere(['like', 'MUTHONI.COURSES.COURSE_NAME', $filter->courseName]);
-    }
-
-    $query->joinWith(['course.dept' => function ($q) {
-        $q->select([
-            'MUTHONI.DEPARTMENTS.DEPT_CODE',
-            'MUTHONI.DEPARTMENTS.DEPT_NAME',
-            'MUTHONI.DEPARTMENTS.FAC_CODE'
-        ]);
-    }], true, 'INNER JOIN')
-        ->orderBy(['MUTHONI.DEGREE_PROGRAMMES.DEGREE_NAME' => SORT_DESC]);
-
-
-    return count($query->all());
-}
+        
+        var newUrl = currentUrl.pathname + '?' + params.toString();
+        
+        if (params.toString() === '') {
+            newUrl = currentUrl.pathname;
+        }
+        
+        window.location.href = newUrl;
+    });
+    
+    $('.kv-grouped-row').each(function() {
+        var groupText = $(this).find('td').text();
+        
+        if (groupText.indexOf('|') !== -1 && !groupText.includes('SEMESTER')) {
+            $(this).addClass('group-programme-header');
+        } 
+        else if (groupText.indexOf('SEMESTER') !== -1 || groupText.indexOf('YEAR') !== -1) {
+            $(this).addClass('group-level-header');
+        }
+        
+        var nextRows = $(this).nextUntil('.kv-grouped-row');
+        var count = nextRows.length;
+        var headerText = $(this).find('td').html();
+        $(this).find('td').html(headerText + ' <span class=\"badge badge-light ml-2\">' + count + ' course(s)</span>');
+    });
+});
+");
 ?>
