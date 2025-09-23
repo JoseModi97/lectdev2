@@ -131,4 +131,12 @@ class Semester extends ActiveRecord
     {
         return $this->hasOne(Group::class, ['GROUP_CODE' => 'GROUP_CODE']);
     }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getMarksheetDef(): ActiveQuery
+    {
+        return $this->hasOne(MarksheetDef::class, ['SEMESTER_ID' => 'SEMESTER_ID']);
+    }
 }
