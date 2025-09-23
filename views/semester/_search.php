@@ -6,7 +6,12 @@ use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use app\models\Semester;
 use app\models\DegreeProgramme;
+use app\models\LevelOfStudy;
+use app\models\SemesterDescription;
+
+
 use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * @var yii\web\View $this
@@ -14,12 +19,37 @@ use yii\db\Expression;
  * @var yii\widgets\ActiveForm $form
  */
 
+
+
+
+
+
+
+
+
+
+
 $semester = Semester::find()
     ->where([
         'ACADEMIC_YEAR' => (Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '')
     ])
     ->all();
 
+
+
+$rows = (new Query())
+    ->select([
+        'MUTHONI.SEMESTERS.SEMESTER_CODE',
+    ])
+    ->distinct()
+    ->from('MUTHONI.SEMESTERS')
+    ->all();
+
+// dd($model);
+
+$semesterList = ArrayHelper::map($rows, 'SEMESTER_CODE', 'SEMESTER_CODE');
+
+// dd($semesterList);
 
 $searchDegreeCodes = array_unique(array_column($semester, 'DEGREE_CODE'));
 
@@ -86,6 +116,26 @@ $academicYears = ArrayHelper::map(
     'ACADEMIC_YEAR'
 );
 
+$levels = ArrayHelper::map(LevelOfStudy::find()->all(), 'LEVEL_OF_STUDY', 'NAME');
+
+$semesterCodes = ArrayHelper::map(
+    Semester::find()
+        ->select(['MUTHONI.SEMESTERS.DESCRIPTION_CODE', 'MUTHONI.SEMESTERS.SEMESTER_CODE', 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC'])
+        ->leftJoin('MUTHONI.SEMESTER_DESCRIPTIONS', 'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE')
+        ->distinct()
+        ->asArray()
+        ->all(),
+    'DESCRIPTION_CODE',
+    function ($model) {
+        return $model['SEMESTER_CODE'] . ' - ' . $model['SEMESTER_DESC'];
+    }
+);
+
+
+
+
+$sem = ArrayHelper::map(Semester::find()->select(['SEMESTER_CODE'])->distinct()->all(), 'SEMESTER_CODE', 'SEMESTER_CODE')
+
 ?>
 
 <div class="semester-search container-fluid px-0">
@@ -120,6 +170,21 @@ $academicYears = ArrayHelper::map(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                'data' => $levels,
+                'options' => ['placeholder' => 'Select Level of Study...'],
+                'pluginOptions' => ['allowClear' => true],
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'SEMESTER_CODE') ?>
+        </div>
+
+        <div class="col-md-6">
+            <?php $form->field($model, 'courseName') ?>
+        </div>
+
         <div class="col-md-6" style="display: none;">
             <?= $form->field($model, 'purpose')->widget(Select2::class, [
                 'data' => [

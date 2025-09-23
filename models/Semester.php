@@ -135,8 +135,8 @@ class Semester extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getMarksheetDef(): ActiveQuery
+    public function getMarksheetDefs(): ActiveQuery
     {
-        return $this->hasOne(MarksheetDef::class, ['SEMESTER_ID' => 'SEMESTER_ID']);
+        return $this->hasMany(MarksheetDef::class, ['SEMESTER_ID' => 'SEMESTER_ID']);
     }
 }
