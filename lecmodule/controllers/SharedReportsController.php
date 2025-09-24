@@ -421,12 +421,16 @@ class SharedReportsController extends BaseController
             $pdf = new Pdf([
                 'mode' => Pdf::MODE_CORE,
                 'format' => Pdf::FORMAT_A4,
-                'orientation' => Pdf::ORIENT_PORTRAIT,
+                'orientation' => Pdf::ORIENT_LANDSCAPE,
                 'destination' => Pdf::DEST_DOWNLOAD,
                 'content' => $content,
                 'filename' => $fileName,
                 'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
                 'cssInline' => $this->classPerformanceCss(),
+                'marginTop' => 10,
+                'marginBottom' => 10,
+                'marginLeft' => 10,
+                'marginRight' => 10,
                 'options' => [
                     'title' => 'Class Performance Report',
                 ],
@@ -582,16 +586,66 @@ class SharedReportsController extends BaseController
     private function classPerformanceCss(): string
     {
         return <<<CSS
-.class-performance-pdf { font-size: 11pt; }
-.class-performance-pdf .report-header { background-color: #0d6efd; color: #fff; }
-.class-performance-pdf .report-header span { font-weight: 600; }
-.class-performance-pdf .section-title { font-size: 11pt; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #495057; }
-.class-performance-pdf .summary-table th { width: 40%; }
-.class-performance-pdf .bar-track { background-color: #e9ecef; border-radius: 4px; height: 6px; }
-.class-performance-pdf .bar-fill { background-color: #0d6efd; border-radius: 4px; height: 6px; }
-.class-performance-pdf .signatory-block { min-height: 90px; }
-.class-performance-pdf .signatory-block .label { text-transform: uppercase; font-size: 9pt; font-weight: 600; color: #6c757d; }
-.class-performance-pdf .notes { font-size: 9.5pt; color: #6c757d; }
+.class-performance-pdf { font-size: 10pt; color: #1f2933; line-height: 1.4; }
+.class-performance-pdf * { box-sizing: border-box; }
+.card { border: 1px solid #d9dee7; border-radius: 6px; background-color: #ffffff; margin-bottom: 16px; page-break-inside: avoid; }
+.card-header { background-color: #f1f4fb; color: #004f9f; padding: 8px 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; font-size: 9pt; }
+.card-header--primary { background-color: #004f9f; color: #ffffff; }
+.card-body { padding: 12px; }
+.summary-card .card-body { padding-top: 10px; padding-bottom: 10px; }
+.summary-header-grid { width: 100%; border-collapse: collapse; }
+.summary-header-grid td { font-size: 8.5pt; text-transform: uppercase; color: rgba(255, 255, 255, 0.92); padding-right: 8px; }
+.summary-header-grid td.brand { font-weight: 700; letter-spacing: 0.6px; }
+.summary-header-grid td.course { text-align: center; }
+.summary-header-grid td.printed-by { text-align: center; }
+.summary-header-grid td.report-date { text-align: right; }
+.summary-table { width: 100%; border-collapse: collapse; }
+.summary-table th, .summary-table td { padding: 6px 8px; border-bottom: 1px solid #e7ecf3; vertical-align: top; }
+.summary-table tr:last-child th, .summary-table tr:last-child td { border-bottom: none; }
+.summary-table th { width: 35%; font-size: 8.5pt; text-transform: uppercase; color: #6c757d; }
+.summary-table td { font-size: 9.5pt; font-weight: 600; color: #1f2933; }
+.layout { width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 16px; }
+.layout td { vertical-align: top; }
+.layout--grade .layout__col--grade-table { width: 38%; }
+.layout--grade .layout__col--grade-chart { width: 32%; }
+.layout--grade .layout__col--key-figures { width: 30%; }
+.layout--averages .layout__col--average-chart { width: 42%; }
+.layout--averages .layout__col--average-summary { width: 30%; }
+.layout--averages .layout__col--notes { width: 28%; }
+.card--center .card-body { padding-top: 16px; padding-bottom: 16px; }
+.card-body--center { display: block; text-align: center; }
+.chart-wrapper { margin: 0 auto; max-width: 320px; }
+.chart-svg { width: 100%; height: auto; }
+.chart-axis { stroke: #93a3b8; stroke-width: 1; }
+.chart-grid { stroke: #e7ecf3; stroke-width: 1; }
+.chart-bar { fill: #008751; }
+.chart-bar-secondary { fill: #004f9f; }
+.chart-label { font-size: 7.5pt; fill: #4a5568; text-transform: uppercase; }
+.chart-value { font-size: 8pt; fill: #004f9f; font-weight: 700; }
+.chart-tick { font-size: 7.5pt; fill: #6c757d; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 6px 8px; border: 1px solid #d9dee7; font-size: 9pt; color: #1f2933; }
+.table thead th { background-color: #f1f4fb; color: #004f9f; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.3px; }
+.grade-table tbody tr:nth-child(odd) td { background-color: #f9fbff; }
+.grade-table .total-row td { background-color: #f1f4fb; font-weight: 600; }
+.figures-list, .average-list { list-style: none; margin: 0; padding: 0; }
+.figures-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 8.5pt; text-transform: uppercase; color: #6c757d; }
+.figures-list li:last-child { margin-bottom: 0; }
+.figures-list .value { font-weight: 600; color: #1f2933; font-size: 9.5pt; }
+.card-subtitle { font-size: 8.5pt; color: #6c757d; margin: 0 0 10px; }
+.average-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #e7ecf3; text-transform: uppercase; font-size: 8.5pt; color: #6c757d; }
+.average-list li:last-child { border-bottom: none; }
+.average-list .value { font-weight: 600; color: #1f2933; font-size: 9.5pt; }
+.notes-text { font-size: 8.5pt; color: #4a5568; margin: 0; line-height: 1.5; }
+.signatories-card .card-body { padding: 0; }
+.signatories-table { width: 100%; border-collapse: collapse; }
+.signatories-table td { border: 1px solid #d9dee7; padding: 14px; vertical-align: top; }
+.signatory-label { text-transform: uppercase; font-size: 8.5pt; color: #004f9f; font-weight: 600; margin-bottom: 12px; }
+.signature-line { border-bottom: 1px solid #8d99ae; height: 16px; margin-bottom: 12px; }
+.signatory-meta { font-size: 8.5pt; color: #6c757d; margin: 0 0 6px; }
+.signatory-meta:last-child { margin-bottom: 0; }
+.text-end { text-align: right; }
+.fw-semibold { font-weight: 600; }
 CSS;
     }
 
