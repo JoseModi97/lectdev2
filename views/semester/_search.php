@@ -6,7 +6,12 @@ use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use app\models\Semester;
 use app\models\DegreeProgramme;
+use app\models\LevelOfStudy;
+use app\models\SemesterDescription;
+
+
 use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * @var yii\web\View $this
@@ -14,12 +19,71 @@ use yii\db\Expression;
  * @var yii\widgets\ActiveForm $form
  */
 
-$semester = Semester::find()->where(['ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? ''])->all();
+
+
+$data = (new Query())
+    ->select([
+        'MUTHONI.SEMESTERS.SEMESTER_CODE',
+        new \yii\db\Expression(
+            "MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC AS SEMESTER_CODE_DESC"
+        )
+    ])
+    ->distinct()
+    ->from('MUTHONI.MARKSHEET_DEF')
+    ->leftJoin(
+        'MUTHONI.SEMESTERS',
+        'MUTHONI.MARKSHEET_DEF.SEMESTER_ID = MUTHONI.SEMESTERS.SEMESTER_ID'
+    )
+    ->innerJoin(
+        'MUTHONI.SEMESTER_DESCRIPTIONS',
+        'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
+    )
+    ->leftJoin(
+        'MUTHONI.COURSES',
+        "MUTHONI.MARKSHEET_DEF.COURSE_ID = MUTHONI.COURSES.COURSE_ID 
+      AND NOT (MUTHONI.SEMESTERS.SEMESTER_TYPE = 'SUPPLEMENTARY')"
+    )
+    ->orderBy([
+        'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
+    ])
+    ->all();
+
+$semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_CODE_DESC');
+
+
+
+
+
+
+
+$semester = Semester::find()
+    ->where([
+        'ACADEMIC_YEAR' => (Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '')
+    ])
+    ->all();
+
+
+
+$rows = (new Query())
+    ->select([
+        'MUTHONI.SEMESTERS.SEMESTER_CODE',
+    ])
+    ->distinct()
+    ->from('MUTHONI.SEMESTERS')
+    ->all();
+
+// dd($model);
+
+$semesterList = ArrayHelper::map($rows, 'SEMESTER_CODE', 'SEMESTER_CODE');
+
+// dd($semesterList);
 
 $searchDegreeCodes = array_unique(array_column($semester, 'DEGREE_CODE'));
 
+$filter = Yii::$app->request->get('filtersFor') ?? Yii::$app->request->get('SemesterSearch')['purpose'] ?? '';
 
-
+$model->purpose = $filter;
+$model->DEGREE_CODE = Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? '';
 $degreeCodes = ArrayHelper::map(
     DegreeProgramme::find()
         ->select([
@@ -78,12 +142,38 @@ $academicYears = ArrayHelper::map(
     'ACADEMIC_YEAR',
     'ACADEMIC_YEAR'
 );
-$model->purpose = 'nonSuppCourses';
+
+$levels = ArrayHelper::map(LevelOfStudy::find()->all(), 'LEVEL_OF_STUDY', 'NAME');
+
+$semesterCodes = ArrayHelper::map(
+    Semester::find()
+        ->select(['MUTHONI.SEMESTERS.DESCRIPTION_CODE', 'MUTHONI.SEMESTERS.SEMESTER_CODE', 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC'])
+        ->leftJoin('MUTHONI.SEMESTER_DESCRIPTIONS', 'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE')
+        ->distinct()
+        ->asArray()
+        ->all(),
+    'DESCRIPTION_CODE',
+    function ($model) {
+        return $model['SEMESTER_CODE'] . ' - ' . $model['SEMESTER_DESC'];
+    }
+);
+
+
+
+
+$sem = ArrayHelper::map(Semester::find()->select(['SEMESTER_CODE'])->distinct()->all(), 'SEMESTER_CODE', 'SEMESTER_CODE');
+$this->registerCss(
+    "
+    .help-block{
+    color: red;
+    }
+    "
+);
 ?>
 
 <div class="semester-search container-fluid px-0">
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        'action' => ['index', 'filtersFor' => $filter],
         'method' => 'get',
     ]); ?>
 
@@ -93,12 +183,12 @@ $model->purpose = 'nonSuppCourses';
                 'data' => $academicYears,
                 'options' => [
                     'placeholder' => 'Select Academic Year...',
-                    'onchange' => <<<JS
-                        $.post("/semester/degcode?ACADEMIC_YEAR=" + $(this).val(), function(data) {
-                            console.log(data);
-                            $("select#degreeCodeSelect").html(data).val(null).trigger("change");
-                        });
-                    JS,
+                    // 'onchange' => <<<JS
+                    //     $.post("/semester/degcode?ACADEMIC_YEAR=" + $(this).val(), function(data) {
+                    //         console.log(data);
+                    //         $("select#degreeCodeSelect").html(data).val(null).trigger("change");
+                    //     });
+                    // JS,
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
@@ -113,7 +203,26 @@ $model->purpose = 'nonSuppCourses';
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-        <div class="col-md-6" style="display:none;">
+        <div class="col-md-6">
+            <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                'data' => $levels,
+                'options' => ['placeholder' => 'Select Level of Study...'],
+                'pluginOptions' => ['allowClear' => true],
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
+                'data' => $semesterLists,
+                'options' => ['placeholder' => 'Select Semester...'],
+                'pluginOptions' => ['allowClear' => true],
+            ]) ?>
+        </div>
+
+        <div class="col-md-6">
+            <?php $form->field($model, 'courseName') ?>
+        </div>
+
+        <div class="col-md-6" style="display: none;">
             <?= $form->field($model, 'purpose')->widget(Select2::class, [
                 'data' => [
                     'nonSuppCourses' => 'Non Supplementary Courses',
@@ -122,7 +231,7 @@ $model->purpose = 'nonSuppCourses';
                     'serviceCourses' => 'Service Courses',
                 ],
                 'options' => [
-                    'placeholder' => 'Select Purpose...',
+                    'placeholder' => 'Select se...',
                 ],
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
@@ -135,7 +244,7 @@ $model->purpose = 'nonSuppCourses';
         ]) ?>
         <?= Html::button('Reset', [
             'class' => 'btn btn-outline-secondary px-4',
-            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to(['index']) . '";'
+            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to(['index?filtersFor=' . $filter]) . '";'
         ]) ?>
     </div>
 

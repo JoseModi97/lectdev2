@@ -396,10 +396,10 @@ class MarksApprovalController extends BaseController
                 throw new Exception('A course marksheet must be provided.');
             }
 
-            $marksheetDetails = SmisHelper::marksheetDetails($marksheetId);
+            $reportDetails = SmisHelper::performanceReportDetails($marksheetId);
 
-            $courseCode = $marksheetDetails['courseCode'];
-            $courseName = $marksheetDetails['courseName'];
+            $courseCode = $reportDetails['courseCode'];
+            $courseName = $reportDetails['courseName'];
 
             $searchModel = new MarksApprovalAssessmentSearch();
             $assessmentsDataProvider = $searchModel->search($marksheetId);
@@ -417,6 +417,7 @@ class MarksApprovalController extends BaseController
                 'panelHeading' => $panelHeading,
                 'searchModel' => $searchModel,
                 'assessmentsDataProvider' => $assessmentsDataProvider,
+                'reportDetails' => $reportDetails,
                 'deptCode' => $this->deptCode,
                 'deptName' => $this->deptName,
                 'facCode' => $this->facCode,

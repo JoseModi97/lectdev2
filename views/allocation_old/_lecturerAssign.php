@@ -44,6 +44,7 @@ Modal::begin([
     'id' => 'allocate-course-lecturers-modal',
     'size' => 'modal-md',
     'options' => ['data-backdrop' => "static", 'data-keyboard' => "false"],
+    'headerOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492);'],
 ]);
 ?>
 
@@ -51,7 +52,7 @@ Modal::begin([
 <!-- course details -->
 <div class="card" style="padding:10px; margin-bottom:10px; border: 1px solid #008cba;border-radius: 5px;">
     <div class="card-body">
-        <p class="card-text"><span class="text-primary">MARKSHEET: </span>
+        <p class="card-text"><span class="text-p">MARKSHEET: </span>
             <span class="lecturer-allocation-marksheet-id"> </span>
         </p>
         <div class="row">
@@ -134,7 +135,8 @@ Modal::begin([
         <?=
         Html::button('submit', [
             'id' => 'submit-internal-lecturers-or-requests',
-            'class' => 'btn btn-primary my-2'
+            'class' => 'btn text-white my-2',
+            'style' => "background-image: linear-gradient(#455492, #304186, #455492)"
         ]);
         ?>
     </div>

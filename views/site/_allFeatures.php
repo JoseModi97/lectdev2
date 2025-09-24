@@ -3,9 +3,11 @@
 use app\assets\JstreeAsset;
 use yii\helpers\Html;
 use app\components\Menu;
+use yii\helpers\Url;
 
 JstreeAsset::register($this);
 $this->title = '';
+
 ?>
 
 <style>
@@ -89,7 +91,11 @@ $this->title = '';
                     Menu::link('Dean approval', '/gr', 'fa fa-user-check'),
                     Menu::parent('Reports', [
                         Menu::link('Marks submission status', '/gr', 'fa fa-clipboard-check'),
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-bar'),
+                        Menu::link(
+                            'Course analysis',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'lecturer'],
+                            'fa fa-chart-bar'
+                        ),
                     ]),
                 ]),
             ]),
@@ -99,17 +105,40 @@ $this->title = '';
                     Menu::link('View uploaded results (interface 2)', '/gr', 'fa fa-file-upload'),
                     Menu::link('View uploaded results (interface 3)', '/gr', 'fa fa-file-upload'),
                     Menu::parent('Allocate lecturers', [
-                        Menu::link('Programme timetables', '/gr', 'fa fa-calendar-alt'),
-                        Menu::link('Supplementary timetables', '/gr', 'fa fa-calendar-plus'),
+                        Menu::link('Programme timetables', '/semester/index?filtersFor=nonSuppCourses', 'fa fa-calendar-alt'),
+                        Menu::link('Supplementary timetables', '/semester/index?filtersFor=suppCourses', 'fa fa-calendar-plus'),
                         Menu::parent('Departmental requests', [
-                            Menu::link('Lecturer requests', '/gr', 'fa fa-chalkboard-teacher'),
+                            Menu::link(
+                                'Lecturer requests',
+                                Url::to([
+                                    'allocation/give',
+                                    'CourseAllocationFilter' => [
+                                        'purpose' => 'requestedCourses',
+                                        'academicYear' => '2024/2025',
+                                    ],
+                                    '_csrf' => Yii::$app->request->csrfToken,
+                                ]),
+                                'fa fa-chalkboard-teacher'
+                            ),
                             Menu::link('Service courses', '/gr', 'fa fa-book-open'),
                         ]),
                     ]),
                     Menu::parent('Reports', [
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-pie'),
-                        Menu::link('Course analysis (Submitted)', '/gr', 'fa fa-chart-line'),
-                        Menu::link('Consolidated marksheet (level based)', '/gr', 'fa fa-layer-group'),
+                        Menu::link(
+                            'Course analysis',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'hod'],
+                            'fa fa-chart-pie'
+                        ),
+                        Menu::link(
+                            'Course analysis (Submitted)',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'hod', 'restrictedTo' => 'submitted'],
+                            'fa fa-chart-line'
+                        ),
+                        Menu::link(
+                            'Consolidated marksheet (level based)',
+                            ['/shared-reports/student-consolidated-marks-filters', 'level' => 'hod'],
+                            'fa fa-layer-group'
+                        ),
                         Menu::link('Received/Missing marks', '/gr', 'fa fa-exclamation-triangle'),
                     ]),
                 ]),
@@ -119,12 +148,24 @@ $this->title = '';
                     Menu::link('View uploaded results (interface 1)', '/gr', 'fa fa-file-upload'),
                     Menu::link('View uploaded results (interface 2)', '/gr', 'fa fa-file-upload'),
                     Menu::parent('Reports', [
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-pie'),
-                        Menu::link('Course analysis (Submitted)', '/gr', 'fa fa-chart-line'),
-                        Menu::link('Consolidated marksheet (level based)', '/gr', 'fa fa-layer-group'),
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-chalkboard'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-ruler'),
+                        Menu::link(
+                            'Course analysis',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'dean'],
+                            'fa fa-chart-pie'
+                        ),
+                        Menu::link(
+                            'Course analysis (Submitted)',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'dean', 'restrictedTo' => 'submitted'],
+                            'fa fa-chart-line'
+                        ),
+                        Menu::link(
+                            'Consolidated marksheet (level based)',
+                            ['/shared-reports/student-consolidated-marks-filters', 'level' => 'dean'],
+                            'fa fa-layer-group'
+                        ),
+                        Menu::link('Created timetables', ['/dean-reports/department-timetables'], 'fa fa-calendar-check'),
+                        Menu::link('Lecturer course allocation', ['/dean-reports/course-allocations-in-departments'], 'fa fa-chalkboard'),
+                        Menu::link('Course work definition', ['/dean-reports/course-work-definition-in-departments'], 'fa fa-ruler'),
                         Menu::link('Received/Missing marks', '/gr', 'fa fa-exclamation-triangle'),
                     ]),
                 ]),
@@ -134,19 +175,23 @@ $this->title = '';
                     Menu::link('Records returned scripts', '/gr', 'fa fa-archive'),
                     Menu::parent('Reports', [
                         Menu::link('Returned scripts', '/gr', 'fa fa-file-contract'),
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-chalkboard'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-briefcase'),
-                        Menu::link('Course analysis', '/gr', 'fa fa-chart-bar'),
+                        Menu::link('Created timetables', ['/faculty-admin-reports/department-timetables'], 'fa fa-calendar-check'),
+                        Menu::link('Lecturer course allocation', ['/faculty-admin-reports/course-allocations-in-departments'], 'fa fa-chalkboard'),
+                        Menu::link('Course work definition', ['/faculty-admin-reports/course-work-definition-in-departments'], 'fa fa-briefcase'),
+                        Menu::link(
+                            'Course analysis',
+                            ['/shared-reports/course-analysis-filters', 'level' => 'dean'],
+                            'fa fa-chart-bar'
+                        ),
                     ]),
                 ]),
             ]),
             Menu::build([
                 Menu::parent('System administrator', [
                     Menu::parent('Reports', [
-                        Menu::link('Created timetables', '/gr', 'fa fa-calendar-check'),
-                        Menu::link('Lecturer course allocation', '/gr', 'fa fa-user-cog'),
-                        Menu::link('Course work definition', '/gr', 'fa fa-cogs'),
+                        Menu::link('Created timetables', ['/system-admin-reports/faculty-timetables'], 'fa fa-calendar-check'),
+                        Menu::link('Lecturer course allocation', ['/system-admin-reports/course-allocations-in-faculties'], 'fa fa-user-cog'),
+                        Menu::link('Course work definition', ['/system-admin-reports/course-work-definition-in-faculties'], 'fa fa-cogs'),
                     ]),
                 ]),
             ]),

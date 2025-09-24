@@ -11,7 +11,7 @@
 use yii\bootstrap5\Modal;
 use yii\helpers\Url;
 
-
+echo $this->render('_lecturerAssign', ['deptCode' => $deptCode]);
 echo $this->render('_externalLecturerAssign', ['deptCode' => $deptCode]);
 
 
@@ -45,8 +45,8 @@ $deptCoursesScript = <<< JS
     const getCourseDetails = function(){
         $('.content-loader').html('');
         $('.content-loader').removeClass('alert-danger');
-        $('.content-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;">' +
-         '<i class="fas fa-spinner fa-pulse"></i></h5>');
+        $('.content-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;">'
+         + '<i class="fas fa-spinner fa-pulse"></i></h5>');
         let courseDetailsAction = '$courseDetailsAction';
         let queryData = {
             'marksheetId' : marksheetId,
@@ -138,13 +138,13 @@ $deptCoursesScript = <<< JS
         };
         
         if(!externalLecturer && !internalLecturer){
-            krajeeDialog.alert('Atleast one lecturer must be provided or a servicing department specified.');
+            alert('Atleast one lecturer must be provided or a servicing department specified.');
         }
         if(formData.externalLecturer && formData.department == ''){
-            krajeeDialog.alert('If you are requesting for a lecturer from another department, the servicing department must be provided.');
+            alert('If you are requesting for a lecturer from another department, the servicing department must be provided.');
         }
         if(formData.internalLecturer && formData.lecturers == 0){
-            krajeeDialog.alert('If the lecturer(s) come from your department, you must provide atleast one.');
+            alert('If the lecturer(s) come from your department, you must provide atleast one.');
         }
 
         let confirmMsg = '';
@@ -157,33 +157,35 @@ $deptCoursesScript = <<< JS
         }
 
         if(externalLecturer || internalLecturer){
-            krajeeDialog.confirm(confirmMsg, function(result){
-                if(result){
-                    $('.content-loader')
-                    .html('<h5 class="text-center text-primary" style="font-size: 100px;">' +
-                     '<i class="fas fa-spinner fa-pulse"></i></h5>');
-                    $.ajax({
-                        type        :   'POST',
-                        url         :   formAction,
-                        data        :   formData,
-                        dataType    :   'json',
-                        encode      :   true             
-                    })
-                    .done(function(response){
-                        $('.content-loader').html('');
-                        if(response.status === 500){
-                            $('.content-loader').addClass('alert-danger');
-                            $('.content-loader').html('<p>' + response.message + '</p>');
-                        }
-                    })
-                    .fail(function(data){});
-                }else{
-                    krajeeDialog.alert('Operation was cancelled.');
-                }
-            });
+            if(confirm(confirmMsg)){
+                $('.content-loader')
+                .html('<h5 class="text-center text-primary" style="font-size: 100px;">'
+                 + '<i class="fas fa-spinner fa-pulse"></i></h5>');
+                $.ajax({
+                    type        :   'POST',
+                    url         :   formAction,
+                    data        :   formData,
+                    dataType    :   'json',
+                    encode      :   true             
+                })
+                .done(function(response){
+                    $('.content-loader').html('');
+                    if(response.status === 500){
+                        $('.content-loader').addClass('alert-danger');
+                        $('.content-loader').html('<p>' + response.message + '</p>');
+                    }else{
+                        $('#allocate-course-lecturers-modal').on('hidden.bs.modal', function () {
+                            window.location.reload();
+                        }).modal('hide');
+                    }
+                })
+                .fail(function(data){});
+            }else{
+                alert('Operation was cancelled.');
+            }
         }
         else{
-            krajeeDialog.alert('No lecturer source has been selected.');
+            alert('No lecturer source has been selected.');
         }
     });
 
@@ -230,54 +232,59 @@ $deptCoursesScript = <<< JS
             'remarks'           : remarks
         };
         if(statusName == ''){
-            krajeeDialog.alert('You must provide a status for this request.');
+            alert('You must provide a status for this request.');
         }
         if(statusName == 'NOT APPROVED' && remarks == ''){
-            krajeeDialog.alert('You must provide remarks for any denied request.');
+            alert('You must provide remarks for any denied request.');
         }
         if(statusName == 'APPROVED' && lecturers.length == 0){
-            krajeeDialog.alert('You must provide atleast one lecturer for any approved request.');
+            alert('You must provide atleast one lecturer for any approved request.');
         }
 
         let confirmMsg = '';
         if(statusName == 'NOT APPROVED'){
             confirmMsg = 'Are you sure you want to deny this request?';
-        }else {
+        }else { 
             confirmMsg = 'Are you sure you to allocate the selected lecturer(s)?';
         }
 
-        krajeeDialog.confirm(confirmMsg, function(result){
-            if(result){
-                $('.content-loader')
-                    .html('<h5 class="text-center text-primary" style="font-size: 100px;">' +
-                        '<i class="fas fa-spinner fa-pulse"></i></h5>');
-                $.ajax({
-                    type        :   'POST',
-                    url         :   formAction,
-                    data        :   formData,
-                    dataType    :   'json',
-                    encode      :   true             
-                })
-                .done(function(response){
-                    $('.content-loader').html('');
-                        if(response.status === 500){
-                            $('.content-loader').addClass('alert-danger');
-                            $('.content-loader').html('<p>' + response.message + '</p>');
-                        }
-                })
-                .fail(function(data){});
-            }else{
-                krajeeDialog.alert('Operation was cancelled.');
-            }
-        }); 
+        if(confirm(confirmMsg)){
+            $('.content-loader')
+                .html('<h5 class="text-center text-primary" style="font-size: 100px;">'
+                    + '<i class="fas fa-spinner fa-pulse"></i></h5>');
+            $.ajax({
+                type        :   'POST',
+                url         :   formAction,
+                data        :   formData,
+                dataType    :   'json',
+                encode      :   true             
+            })
+            .done(function(response){
+                $('.content-loader').html('');
+                    if(response.status === 500){
+                        $('.content-loader').addClass('alert-danger');
+                        $('.content-loader').html('<p>' + response.message + '</p>');
+                    }else{
+                        $('#allocate-external-lecturers-modal').on('hidden.bs.modal', function () {
+                            window.location.reload();
+                        }).modal('hide');
+                    }
+            })
+            .fail(function(data){});
+        }else{
+            alert('Operation was cancelled.');
+        } 
     });
 
     // Load modal
     const loadModal = function(e){
         e.preventDefault();
-        $('#modalContent')
-            .html('<h1 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h1>');
-        $('#modal').modal('show').find('#modalContent').load($(this).attr('href'), function(e){});
+        var url = $(this).attr('href');
+        $('#modal').modal('show');
+        $('#modalContent').html('<h1 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h1>');
+        $.get(url, function(data) {
+            $('#modalContent').html(data);
+        });
     }
 
     // View details for a requested course

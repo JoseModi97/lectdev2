@@ -54,7 +54,11 @@ $this->title = $title;
         </div>
     </div>
     <div class="form-group">
-        <?= Html::submitButton('submit', ['id' => 'manage-allocated-lecturers-btn', 'class' => 'btn']); ?>
+        <?= Html::submitButton('submit', [
+            'id' => 'manage-allocated-lecturers-btn',
+            'class' => 'btn text-white my-2',
+            'style' => "background-image: linear-gradient(#455492, #304186, #455492)"
+        ]); ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

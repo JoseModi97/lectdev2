@@ -64,6 +64,7 @@ class Semester extends ActiveRecord
             [['ADMIN_USER'], 'string', 'max' => 255],
             [['SESSION_TYPE'], 'string', 'max' => 15],
             [['SEMESTER_ID'], 'unique'],
+            [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE'], 'required'],
         ];
     }
 
@@ -129,5 +130,13 @@ class Semester extends ActiveRecord
     public function getGroup(): ActiveQuery
     {
         return $this->hasOne(Group::class, ['GROUP_CODE' => 'GROUP_CODE']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getMarksheetDefs(): ActiveQuery
+    {
+        return $this->hasMany(MarksheetDef::class, ['SEMESTER_ID' => 'SEMESTER_ID']);
     }
 }
