@@ -124,7 +124,7 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                     <div class="panel-card">
                         <div class="panel-header">Grade distribution</div>
                         <div class="panel-body">
-                            <p class="panel-intro">Distribution of grades attained by the class.</p>
+                            <!-- <p class="panel-intro">Distribution of grades attained by the class.</p> -->
                             <table class="data-table">
                                 <thead>
                                     <tr>
@@ -190,7 +190,7 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                     <div class="panel-card panel-card--compact">
                         <div class="panel-header">Key figures</div>
                         <div class="panel-body">
-                            <p class="panel-intro">Quick reference for print and review.</p>
+                            <!-- <p class="panel-intro">Quick reference for print and review.</p> -->
                             <table class="info-table">
                                 <tr>
                                     <th>Highest grade</th>
@@ -281,7 +281,7 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                     <div class="panel-card panel-card--notes">
                         <div class="panel-header">Notes</div>
                         <div class="panel-body">
-                            <p class="notes-text">
+                            <p class="">
                                 Use this report to highlight key trends and prepare quick talking points before meetings or when
                                 exporting the PDF for departmental reviews.
                             </p>

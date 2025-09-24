@@ -618,13 +618,13 @@ class SharedReportsController extends BaseController
 .section-grid__col--narrow { width: 28%; }
 .section-grid__col--notes { width: 28%; }
 .panel-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; background-color: #ffffff; page-break-inside: avoid; }
-.panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 7px 11px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin: 0; }
+.panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 7px 11px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 0; }
 .panel-body { padding: 14px 12px 10px; }
 .panel-card--compact .panel-body { padding: 12px 10px 9px; }
 .panel-card--notes .panel-body { padding: 14px 12px 10px; }
 .panel-card--center .panel-body { text-align: center; }
 .panel-body--chart { text-align: center; padding: 12px 0 6px; }
-.panel-intro { font-size: 8.1pt; color: #6c757d; margin: 4px 0 6px; }
+.panel-intro { font-size: 8.1pt; color: #6c757d; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { border: 1px solid #d9dee7; padding: 5px 7px; font-size: 8.3pt; }
 .data-table th { background-color: #f9fafe; text-transform: uppercase; color: #6c757d; font-weight: 600; }
