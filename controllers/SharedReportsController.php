@@ -426,12 +426,16 @@ class SharedReportsController extends BaseController
             $pdf = new Pdf([
                 'mode' => Pdf::MODE_CORE,
                 'format' => Pdf::FORMAT_A4,
-                'orientation' => Pdf::ORIENT_PORTRAIT,
+                'orientation' => Pdf::ORIENT_LANDSCAPE,
                 'destination' => Pdf::DEST_DOWNLOAD,
                 'content' => $content,
                 'filename' => $fileName,
                 'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
                 'cssInline' => $this->classPerformanceCss(),
+                'marginTop' => 10,
+                'marginBottom' => 10,
+                'marginLeft' => 10,
+                'marginRight' => 10,
                 'options' => [
                     'title' => 'Class Performance Report',
                 ],
@@ -587,67 +591,53 @@ class SharedReportsController extends BaseController
     private function classPerformanceCss(): string
     {
         return <<<CSS
-.class-performance-pdf { font-size: 11pt; color: #1f2933; }
-.letterhead { display: table; width: 100%; }
-.letterhead .logo { width: 85px; height: auto; display: table-cell; vertical-align: middle; }
-.letterhead .institution { display: table-cell; vertical-align: middle; padding-left: 16px; }
-.letterhead .institution-name { font-size: 17pt; font-weight: 700; letter-spacing: 1px; color: #004f9f; margin: 0; text-transform: uppercase; }
-.letterhead .institution-tagline { font-size: 10pt; color: #008751; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 0.5px; }
-.letterhead .institution-contact { font-size: 9pt; color: #6c757d; margin: 6px 0 0; }
-.brand-divider { height: 5px; background: linear-gradient(90deg, #004f9f 0%, #008751 100%); margin: 18px 0; border-radius: 2px; }
-.document-title { text-align: center; margin-bottom: 18px; }
-.document-title .title-main { font-size: 14pt; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #004f9f; margin: 0; }
-.document-title .title-sub { font-size: 11pt; color: #2f3f4f; margin: 6px 0 0; }
-.meta-card { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; margin-bottom: 20px; background-color: #ffffff; }
-.meta-card .meta-header { background-color: #f1f4fb; color: #004f9f; padding: 9px 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-size: 10pt; }
-.meta-card .meta-body { padding: 12px 14px; }
-.meta-card .summary-table th { width: 36%; text-transform: uppercase; font-size: 9.5pt; color: #6c757d; }
-.meta-card .summary-table td { font-weight: 600; color: #1f2933; font-size: 10.5pt; }
-.meta-card .meta-footer { background-color: #f9fafe; padding: 10px 14px; border-top: 1px solid #d9dee7; }
-.meta-card .meta-item { display: inline-block; width: 32%; font-size: 9pt; text-transform: uppercase; color: #6c757d; }
-.meta-card .meta-item span { display: block; font-size: 10pt; color: #1f2933; font-weight: 600; margin-top: 2px; }
-.metrics-table { width: 100%; border-collapse: separate; border-spacing: 12px 0; margin: 0 0 22px; }
-.metrics-table td { padding: 0; }
-.metric-card { background-color: #ffffff; border: 1px solid #d9dee7; border-radius: 6px; padding: 12px 14px; height: 100%; }
-.metric-label { font-size: 9pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.5px; }
-.metric-value { font-size: 14pt; font-weight: 700; color: #004f9f; margin: 4px 0 6px; }
-.metric-caption { font-size: 9pt; color: #6c757d; }
-.panel-card { border: 1px solid #d9dee7; border-radius: 6px; margin-bottom: 20px; background-color: #ffffff; }
-.panel-card .panel-header { background-color: #004f9f; color: #ffffff; padding: 9px 14px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; font-size: 10pt; }
-.panel-card .panel-body { padding: 14px; }
-.panel-card .panel-body .table { margin-bottom: 0; }
-.panel-card table thead th { background-color: #f1f4fb; color: #004f9f; font-size: 9pt; text-transform: uppercase; }
-.panel-card table th { width: 55%; font-size: 9.5pt; color: #4a5568; }
-.panel-card table td { font-size: 10pt; color: #1f2933; }
-.panel-intro { font-size: 9pt; color: #6c757d; margin-bottom: 10px; }
-.bar-row { margin-bottom: 10px; }
-.bar-row:last-child { margin-bottom: 0; }
-.bar-label { font-size: 9pt; color: #4a5568; text-transform: uppercase; }
-.bar-percent { font-size: 9pt; color: #004f9f; float: right; font-weight: 600; }
-.bar-track { background-color: #e7ecf3; border-radius: 4px; height: 7px; clear: both; }
-.bar-fill { background-color: #008751; border-radius: 4px; height: 7px; }
-.chart-container { margin-bottom: 16px; }
-.chart-svg { width: 100%; height: auto; }
+.class-performance-pdf { font-size: 9.5pt; color: #1f2933; line-height: 1.4; }
+.class-performance-pdf * { box-sizing: border-box; }
+.report-title { margin-bottom: 12px; }
+.report-title h1 { font-size: 16pt; margin: 0; color: #0b3d91; text-transform: uppercase; letter-spacing: 0.6px; }
+.report-title .report-subtitle { margin: 4px 0 0; font-size: 10pt; color: #4a5568; }
+.report-title .report-meta { margin: 6px 0 0; font-size: 8.5pt; color: #6c757d; }
+.summary-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; margin-bottom: 14px; background-color: #ffffff; page-break-inside: avoid; }
+.summary-card__header { background-color: #0b3d91; color: #ffffff; padding: 8px 12px; font-size: 9pt; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.summary-card__body { padding: 12px; }
+.summary-grid { width: 100%; border-collapse: collapse; }
+.summary-grid td { width: 33.33%; padding: 6px 10px; vertical-align: top; }
+.summary-grid__label { display: block; font-size: 8.2pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.3px; margin-bottom: 2px; }
+.summary-grid__value { display: block; font-weight: 600; color: #1f2933; font-size: 9.5pt; }
+.dashboard-grid { width: 100%; border-collapse: separate; border-spacing: 10px; margin: 0 0 14px; }
+.dashboard-grid .dashboard-cell { vertical-align: top; }
+.dashboard-cell--wide { width: 40%; }
+.dashboard-cell--chart { width: 32%; }
+.dashboard-cell--compact { width: 28%; }
+.dashboard-cell--notes { width: 28%; }
+.panel-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; background-color: #ffffff; page-break-inside: avoid; }
+.panel-card .panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 8px 12px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.panel-card .panel-body { padding: 12px; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { border: 1px solid #d9dee7; padding: 6px 8px; font-size: 8.5pt; }
+.data-table th { background-color: #f9fafe; text-transform: uppercase; color: #6c757d; font-weight: 600; }
+.data-table .text-end { text-align: right; }
+.totals-row td { background-color: #f1f4fb; font-weight: 600; }
+.panel-intro { font-size: 8.3pt; color: #6c757d; margin-bottom: 8px; }
+.chart-container { margin: 0 auto; text-align: center; }
+.chart-svg { width: 100%; height: auto; max-width: 340px; }
 .chart-axis { stroke: #93a3b8; stroke-width: 1; }
 .chart-grid { stroke: #e7ecf3; stroke-width: 1; }
 .chart-bar { fill: #008751; }
-.chart-bar-secondary { fill: #004f9f; }
-.chart-label { font-size: 8pt; fill: #4a5568; text-transform: uppercase; }
-.chart-value { font-size: 8.5pt; fill: #004f9f; font-weight: 700; }
-.chart-tick { font-size: 8pt; fill: #6c757d; }
-.key-figures { border-top: 1px solid #d9dee7; margin-top: 16px; padding-top: 10px; }
-.key-figure { display: flex; justify-content: space-between; text-transform: uppercase; font-size: 9pt; color: #6c757d; margin-bottom: 6px; }
-.key-figure:last-child { margin-bottom: 0; }
-.key-figure strong { color: #1f2933; font-size: 10pt; }
-.notes { font-size: 9.5pt; color: #4a5568; margin: 0; }
+.chart-bar-secondary { fill: #0b3d91; }
+.chart-label { font-size: 7.5pt; fill: #4a5568; text-transform: uppercase; }
+.chart-value { font-size: 8pt; fill: #0b3d91; font-weight: 700; }
+.chart-tick { font-size: 7.5pt; fill: #6c757d; }
+.info-table { width: 100%; border-collapse: collapse; }
+.info-table th { text-transform: uppercase; font-size: 8.3pt; color: #6c757d; padding: 4px 0; text-align: left; }
+.info-table td { font-size: 9.5pt; color: #1f2933; font-weight: 600; padding: 4px 0; text-align: right; }
+.notes-text { font-size: 8.5pt; color: #4a5568; margin: 0; line-height: 1.45; }
 .signatory-card .panel-body { padding: 0; }
-.signatory-card .table { border: none; }
-.signatory-card .table td { border-color: #d9dee7; }
-.signatory-block { min-height: 130px; padding: 16px; vertical-align: top; }
-.signatory-block .label { text-transform: uppercase; font-size: 9pt; color: #004f9f; font-weight: 600; margin-bottom: 12px; }
-.signature-line { border-bottom: 1px solid #8d99ae; margin: 24px 0 12px; height: 18px; }
-.signatory-name, .signatory-date { font-size: 9pt; color: #6c757d; }
-.totals-row td { background-color: #f9fafe; font-weight: 600; }
+.signatory-table { width: 100%; border-collapse: collapse; }
+.signatory-table td { border: 1px solid #d9dee7; padding: 12px; vertical-align: top; width: 33.33%; }
+.signatory-label { text-transform: uppercase; font-size: 8.5pt; color: #0b3d91; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 12px; }
+.signature-line { border-bottom: 1px solid #8d99ae; margin: 18px 0 12px; height: 16px; }
+.signatory-meta { font-size: 8.3pt; color: #6c757d; }
 CSS;
     }
 
