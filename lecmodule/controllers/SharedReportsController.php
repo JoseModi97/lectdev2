@@ -427,7 +427,7 @@ class SharedReportsController extends BaseController
                 'filename' => $fileName,
                 'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
                 'cssInline' => $this->classPerformanceCss(),
-                'marginTop' => 10,
+                'marginTop' => 28,
                 'marginBottom' => 10,
                 'marginLeft' => 10,
                 'marginRight' => 10,
