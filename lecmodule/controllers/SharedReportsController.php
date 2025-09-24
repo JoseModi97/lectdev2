@@ -586,54 +586,35 @@ class SharedReportsController extends BaseController
     private function classPerformanceCss(): string
     {
         return <<<CSS
-.class-performance-pdf { font-size: 10pt; color: #1f2933; line-height: 1.35; }
+.class-performance-pdf { font-size: 10pt; color: #1f2933; line-height: 1.4; }
 .class-performance-pdf * { box-sizing: border-box; }
-.page-section { padding: 12px 0 20px; page-break-inside: avoid; }
-.page-section + .page-section { page-break-before: always; break-before: page; }
-.page-section--distribution { page-break-before: always !important; break-before: page; }
-.page-header { margin-bottom: 18px; }
-.letterhead { display: table; width: 100%; }
-.letterhead .logo { width: 75px; height: auto; display: table-cell; vertical-align: middle; }
-.letterhead .institution { display: table-cell; vertical-align: middle; padding-left: 14px; }
-.letterhead .institution-name { font-size: 16pt; font-weight: 700; letter-spacing: 0.8px; color: #004f9f; margin: 0; text-transform: uppercase; }
-.letterhead .institution-tagline { font-size: 9pt; color: #008751; margin: 3px 0 0; text-transform: uppercase; letter-spacing: 0.4px; }
-.letterhead .institution-contact { font-size: 8.5pt; color: #6c757d; margin: 4px 0 0; }
-.brand-divider { height: 4px; background: linear-gradient(90deg, #004f9f 0%, #008751 100%); margin: 12px 0; border-radius: 2px; }
-.document-title { text-align: center; margin-bottom: 12px; }
-.document-title .title-main { font-size: 13pt; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #004f9f; margin: 0; }
-.document-title .title-sub { font-size: 10pt; color: #2f3f4f; margin: 4px 0 0; }
-.meta-card, .metrics-table, .panel-card, .signatory-card, .row { page-break-inside: avoid; }
-.meta-card { border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden; margin-bottom: 14px; background-color: #ffffff; }
-.meta-card .meta-header { background-color: #f1f4fb; color: #004f9f; padding: 7px 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; font-size: 9.5pt; }
-.meta-card .meta-body { padding: 10px 12px; }
-.meta-card .summary-table th { width: 34%; text-transform: uppercase; font-size: 9pt; color: #6c757d; }
-.meta-card .summary-table td { font-weight: 600; color: #1f2933; font-size: 10pt; }
-.meta-card .meta-footer { background-color: #f9fafe; padding: 8px 12px; border-top: 1px solid #d9dee7; }
-.meta-card .meta-item { display: inline-block; width: 32%; font-size: 8.5pt; text-transform: uppercase; color: #6c757d; }
-.meta-card .meta-item span { display: block; font-size: 9.5pt; color: #1f2933; font-weight: 600; margin-top: 2px; }
-.metrics-table { width: 100%; border-collapse: separate; border-spacing: 8px 0; margin: 0 0 16px; }
-.metrics-table td { padding: 0; }
-.metric-card { background-color: #ffffff; border: 1px solid #d9dee7; border-radius: 6px; padding: 10px 12px; height: 100%; }
-.metric-label { font-size: 8.5pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.4px; }
-.metric-value { font-size: 13pt; font-weight: 700; color: #004f9f; margin: 4px 0 4px; }
-.metric-caption { font-size: 8.5pt; color: #6c757d; }
-.row { margin-left: -8px; margin-right: -8px; }
-.row > [class*='col-'] { padding-left: 8px; padding-right: 8px; }
-.panel-card { border: 1px solid #d9dee7; border-radius: 6px; margin-bottom: 14px; background-color: #ffffff; }
-.panel-card .panel-header { background-color: #004f9f; color: #ffffff; padding: 8px 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px; font-size: 9.5pt; }
-.panel-card .panel-body { padding: 12px; }
-.panel-card .panel-body .table { margin-bottom: 0; }
-.panel-card table thead th { background-color: #f1f4fb; color: #004f9f; font-size: 8.5pt; text-transform: uppercase; }
-.panel-card table th { width: 54%; font-size: 9pt; color: #4a5568; }
-.panel-card table td { font-size: 9.5pt; color: #1f2933; }
-.panel-intro { font-size: 8.5pt; color: #6c757d; margin-bottom: 8px; }
-.bar-row { margin-bottom: 8px; }
-.bar-row:last-child { margin-bottom: 0; }
-.bar-label { font-size: 8.5pt; color: #4a5568; text-transform: uppercase; }
-.bar-percent { font-size: 8.5pt; color: #004f9f; float: right; font-weight: 600; }
-.bar-track { background-color: #e7ecf3; border-radius: 4px; height: 6px; clear: both; }
-.bar-fill { background-color: #008751; border-radius: 4px; height: 6px; }
-.chart-container { margin-bottom: 12px; }
+.card { border: 1px solid #d9dee7; border-radius: 6px; background-color: #ffffff; margin-bottom: 16px; page-break-inside: avoid; }
+.card-header { background-color: #f1f4fb; color: #004f9f; padding: 8px 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; font-size: 9pt; }
+.card-header--primary { background-color: #004f9f; color: #ffffff; }
+.card-body { padding: 12px; }
+.summary-card .card-body { padding-top: 10px; padding-bottom: 10px; }
+.summary-header-grid { width: 100%; border-collapse: collapse; }
+.summary-header-grid td { font-size: 8.5pt; text-transform: uppercase; color: rgba(255, 255, 255, 0.92); padding-right: 8px; }
+.summary-header-grid td.brand { font-weight: 700; letter-spacing: 0.6px; }
+.summary-header-grid td.course { text-align: center; }
+.summary-header-grid td.printed-by { text-align: center; }
+.summary-header-grid td.report-date { text-align: right; }
+.summary-table { width: 100%; border-collapse: collapse; }
+.summary-table th, .summary-table td { padding: 6px 8px; border-bottom: 1px solid #e7ecf3; vertical-align: top; }
+.summary-table tr:last-child th, .summary-table tr:last-child td { border-bottom: none; }
+.summary-table th { width: 35%; font-size: 8.5pt; text-transform: uppercase; color: #6c757d; }
+.summary-table td { font-size: 9.5pt; font-weight: 600; color: #1f2933; }
+.layout { width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 16px; }
+.layout td { vertical-align: top; }
+.layout--grade .layout__col--grade-table { width: 38%; }
+.layout--grade .layout__col--grade-chart { width: 32%; }
+.layout--grade .layout__col--key-figures { width: 30%; }
+.layout--averages .layout__col--average-chart { width: 42%; }
+.layout--averages .layout__col--average-summary { width: 30%; }
+.layout--averages .layout__col--notes { width: 28%; }
+.card--center .card-body { padding-top: 16px; padding-bottom: 16px; }
+.card-body--center { display: block; text-align: center; }
+.chart-wrapper { margin: 0 auto; max-width: 320px; }
 .chart-svg { width: 100%; height: auto; }
 .chart-axis { stroke: #93a3b8; stroke-width: 1; }
 .chart-grid { stroke: #e7ecf3; stroke-width: 1; }
@@ -642,19 +623,29 @@ class SharedReportsController extends BaseController
 .chart-label { font-size: 7.5pt; fill: #4a5568; text-transform: uppercase; }
 .chart-value { font-size: 8pt; fill: #004f9f; font-weight: 700; }
 .chart-tick { font-size: 7.5pt; fill: #6c757d; }
-.key-figures { border-top: 1px solid #d9dee7; margin-top: 12px; padding-top: 8px; }
-.key-figure { display: flex; justify-content: space-between; text-transform: uppercase; font-size: 8.5pt; color: #6c757d; margin-bottom: 5px; }
-.key-figure:last-child { margin-bottom: 0; }
-.key-figure strong { color: #1f2933; font-size: 9.5pt; }
-.notes { font-size: 8.5pt; color: #4a5568; margin: 0; }
-.signatory-card .panel-body { padding: 0; }
-.signatory-card .table { border: none; margin-bottom: 0; }
-.signatory-card .table td { border-color: #d9dee7; }
-.signatory-block { min-height: 110px; padding: 12px; vertical-align: top; }
-.signatory-block .label { text-transform: uppercase; font-size: 8.5pt; color: #004f9f; font-weight: 600; margin-bottom: 10px; }
-.signature-line { border-bottom: 1px solid #8d99ae; margin: 18px 0 10px; height: 16px; }
-.signatory-name, .signatory-date { font-size: 8.5pt; color: #6c757d; }
-.totals-row td { background-color: #f9fafe; font-weight: 600; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 6px 8px; border: 1px solid #d9dee7; font-size: 9pt; color: #1f2933; }
+.table thead th { background-color: #f1f4fb; color: #004f9f; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.3px; }
+.grade-table tbody tr:nth-child(odd) td { background-color: #f9fbff; }
+.grade-table .total-row td { background-color: #f1f4fb; font-weight: 600; }
+.figures-list, .average-list { list-style: none; margin: 0; padding: 0; }
+.figures-list li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 8.5pt; text-transform: uppercase; color: #6c757d; }
+.figures-list li:last-child { margin-bottom: 0; }
+.figures-list .value { font-weight: 600; color: #1f2933; font-size: 9.5pt; }
+.card-subtitle { font-size: 8.5pt; color: #6c757d; margin: 0 0 10px; }
+.average-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #e7ecf3; text-transform: uppercase; font-size: 8.5pt; color: #6c757d; }
+.average-list li:last-child { border-bottom: none; }
+.average-list .value { font-weight: 600; color: #1f2933; font-size: 9.5pt; }
+.notes-text { font-size: 8.5pt; color: #4a5568; margin: 0; line-height: 1.5; }
+.signatories-card .card-body { padding: 0; }
+.signatories-table { width: 100%; border-collapse: collapse; }
+.signatories-table td { border: 1px solid #d9dee7; padding: 14px; vertical-align: top; }
+.signatory-label { text-transform: uppercase; font-size: 8.5pt; color: #004f9f; font-weight: 600; margin-bottom: 12px; }
+.signature-line { border-bottom: 1px solid #8d99ae; height: 16px; margin-bottom: 12px; }
+.signatory-meta { font-size: 8.5pt; color: #6c757d; margin: 0 0 6px; }
+.signatory-meta:last-child { margin-bottom: 0; }
+.text-end { text-align: right; }
+.fw-semibold { font-weight: 600; }
 CSS;
     }
 
