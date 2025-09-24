@@ -14,7 +14,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-require_once Yii::getAlias('@app/views') . '/shared-reports/classPerfomanceHelpers.php';
+require_once Yii::getAlias('@views') . '/shared-reports/classPerfomanceHelpers.php';
 
 $reportSummary = [
     'Academic Year' => $reportDetails['academicYear'],

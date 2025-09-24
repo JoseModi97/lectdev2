@@ -14,7 +14,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-require_once Yii::getAlias('@app/views') . '/shared-reports/classPerfomanceHelpers.php';
+require_once Yii::getAlias('@views') . '/shared-reports/classPerfomanceHelpers.php';
 
 $reportSummary = [
     'Academic Year' => $reportDetails['academicYear'],
@@ -83,24 +83,19 @@ $reportSummary = [
                                         <td class="text-end" id="grade-A-count"></td>
                                     </tr>
                                     <tr>
-                                        <td>60 - 69.99</td>
+                                        <td>56 - 69.99</td>
                                         <td>B</td>
                                         <td class="text-end" id="grade-B-count"></td>
                                     </tr>
                                     <tr>
-                                        <td>50 - 59.99</td>
+                                        <td>40 - 55.99</td>
                                         <td>C</td>
                                         <td class="text-end" id="grade-C-count"></td>
                                     </tr>
                                     <tr>
-                                        <td>40 - 49.99</td>
+                                        <td>0 - 39.99</td>
                                         <td>D</td>
                                         <td class="text-end" id="grade-D-count"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>0 - 39.99</td>
-                                        <td>E</td>
-                                        <td class="text-end" id="grade-E-count"></td>
                                     </tr>
                                     <tr>
                                         <td>--</td>
@@ -146,7 +141,7 @@ $reportSummary = [
                             </li>
                             <li class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="text-muted text-uppercase">Lowest grade</span>
-                                <span class="fw-semibold">E / X</span>
+                                <span class="fw-semibold">D / X</span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center">
                                 <span class="text-muted text-uppercase">Report date</span>
@@ -288,7 +283,6 @@ $analysisScript = <<< JS
             let gradeB = "B     ";
             let gradeC = "C     ";
             let gradeD = "D     ";
-            let gradeE = "E     ";
             let gradeEStar = "E*    ";
             let gradeX = null;
 
@@ -296,7 +290,6 @@ $analysisScript = <<< JS
             let gradeBCount;
             let gradeCCount;
             let gradeDCount;
-            let gradeECount;
             let gradeEStarCount;
             let gradeXCount;
 
@@ -311,9 +304,6 @@ $analysisScript = <<< JS
 
             if(containsGrade(gradeD, grades)) gradeDCount = gradeCount(gradeD, grades)
             else gradeDCount = 0;
-
-            if(containsGrade(gradeE, grades)) gradeECount = gradeCount(gradeE, grades)
-            else gradeECount = 0;
             
             if(containsGrade(gradeEStar, grades)) gradeEStarCount = gradeCount(gradeEStar, grades)
             else gradeEStarCount = 0;
@@ -325,7 +315,6 @@ $analysisScript = <<< JS
             $('#grade-B-count').text(gradeBCount);
             $('#grade-C-count').text(gradeCCount);
             $('#grade-D-count').text(gradeDCount);
-            $('#grade-E-count').text(gradeECount);
             $('#grade-E-star-count').text(gradeEStarCount);
             $('#grade-X-count').text(gradeXCount);
             $('#students-count').text(parseInt(classStats.totalStudents));
@@ -338,7 +327,6 @@ $analysisScript = <<< JS
                         gradeB,
                         gradeC,
                         gradeD,
-                        gradeE,
                         gradeEStar,
                         'X',
                         'TOTAL'
@@ -350,7 +338,6 @@ $analysisScript = <<< JS
                             gradeBCount,
                             gradeCCount,
                             gradeDCount,
-                            gradeECount,
                             gradeEStarCount,
                             gradeXCount,
                             parseInt(classStats.totalStudents)
@@ -360,7 +347,6 @@ $analysisScript = <<< JS
                             'rgba(54, 162, 235, 0.2)',
                             'rgba(255, 206, 86, 0.2)',
                             'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
                             'rgba(255, 159, 64, 0.2)',
                             'rgba(255, 159, 64, 0.2)',
                             'rgba(75, 192, 192, 0.2)'
@@ -370,7 +356,6 @@ $analysisScript = <<< JS
                             'rgba(54, 162, 235, 1)',
                             'rgba(255, 206, 86, 1)',
                             'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)',
                             'rgba(255, 159, 64, 1)',
                             'rgba(54, 162, 235, 1)'
