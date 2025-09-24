@@ -30,6 +30,26 @@ echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
 $data = $dataProvider->getModels();
+$courseCodeFilter = [];
+$courseNameFilter = [];
+
+foreach ($data as $model) {
+    $course = $model->course ?? null;
+    if ($course === null) {
+        continue;
+    }
+
+    if (!empty($course->COURSE_CODE)) {
+        $courseCodeFilter[$course->COURSE_CODE] = $course->COURSE_CODE;
+    }
+
+    if (!empty($course->COURSE_NAME)) {
+        $courseNameFilter[$course->COURSE_NAME] = $course->COURSE_NAME;
+    }
+}
+
+ksort($courseCodeFilter);
+asort($courseNameFilter);
 
 $lecturersList = ArrayHelper::map(
     EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
@@ -142,11 +162,25 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'courseCode',
                         'label' => 'Course Code',
                         'value' => 'course.COURSE_CODE',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseCodeFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course code'],
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course code'],
                     ],
                     [
                         'attribute' => 'courseName',
                         'label' => 'Course Name',
                         'value' => 'course.COURSE_NAME',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseNameFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course name'],
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course name'],
                     ],
                     [
                         'label' => 'Group Name',
