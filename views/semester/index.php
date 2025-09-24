@@ -139,12 +139,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     //     ],
                     // ],
                     [
-                        'attribute' => 'course.COURSE_CODE',
+                        'attribute' => 'courseCode',
                         'label' => 'Course Code',
+                        'value' => 'course.COURSE_CODE',
                     ],
                     [
-                        'attribute' => 'course.COURSE_NAME',
+                        'attribute' => 'courseName',
                         'label' => 'Course Name',
+                        'value' => 'course.COURSE_NAME',
                     ],
                     [
                         'label' => 'Group Name',
