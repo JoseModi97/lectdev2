@@ -591,34 +591,37 @@ class SharedReportsController extends BaseController
     private function classPerformanceCss(): string
     {
         return <<<CSS
-.class-performance-pdf { font-size: 9.5pt; color: #1f2933; line-height: 1.4; }
+.class-performance-pdf { font-size: 9.3pt; color: #1f2933; line-height: 1.35; }
 .class-performance-pdf * { box-sizing: border-box; }
 .report-title { margin-bottom: 12px; }
 .report-title h1 { font-size: 16pt; margin: 0; color: #0b3d91; text-transform: uppercase; letter-spacing: 0.6px; }
 .report-title .report-subtitle { margin: 4px 0 0; font-size: 10pt; color: #4a5568; }
-.report-title .report-meta { margin: 6px 0 0; font-size: 8.5pt; color: #6c757d; }
+.report-title .report-meta { margin: 4px 0 0; font-size: 8.3pt; color: #6c757d; }
 .summary-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; margin-bottom: 14px; background-color: #ffffff; page-break-inside: avoid; }
-.summary-card__header { background-color: #0b3d91; color: #ffffff; padding: 8px 12px; font-size: 9pt; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-.summary-card__body { padding: 12px; }
+.summary-card__header { background-color: #0b3d91; color: #ffffff; padding: 7px 12px; font-size: 8.7pt; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.summary-card__body { padding: 10px 12px; }
 .summary-grid { width: 100%; border-collapse: collapse; }
-.summary-grid td { width: 33.33%; padding: 6px 10px; vertical-align: top; }
+.summary-grid td { width: 33.33%; padding: 4px 8px; vertical-align: top; }
 .summary-grid__label { display: block; font-size: 8.2pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.3px; margin-bottom: 2px; }
 .summary-grid__value { display: block; font-weight: 600; color: #1f2933; font-size: 9.5pt; }
-.dashboard-grid { width: 100%; border-collapse: separate; border-spacing: 10px; margin: 0 0 14px; }
-.dashboard-grid .dashboard-cell { vertical-align: top; }
-.dashboard-cell--wide { width: 40%; }
-.dashboard-cell--chart { width: 32%; }
-.dashboard-cell--compact { width: 28%; }
-.dashboard-cell--notes { width: 28%; }
+.layout-grid { width: 100%; border-collapse: separate; border-spacing: 12px 10px; margin: 0 0 12px; }
+.layout-grid__col--wide { width: 60%; }
+.layout-grid__col--narrow { width: 40%; }
+.layout-grid__cell { vertical-align: top; padding: 0; }
+.layout-grid__cell--stack { padding: 0; }
+.stack-grid { width: 100%; border-collapse: separate; border-spacing: 10px; }
+.stack-grid__cell { padding: 0; vertical-align: top; }
 .panel-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; background-color: #ffffff; page-break-inside: avoid; }
-.panel-card .panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 8px 12px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
-.panel-card .panel-body { padding: 12px; }
+.panel-card .panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 7px 11px; font-size: 8.3pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.panel-card .panel-body { padding: 10px 12px; }
+.panel-card.panel-card--compact .panel-body { padding: 9px 10px; }
+.panel-card.panel-card--notes .panel-body { padding: 9px 10px; }
 .data-table { width: 100%; border-collapse: collapse; }
-.data-table th, .data-table td { border: 1px solid #d9dee7; padding: 6px 8px; font-size: 8.5pt; }
+.data-table th, .data-table td { border: 1px solid #d9dee7; padding: 5px 7px; font-size: 8.3pt; }
 .data-table th { background-color: #f9fafe; text-transform: uppercase; color: #6c757d; font-weight: 600; }
 .data-table .text-end { text-align: right; }
 .totals-row td { background-color: #f1f4fb; font-weight: 600; }
-.panel-intro { font-size: 8.3pt; color: #6c757d; margin-bottom: 8px; }
+.panel-intro { font-size: 8.1pt; color: #6c757d; margin-bottom: 6px; }
 .chart-container { margin: 0 auto; text-align: center; }
 .chart-svg { width: 100%; height: auto; max-width: 340px; }
 .chart-axis { stroke: #93a3b8; stroke-width: 1; }
@@ -629,14 +632,14 @@ class SharedReportsController extends BaseController
 .chart-value { font-size: 8pt; fill: #0b3d91; font-weight: 700; }
 .chart-tick { font-size: 7.5pt; fill: #6c757d; }
 .info-table { width: 100%; border-collapse: collapse; }
-.info-table th { text-transform: uppercase; font-size: 8.3pt; color: #6c757d; padding: 4px 0; text-align: left; }
-.info-table td { font-size: 9.5pt; color: #1f2933; font-weight: 600; padding: 4px 0; text-align: right; }
+.info-table th { text-transform: uppercase; font-size: 8.1pt; color: #6c757d; padding: 3px 0; text-align: left; }
+.info-table td { font-size: 9.3pt; color: #1f2933; font-weight: 600; padding: 3px 0; text-align: right; }
 .notes-text { font-size: 8.5pt; color: #4a5568; margin: 0; line-height: 1.45; }
 .signatory-card .panel-body { padding: 0; }
 .signatory-table { width: 100%; border-collapse: collapse; }
-.signatory-table td { border: 1px solid #d9dee7; padding: 12px; vertical-align: top; width: 33.33%; }
-.signatory-label { text-transform: uppercase; font-size: 8.5pt; color: #0b3d91; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 12px; }
-.signature-line { border-bottom: 1px solid #8d99ae; margin: 18px 0 12px; height: 16px; }
+.signatory-table td { border: 1px solid #d9dee7; padding: 10px; vertical-align: top; width: 33.33%; }
+.signatory-label { text-transform: uppercase; font-size: 8.5pt; color: #0b3d91; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 10px; }
+.signature-line { border-bottom: 1px solid #8d99ae; margin: 14px 0 10px; height: 14px; }
 .signatory-meta { font-size: 8.3pt; color: #6c757d; }
 CSS;
     }

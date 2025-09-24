@@ -37,9 +37,9 @@ $gradeCounts = array_map(static function ($row) {
 
 $gradeBarCount = max(count($gradeLabels), 1);
 $gradeChartHeight = 170;
-$gradeBarWidth = 28;
-$gradeBarSpacing = 16;
-$gradeAxisLeft = 42;
+$gradeBarWidth = 24;
+$gradeBarSpacing = 12;
+$gradeAxisLeft = 38;
 $gradeAxisBottom = $gradeChartHeight + 20;
 $gradeSvgHeight = $gradeChartHeight + 60;
 $gradeSvgWidth = (int)($gradeAxisLeft + ($gradeBarCount * ($gradeBarWidth + $gradeBarSpacing)) + 16);
@@ -54,9 +54,9 @@ $averageValues = [
     (float)($averages['final'] ?? 0),
 ];
 $averageMaxValue = max(array_merge([100.0], $averageValues, [1]));
-$averageBarWidth = 38;
-$averageBarSpacing = 28;
-$averageAxisLeft = 48;
+$averageBarWidth = 32;
+$averageBarSpacing = 22;
+$averageAxisLeft = 44;
 $averageAxisBottom = $averageChartHeight + 20;
 $averageSvgHeight = $averageChartHeight + 60;
 $averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBarWidth + $averageBarSpacing)) + 24);
@@ -97,9 +97,14 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
         </div>
     </div>
 
-    <table class="dashboard-grid">
+    <table class="layout-grid">
+        <colgroup>
+            <col class="layout-grid__col layout-grid__col--wide" />
+            <col class="layout-grid__col layout-grid__col--narrow" />
+        </colgroup>
+        <tbody>
         <tr>
-            <td class="dashboard-cell dashboard-cell--wide">
+            <td class="layout-grid__cell">
                 <div class="panel-card">
                     <div class="panel-header">Grade distribution</div>
                     <div class="panel-body">
@@ -129,71 +134,78 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                     </div>
                 </div>
             </td>
-            <td class="dashboard-cell dashboard-cell--chart">
-                <div class="panel-card">
-                    <div class="panel-header">Grade distribution chart</div>
-                    <div class="panel-body">
-                        <p class="panel-intro">Visual overview of grade performance.</p>
-                        <div class="chart-container">
-                            <svg class="chart-svg" width="<?= $gradeSvgWidth; ?>" height="<?= $gradeSvgHeight; ?>" viewBox="0 0 <?= $gradeSvgWidth; ?> <?= $gradeSvgHeight; ?>">
-                                <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
-                                <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisLeft; ?>" y2="<?= $gradeAxisBottom - $gradeChartHeight; ?>" class="chart-axis" />
+            <td class="layout-grid__cell layout-grid__cell--stack">
+                <table class="stack-grid">
+                    <tbody>
+                    <tr>
+                        <td class="stack-grid__cell">
+                            <div class="panel-card">
+                                <div class="panel-header">Grade distribution chart</div>
+                                <div class="panel-body">
+                                    <p class="panel-intro">Visual overview of grade performance.</p>
+                                    <div class="chart-container">
+                                        <svg class="chart-svg" width="<?= $gradeSvgWidth; ?>" height="<?= $gradeSvgHeight; ?>" viewBox="0 0 <?= $gradeSvgWidth; ?> <?= $gradeSvgHeight; ?>">
+                                            <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
+                                            <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisLeft; ?>" y2="<?= $gradeAxisBottom - $gradeChartHeight; ?>" class="chart-axis" />
 
-                                <?php for ($tick = 1; $tick <= $gradeTickSteps; $tick++): ?>
-                                    <?php
-                                    $ratio = $tick / $gradeTickSteps;
-                                    $tickValue = $gradeMaxCount * $ratio;
-                                    $tickY = $gradeAxisBottom - ($gradeChartHeight * $ratio);
-                                    ?>
-                                    <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
-                                    <text x="<?= $gradeAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
-                                <?php endfor; ?>
+                                            <?php for ($tick = 1; $tick <= $gradeTickSteps; $tick++): ?>
+                                                <?php
+                                                $ratio = $tick / $gradeTickSteps;
+                                                $tickValue = $gradeMaxCount * $ratio;
+                                                $tickY = $gradeAxisBottom - ($gradeChartHeight * $ratio);
+                                                ?>
+                                                <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
+                                                <text x="<?= $gradeAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
+                                            <?php endfor; ?>
 
-                                <?php foreach ($gradeCounts as $index => $count): ?>
-                                    <?php
-                                    $label = $gradeLabels[$index] ?? '';
-                                    $barHeight = $gradeMaxCount > 0 ? ($count / $gradeMaxCount) * $gradeChartHeight : 0;
-                                    $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing)) + ($gradeBarSpacing / 2);
-                                    $barY = $gradeAxisBottom - $barHeight;
-                                    $valueY = $barHeight > 0 ? $barY - 6 : $gradeAxisBottom - 6;
-                                    ?>
-                                    <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar" />
-                                    <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($count)); ?></text>
-                                    <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
-                                <?php endforeach; ?>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            <td class="dashboard-cell dashboard-cell--compact">
-                <div class="panel-card">
-                    <div class="panel-header">Key figures</div>
-                    <div class="panel-body">
-                        <p class="panel-intro">Quick reference metrics for review.</p>
-                        <table class="info-table">
-                            <tr>
-                                <th>Highest grade</th>
-                                <td><?= Html::encode($highestGrade); ?></td>
-                            </tr>
-                            <tr>
-                                <th>Lowest grade</th>
-                                <td><?= Html::encode($lowestGrade); ?></td>
-                            </tr>
-                            <tr>
-                                <th>Report date</th>
-                                <td><?= Html::encode($date); ?></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
+                                            <?php foreach ($gradeCounts as $index => $count): ?>
+                                                <?php
+                                                $label = $gradeLabels[$index] ?? '';
+                                                $barHeight = $gradeMaxCount > 0 ? ($count / $gradeMaxCount) * $gradeChartHeight : 0;
+                                                $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing)) + ($gradeBarSpacing / 2);
+                                                $barY = $gradeAxisBottom - $barHeight;
+                                                $valueY = $barHeight > 0 ? $barY - 6 : $gradeAxisBottom - 6;
+                                                ?>
+                                                <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar" />
+                                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($count)); ?></text>
+                                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
+                                            <?php endforeach; ?>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stack-grid__cell">
+                            <div class="panel-card panel-card--compact">
+                                <div class="panel-header">Key figures</div>
+                                <div class="panel-body">
+                                    <p class="panel-intro">Quick reference metrics for review.</p>
+                                    <table class="info-table">
+                                        <tr>
+                                            <th>Highest grade</th>
+                                            <td><?= Html::encode($highestGrade); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Lowest grade</th>
+                                            <td><?= Html::encode($lowestGrade); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Report date</th>
+                                            <td><?= Html::encode($date); ?></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </td>
         </tr>
-    </table>
-
-    <table class="dashboard-grid">
         <tr>
-            <td class="dashboard-cell dashboard-cell--chart">
+            <td class="layout-grid__cell">
                 <div class="panel-card">
                     <div class="panel-header">Average scores chart</div>
                     <div class="panel-body">
@@ -230,39 +242,50 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                     </div>
                 </div>
             </td>
-            <td class="dashboard-cell dashboard-cell--compact">
-                <div class="panel-card">
-                    <div class="panel-header">Average scores summary</div>
-                    <div class="panel-body">
-                        <table class="info-table">
-                            <tr>
-                                <th>Coursework</th>
-                                <td><?= Html::encode(number_format((float)$averages['coursework'], 2)); ?></td>
-                            </tr>
-                            <tr>
-                                <th>Exam</th>
-                                <td><?= Html::encode(number_format((float)$averages['exam'], 2)); ?></td>
-                            </tr>
-                            <tr>
-                                <th>Final score</th>
-                                <td><?= Html::encode(number_format((float)$averages['final'], 2)); ?></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </td>
-            <td class="dashboard-cell dashboard-cell--notes">
-                <div class="panel-card">
-                    <div class="panel-header">Notes</div>
-                    <div class="panel-body">
-                        <p class="notes-text">
-                            Use this report to highlight key trends and prepare quick talking points before meetings or when
-                            exporting the PDF for departmental reviews.
-                        </p>
-                    </div>
-                </div>
+            <td class="layout-grid__cell layout-grid__cell--stack">
+                <table class="stack-grid">
+                    <tbody>
+                    <tr>
+                        <td class="stack-grid__cell">
+                            <div class="panel-card panel-card--compact">
+                                <div class="panel-header">Average scores summary</div>
+                                <div class="panel-body">
+                                    <table class="info-table">
+                                        <tr>
+                                            <th>Coursework</th>
+                                            <td><?= Html::encode(number_format((float)$averages['coursework'], 2)); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Exam</th>
+                                            <td><?= Html::encode(number_format((float)$averages['exam'], 2)); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Final score</th>
+                                            <td><?= Html::encode(number_format((float)$averages['final'], 2)); ?></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="stack-grid__cell">
+                            <div class="panel-card panel-card--notes">
+                                <div class="panel-header">Notes</div>
+                                <div class="panel-body">
+                                    <p class="notes-text">
+                                        Use this report to highlight key trends and prepare quick talking points before meetings or when
+                                        exporting the PDF for departmental reviews.
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </td>
         </tr>
+        </tbody>
     </table>
 
     <div class="panel-card signatory-card">
