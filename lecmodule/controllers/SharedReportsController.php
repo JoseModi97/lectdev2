@@ -437,17 +437,15 @@ class SharedReportsController extends BaseController
             $searchModel = new MissingMarksAssessmentsSearch();
             $assessmentsDataProvider = $searchModel->search($marksheetId);
 
-            $marksheetDetails = SmisHelper::marksheetDetails($marksheetId);
+            $reportDetails = SmisHelper::performanceReportDetails($marksheetId);
 
-            $courseCode = $marksheetDetails['courseCode'];
-            $courseName = $marksheetDetails['courseName'];
-
-            $panelHeading = 'ASSESSMENTS IN ' . $courseName .' ('. $courseCode .')';
+            $panelHeading = 'ASSESSMENTS IN ' . $reportDetails['courseName'] .' ('. $reportDetails['courseCode'] .')';
 
             return $this->render('assessments', [
                 'title' => 'Course assessments',
                 'panelHeading' => $panelHeading,
                 'assessmentsDataProvider' => $assessmentsDataProvider,
+                'reportDetails' => $reportDetails,
             ]);
         }catch(Exception $ex){
             $message = $ex->getMessage();
