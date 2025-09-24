@@ -25,7 +25,7 @@ use app\models\EmpVerifyView;
 /** @var bool $searchPerformed */
 // dd(array_column($dataProvider->getModels(), 'ACADEMIC_YEAR'));
 $code = $deptCode;
-
+// dd($dataProvider->query->createCommand()->rawSql);
 echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
@@ -104,8 +104,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
             <?php
             if (!empty(Yii::$app->request->get('SemesterSearch'))) {
+                $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY']]);
             ?>
                 <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
+                <p><?= Html::encode($level['NAME']) ?>, SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE']) ?></p>
             <?php
             }
             ?>
@@ -123,27 +125,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
-                    [
-                        'label' => 'Level of Study',
-                        'value' => function ($model) {
-                            $semDesc = $model->semester->semesterDescription;
-                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC . ' - ' . $model->semester->group->GROUP_NAME;
-                        },
-
-                        // 'value' => function ($model) {
-                        //     if ($model->SEMESTER_CODE === null) {
-                        //         return ucfirst('(not set)');
-                        //     }
-
-                        //     $semDesc = SemesterDescription::findOne(['DESCRIPTION_CODE' => $model->semester->DESCRIPTION_CODE]);
-
-                        //     $words = $model->SEMESTER_CODE . ' - ' . $semDesc['SEMESTER_DESC'];
-                        //     return $words;
-                        // },
-                        'group' => true,
-                        'groupedRow' => true,
-                        'contentOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;'],
-                    ],
+                    // [
+                    //     'label' => 'Level of Study',
+                    //     'value' => function ($model) {
+                    //         $semDesc = $model->semester->semesterDescription;
+                    //         return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC;
+                    //     },
+                    //     'group' => true,
+                    //     'groupedRow' => true,
+                    //     'contentOptions' => [
+                    //         'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+                    //         'class' => 'py-3'
+                    //     ],
+                    // ],
                     [
                         'attribute' => 'course.COURSE_CODE',
                         'label' => 'Course Code',
@@ -153,8 +147,16 @@ $this->params['breadcrumbs'][] = $this->title;
                         'label' => 'Course Name',
                     ],
                     [
+                        'label' => 'Group Name',
+                        'value' => function ($model) {
+                            $semDesc = $model->semester->semesterDescription;
+                            return $model->semester->group->GROUP_NAME;
+                        },
+                        'group' => true,
+                    ],
+                    [
                         'attribute' => 'PAYROLL_NO', // Attribute to filter on
-                        'label' => 'Assigned Lecturer(s)',
+                        'header' => 'Assigned Lecturer(s)',
                         'format' => 'raw',
                         'vAlign' => 'middle',
                         'width' => '25%',
