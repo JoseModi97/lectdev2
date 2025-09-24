@@ -1,1 +1,0 @@
-a:2:{i:0;a:2:{s:6:"schema";N;s:12:"cacheVersion";i:1;}i:1;O:25:"yii\caching\TagDependency":3:{s:4:"tags";s:32:"db63cb5fb4b22976c46e70698e4cef15";s:4:"data";a:1:{s:32:"81cd17c9880f652a8abb7f87e13789a9";s:21:"0.62540700 1631858776";}s:8:"reusable";b:0;}}
