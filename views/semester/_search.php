@@ -238,7 +238,7 @@ $this->registerCss(
         </div>
     </div>
     <div class="card-footer d-flex justify-content-start gap-2">
-        <?php Html::submitButton('Search', [
+        <?= Html::submitButton('Search', [
             'class' => 'btn text-white px-4',
             'style' => "background-image: linear-gradient(#455492, #304186, #455492)",
         ]) ?>
@@ -251,14 +251,3 @@ $this->registerCss(
 
     <?php ActiveForm::end(); ?>
 </div>
-
-<?php
-$script = <<<JS
-    $('select').on('change', function() {
-        // Submit the form
-        $(this).closest('form').submit();
-    });
-JS;
-
-$this->registerJs($script);
-?>

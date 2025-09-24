@@ -30,6 +30,43 @@ echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
 $data = $dataProvider->getModels();
+$data = $dataProvider->getModels();
+$courseCodeFilter = [];
+$courseNameFilter = [];
+
+foreach ($data as $model) {
+    $course = $model->course ?? null;
+    if ($course === null) {
+        continue;
+    }
+
+    $code = trim((string) ($course->COURSE_CODE ?? ''));
+    if ($code !== '') {
+        $courseCodeFilter[$code] = $code;
+    }
+
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    if ($name !== '') {
+        $courseNameFilter[$name] = $name;
+    }
+}
+
+$selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
+if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
+    $courseCodeFilter[$selectedCourseCode] = $selectedCourseCode;
+}
+
+$selectedCourseName = trim((string) ($searchModel->courseName ?? ''));
+if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $courseNameFilter)) {
+    $courseNameFilter[$selectedCourseName] = $selectedCourseName;
+}
+
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
 
 $lecturersList = ArrayHelper::map(
     EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
@@ -139,12 +176,30 @@ $this->params['breadcrumbs'][] = $this->title;
                     //     ],
                     // ],
                     [
-                        'attribute' => 'course.COURSE_CODE',
+                        'attribute' => 'courseCode',
                         'label' => 'Course Code',
+                        'value' => 'course.COURSE_CODE',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseCodeFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course code'],
+                            'initValueText' => $selectedCourseCode,
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course code'],
                     ],
                     [
-                        'attribute' => 'course.COURSE_NAME',
+                        'attribute' => 'courseName',
                         'label' => 'Course Name',
+                        'value' => 'course.COURSE_NAME',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseNameFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course name'],
+                            'initValueText' => $selectedCourseName,
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course name'],
                     ],
                     [
                         'label' => 'Group Name',
