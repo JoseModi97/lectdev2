@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -35,7 +36,7 @@ $reportSummary = [
             </p>
         </div>
         <a href="<?= Url::to(['/shared-reports/class-performance-download', 'marksheetId' => $reportDetails['marksheetId']]); ?>"
-           id="download-analysis-report" class="btn btn-primary" target="_blank" rel="noopener">
+            id="download-analysis-report" class="btn btn-primary" target="_blank" rel="noopener">
             Download report
         </a>
     </div>
