@@ -59,16 +59,46 @@ $gradeCounts = array_map(static function ($row) {
     return (int)($row['count'] ?? 0);
 }, $gradeRows);
 
+$gradePercentages = array_map(static function ($row) {
+    return (float)($row['percentage'] ?? 0.0);
+}, $gradeRows);
+
+$gradePalette = [
+    'A' => ['#0d7c66', '#13b87b'],
+    'B' => ['#1e8d73', '#2cc48d'],
+    'C' => ['#2e9d82', '#45d1a7'],
+    'D' => ['#d77c1f', '#f0b552'],
+    'E' => ['#c43f3f', '#ef6d6d'],
+    'F' => ['#b12f3d', '#e05763'],
+    'E*' => ['#5f6a7d', '#8b95a6'],
+    'X' => ['#7c8797', '#aeb7c4'],
+];
+
 $gradeBarCount = max(count($gradeLabels), 1);
-$gradeChartHeight = 180;
-$gradeBarWidth = 32;
-$gradeBarSpacing = 18;
-$gradeAxisLeft = 42;
-$gradeAxisBottom = $gradeChartHeight + 20;
-$gradeSvgHeight = $gradeChartHeight + 60;
-$gradeSvgWidth = (int)($gradeAxisLeft + ($gradeBarCount * ($gradeBarWidth + $gradeBarSpacing)) + 16);
+$gradeChartHeight = 184;
+$gradeBarWidth = 34;
+$gradeBarSpacing = 22;
+$gradeAxisLeft = 48;
+$gradeAxisBottom = $gradeChartHeight + 26;
+$gradeSvgHeight = $gradeChartHeight + 72;
+$gradeSvgWidth = (int)($gradeAxisLeft + ($gradeBarCount * ($gradeBarWidth + $gradeBarSpacing)) + 40);
 $gradeMaxCount = max(array_merge($gradeCounts, [1]));
 $gradeTickSteps = 4;
+$gradePlotPadding = 24;
+$gradePlotX = $gradeAxisLeft - $gradePlotPadding;
+$gradePlotY = $gradeAxisBottom - $gradeChartHeight - 12;
+$gradePlotWidth = max($gradeSvgWidth - $gradePlotX - 16, 0);
+$gradePlotHeight = $gradeChartHeight + 36;
+$gradeAxisRight = $gradePlotX + $gradePlotWidth - 12;
+
+$gradeMaxIndex = null;
+$gradeMaxValue = -1;
+foreach ($gradeCounts as $index => $count) {
+    if ($count > $gradeMaxValue) {
+        $gradeMaxValue = $count;
+        $gradeMaxIndex = $index;
+    }
+}
 
 $averageChartHeight = 180;
 $averageLabels = ['Coursework', 'Exam', 'Final Score'];
@@ -78,12 +108,26 @@ $averageValues = [
     (float)($averages['final'] ?? 0),
 ];
 $averageMaxValue = max(array_merge([100.0], $averageValues, [1]));
-$averageBarWidth = 42;
-$averageBarSpacing = 32;
-$averageAxisLeft = 48;
-$averageAxisBottom = $averageChartHeight + 20;
-$averageSvgHeight = $averageChartHeight + 60;
-$averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBarWidth + $averageBarSpacing)) + 24);
+$averageBarWidth = 44;
+$averageBarSpacing = 36;
+$averageAxisLeft = 54;
+$averageAxisBottom = $averageChartHeight + 28;
+$averageSvgHeight = $averageChartHeight + 76;
+$averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBarWidth + $averageBarSpacing)) + 48);
+$averagePassThreshold = 40.0;
+$averageStretchThreshold = 70.0;
+$averagePassY = $averageAxisBottom - ($averagePassThreshold / $averageMaxValue) * $averageChartHeight;
+$averageStretchY = $averageAxisBottom - ($averageStretchThreshold / $averageMaxValue) * $averageChartHeight;
+$averagePlotPadding = 28;
+$averagePlotX = $averageAxisLeft - $averagePlotPadding;
+$averagePlotY = $averageAxisBottom - $averageChartHeight - 16;
+$averagePlotWidth = max($averageSvgWidth - $averagePlotX - 18, 0);
+$averagePlotHeight = $averageChartHeight + 44;
+$averageAxisRight = $averagePlotX + $averagePlotWidth - 20;
+$averageGradientStart = '#0c4fab';
+$averageGradientEnd = '#1f80f0';
+$averageTargetStart = '#d9ecff';
+$averageTargetEnd = '#eef5ff';
 ?>
 <div class="class-performance-pdf">
     <div class="letterhead">
@@ -153,7 +197,23 @@ $averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBa
                 <div class="panel-body">
                     <div class="chart-container">
                         <svg class="chart-svg" width="<?= $gradeSvgWidth; ?>" height="<?= $gradeSvgHeight; ?>" viewBox="0 0 <?= $gradeSvgWidth; ?> <?= $gradeSvgHeight; ?>">
-                            <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
+                            <defs>
+                                <?php foreach ($gradeRows as $index => $row): ?>
+                                    <?php
+                                    $paletteKey = strtoupper((string)($row['label'] ?? ''));
+                                    $gradientColours = $gradePalette[$paletteKey] ?? ['#008751', '#12b873'];
+                                    $gradientId = 'gradeBarGradient' . $index;
+                                    ?>
+                                    <linearGradient id="<?= $gradientId; ?>" x1="0" y1="1" x2="0" y2="0">
+                                        <stop offset="0%" stop-color="<?= $gradientColours[0]; ?>" />
+                                        <stop offset="100%" stop-color="<?= $gradientColours[1]; ?>" />
+                                    </linearGradient>
+                                <?php endforeach; ?>
+                            </defs>
+
+                            <rect x="<?= $gradePlotX; ?>" y="<?= $gradePlotY; ?>" width="<?= $gradePlotWidth; ?>" height="<?= $gradePlotHeight; ?>" class="chart-plot" rx="12" />
+
+                            <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisRight; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
                             <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisLeft; ?>" y2="<?= $gradeAxisBottom - $gradeChartHeight; ?>" class="chart-axis" />
 
                             <?php for ($tick = 1; $tick <= $gradeTickSteps; $tick++): ?>
@@ -162,21 +222,31 @@ $averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBa
                                 $tickValue = $gradeMaxCount * $ratio;
                                 $tickY = $gradeAxisBottom - ($gradeChartHeight * $ratio);
                                 ?>
-                                <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
-                                <text x="<?= $gradeAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
+                                <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeAxisRight; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
+                                <text x="<?= $gradeAxisLeft - 10; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
                             <?php endfor; ?>
+
+                            <text x="<?= $gradeAxisLeft - 36; ?>" y="<?= $gradePlotY + ($gradePlotHeight / 2); ?>" class="chart-axis-label" transform="rotate(-90 <?= $gradeAxisLeft - 36; ?> <?= $gradePlotY + ($gradePlotHeight / 2); ?>)">Students</text>
+                            <text x="<?= $gradeAxisLeft + ($gradePlotWidth / 2); ?>" y="<?= $gradeAxisBottom + 34; ?>" class="chart-axis-label">Grade</text>
 
                             <?php foreach ($gradeCounts as $index => $count): ?>
                                 <?php
                                 $label = $gradeLabels[$index] ?? '';
+                                $percentage = $gradePercentages[$index] ?? 0;
+                                $gradientId = 'gradeBarGradient' . $index;
                                 $barHeight = $gradeMaxCount > 0 ? ($count / $gradeMaxCount) * $gradeChartHeight : 0;
-                                $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing)) + ($gradeBarSpacing / 2);
+                                $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing));
                                 $barY = $gradeAxisBottom - $barHeight;
-                                $valueY = $barHeight > 0 ? $barY - 6 : $gradeAxisBottom - 6;
+                                $valueY = $barHeight > 0 ? max($barY - 10, 18) : $gradeAxisBottom - 12;
+                                $subValueY = min($valueY + 12, $gradeAxisBottom - 4);
                                 ?>
-                                <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar" />
-                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($count)); ?></text>
-                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
+                                <?php if ($barHeight > 0): ?>
+                                    <rect x="<?= $barX; ?>" y="<?= $barY + 4; ?>" width="<?= $gradeBarWidth; ?>" height="<?= max($barHeight - 2, 0); ?>" class="chart-bar-shadow" rx="10" opacity="0.15" />
+                                <?php endif; ?>
+                                <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" fill="url(#<?= $gradientId; ?>)" class="chart-bar<?= $index === $gradeMaxIndex && $gradeMaxValue > 0 ? ' chart-bar-top' : ''; ?>" rx="10" />
+                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value chart-value--emerald"><?= Html::encode(number_format($count)); ?></text>
+                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $subValueY; ?>" text-anchor="middle" class="chart-subvalue"><?= Html::encode(number_format($percentage, 1)); ?>%</text>
+                                <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 20; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
                             <?php endforeach; ?>
                         </svg>
                     </div>
@@ -247,7 +317,29 @@ $averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBa
                     <p class="panel-intro">Average marks per assessment component.</p>
                     <div class="chart-container">
                         <svg class="chart-svg" width="<?= $averageSvgWidth; ?>" height="<?= $averageSvgHeight; ?>" viewBox="0 0 <?= $averageSvgWidth; ?> <?= $averageSvgHeight; ?>">
-                            <line x1="<?= $averageAxisLeft; ?>" y1="<?= $averageAxisBottom; ?>" x2="<?= $averageSvgWidth - 18; ?>" y2="<?= $averageAxisBottom; ?>" class="chart-axis" />
+                            <defs>
+                                <linearGradient id="averageBarGradient" x1="0" y1="1" x2="0" y2="0">
+                                    <stop offset="0%" stop-color="<?= $averageGradientStart; ?>" />
+                                    <stop offset="100%" stop-color="<?= $averageGradientEnd; ?>" />
+                                </linearGradient>
+                                <linearGradient id="averageTargetGradient" x1="0" y1="1" x2="0" y2="0">
+                                    <stop offset="0%" stop-color="<?= $averageTargetStart; ?>" />
+                                    <stop offset="100%" stop-color="<?= $averageTargetEnd; ?>" />
+                                </linearGradient>
+                            </defs>
+
+                            <rect x="<?= $averagePlotX; ?>" y="<?= $averagePlotY; ?>" width="<?= $averagePlotWidth; ?>" height="<?= $averagePlotHeight; ?>" class="chart-plot" rx="12" />
+
+                            <?php if ($averageStretchY < $averageAxisBottom): ?>
+                                <?php
+                                $targetBandY = max($averageStretchY, $averagePlotY);
+                                $targetBandHeight = max($averageAxisBottom - $targetBandY, 0);
+                                ?>
+                                <rect x="<?= $averagePlotX + 6; ?>" y="<?= $targetBandY; ?>" width="<?= max($averagePlotWidth - 12, 0); ?>" height="<?= $targetBandHeight; ?>" fill="url(#averageTargetGradient)" class="chart-target-band" rx="12" />
+                                <text x="<?= $averageAxisRight - 4; ?>" y="<?= max($targetBandY + 18, 16); ?>" text-anchor="end" class="chart-threshold-label">Excellence ≥ <?= Html::encode(number_format($averageStretchThreshold, 0)); ?></text>
+                            <?php endif; ?>
+
+                            <line x1="<?= $averageAxisLeft; ?>" y1="<?= $averageAxisBottom; ?>" x2="<?= $averageAxisRight; ?>" y2="<?= $averageAxisBottom; ?>" class="chart-axis" />
                             <line x1="<?= $averageAxisLeft; ?>" y1="<?= $averageAxisBottom; ?>" x2="<?= $averageAxisLeft; ?>" y2="<?= $averageAxisBottom - $averageChartHeight; ?>" class="chart-axis" />
 
                             <?php for ($tick = 1; $tick <= 4; $tick++): ?>
@@ -256,21 +348,34 @@ $averageSvgWidth = (int)($averageAxisLeft + (count($averageLabels) * ($averageBa
                                 $tickValue = $averageMaxValue * $ratio;
                                 $tickY = $averageAxisBottom - ($averageChartHeight * $ratio);
                                 ?>
-                                <line x1="<?= $averageAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $averageSvgWidth - 18; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
-                                <text x="<?= $averageAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue, 0)); ?></text>
+                                <line x1="<?= $averageAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $averageAxisRight; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
+                                <text x="<?= $averageAxisLeft - 10; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue, 0)); ?></text>
                             <?php endfor; ?>
+
+                            <line x1="<?= $averageAxisLeft; ?>" y1="<?= $averagePassY; ?>" x2="<?= $averageAxisRight; ?>" y2="<?= $averagePassY; ?>" class="chart-threshold" />
+                            <text x="<?= $averageAxisLeft + 6; ?>" y="<?= $averagePassY - 6; ?>" class="chart-threshold-label">Pass mark <?= Html::encode(number_format($averagePassThreshold, 0)); ?></text>
+
+                            <text x="<?= $averageAxisLeft - 38; ?>" y="<?= $averagePlotY + ($averagePlotHeight / 2); ?>" class="chart-axis-label" transform="rotate(-90 <?= $averageAxisLeft - 38; ?> <?= $averagePlotY + ($averagePlotHeight / 2); ?>)">Marks</text>
+                            <text x="<?= $averageAxisLeft + ($averagePlotWidth / 2); ?>" y="<?= $averageAxisBottom + 36; ?>" class="chart-axis-label">Assessment component</text>
 
                             <?php foreach ($averageLabels as $index => $label): ?>
                                 <?php
                                 $value = $averageValues[$index] ?? 0;
                                 $barHeight = $averageMaxValue > 0 ? ($value / $averageMaxValue) * $averageChartHeight : 0;
-                                $barX = $averageAxisLeft + ($index * ($averageBarWidth + $averageBarSpacing)) + ($averageBarSpacing / 2);
+                                $barX = $averageAxisLeft + ($index * ($averageBarWidth + $averageBarSpacing));
                                 $barY = $averageAxisBottom - $barHeight;
-                                $valueY = $barHeight > 0 ? $barY - 8 : $averageAxisBottom - 6;
+                                $valueY = $barHeight > 0 ? max($barY - 10, 18) : $averageAxisBottom - 12;
+                                $delta = $value - $averagePassThreshold;
+                                $deltaLabel = ($delta >= 0 ? '+' : '') . number_format($delta, 1);
+                                $subValueY = min($valueY + 12, $averageAxisBottom - 4);
                                 ?>
-                                <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $averageBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar-secondary" />
-                                <text x="<?= $barX + ($averageBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($value, 1)); ?></text>
-                                <text x="<?= $barX + ($averageBarWidth / 2); ?>" y="<?= $averageAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
+                                <?php if ($barHeight > 0): ?>
+                                    <rect x="<?= $barX; ?>" y="<?= $barY + 4; ?>" width="<?= $averageBarWidth; ?>" height="<?= max($barHeight - 2, 0); ?>" class="chart-bar-shadow" rx="10" opacity="0.15" />
+                                <?php endif; ?>
+                                <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $averageBarWidth; ?>" height="<?= $barHeight; ?>" fill="url(#averageBarGradient)" class="chart-bar-secondary" rx="10" />
+                                <text x="<?= $barX + ($averageBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value chart-value--marine"><?= Html::encode(number_format($value, 1)); ?></text>
+                                <text x="<?= $barX + ($averageBarWidth / 2); ?>" y="<?= $subValueY; ?>" text-anchor="middle" class="chart-subvalue"><?= Html::encode($deltaLabel); ?> vs pass</text>
+                                <text x="<?= $barX + ($averageBarWidth / 2); ?>" y="<?= $averageAxisBottom + 22; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
                             <?php endforeach; ?>
                         </svg>
                     </div>

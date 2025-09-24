@@ -628,13 +628,23 @@ class SharedReportsController extends BaseController
 .bar-fill { background-color: #008751; border-radius: 4px; height: 7px; }
 .chart-container { margin-bottom: 16px; }
 .chart-svg { width: 100%; height: auto; }
-.chart-axis { stroke: #93a3b8; stroke-width: 1; }
-.chart-grid { stroke: #e7ecf3; stroke-width: 1; }
+.chart-plot { fill: #f5f8fd; stroke: #d9dee7; stroke-width: 1; }
+.chart-axis { stroke: #8fa0b8; stroke-width: 1.2; }
+.chart-grid { stroke: #e5ebf4; stroke-width: 1; }
 .chart-bar { fill: #008751; }
 .chart-bar-secondary { fill: #004f9f; }
-.chart-label { font-size: 8pt; fill: #4a5568; text-transform: uppercase; }
-.chart-value { font-size: 8.5pt; fill: #004f9f; font-weight: 700; }
+.chart-bar-shadow { fill: #0b1e39; }
+.chart-bar-top { stroke: #0c4fa3; stroke-width: 1.5; }
+.chart-label { font-size: 8pt; fill: #4a5568; text-transform: uppercase; letter-spacing: 0.3px; }
+.chart-value { font-size: 8.5pt; fill: #0c4fa3; font-weight: 700; }
+.chart-value--emerald { fill: #0f6b4a; }
+.chart-value--marine { fill: #0c4fa3; }
+.chart-subvalue { font-size: 7.5pt; fill: #5b6b7f; font-weight: 600; }
 .chart-tick { font-size: 8pt; fill: #6c757d; }
+.chart-axis-label { font-size: 7.5pt; fill: #6c7a8a; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; }
+.chart-threshold { stroke: #008751; stroke-dasharray: 5 4; stroke-width: 1; }
+.chart-threshold-label { font-size: 7pt; fill: #008751; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+.chart-target-band { opacity: 0.55; }
 .key-figures { border-top: 1px solid #d9dee7; margin-top: 16px; padding-top: 10px; }
 .key-figure { display: flex; justify-content: space-between; text-transform: uppercase; font-size: 9pt; color: #6c757d; margin-bottom: 6px; }
 .key-figure:last-child { margin-bottom: 0; }
