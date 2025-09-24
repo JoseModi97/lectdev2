@@ -626,6 +626,15 @@ class SharedReportsController extends BaseController
 .bar-percent { font-size: 9pt; color: #004f9f; float: right; font-weight: 600; }
 .bar-track { background-color: #e7ecf3; border-radius: 4px; height: 7px; clear: both; }
 .bar-fill { background-color: #008751; border-radius: 4px; height: 7px; }
+.chart-container { margin-bottom: 16px; }
+.chart-svg { width: 100%; height: auto; }
+.chart-axis { stroke: #93a3b8; stroke-width: 1; }
+.chart-grid { stroke: #e7ecf3; stroke-width: 1; }
+.chart-bar { fill: #008751; }
+.chart-bar-secondary { fill: #004f9f; }
+.chart-label { font-size: 8pt; fill: #4a5568; text-transform: uppercase; }
+.chart-value { font-size: 8.5pt; fill: #004f9f; font-weight: 700; }
+.chart-tick { font-size: 8pt; fill: #6c757d; }
 .key-figures { border-top: 1px solid #d9dee7; margin-top: 16px; padding-top: 10px; }
 .key-figure { display: flex; justify-content: space-between; text-transform: uppercase; font-size: 9pt; color: #6c757d; margin-bottom: 6px; }
 .key-figure:last-child { margin-bottom: 0; }
