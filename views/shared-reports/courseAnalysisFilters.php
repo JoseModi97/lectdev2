@@ -14,6 +14,26 @@ use yii\web\View;
 
 $this->title = $title;
 $this->params['breadcrumbs'][] = $this->title;
+
+$courseAnalysisConfig = [
+    'urls' => [
+        'academicYears' => Url::to(['/shared-reports/get-academic-years']),
+        'programmes' => Url::to(['/shared-reports/get-programmes']),
+        'levels' => Url::to(['/shared-reports/get-levels-of-study']),
+        'semesters' => Url::to(['/shared-reports/get-semesters']),
+        'groups' => Url::to(['/shared-reports/get-groups']),
+    ],
+    'selected' => [
+        'academicYear' => $filter->academicYear,
+        'degreeCode' => $filter->degreeCode,
+        'levelOfStudy' => $filter->levelOfStudy,
+        'group' => $filter->group,
+        'semester' => $filter->semester,
+    ],
+];
+
+$this->registerJsVar('courseAnalysisConfig', $courseAnalysisConfig, View::POS_HEAD);
+$this->registerJsFile('@web/js/course-analysis.js', ['depends' => [\yii\web\JqueryAsset::class]]);
 ?>
 
 <div class="semester-index">
@@ -21,34 +41,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="card-header text-white fw-bold" style="background-image: linear-gradient(#455492, #304186, #455492);">
             Academic Filters
         </div>
-        <div class=" card-body row g-3">
+        <div class="card-body row g-3">
             <?php echo $this->render('_search', [
                 'model' => $filter,
             ]); ?>
         </div>
-
     </div>
 </div>
-
-<?php
-$this->registerJsFile('@web/js/course-analysis.js', ['depends' => [\yii\web\JqueryAsset::class]]);
-
-$getAcademicYearsUrl = Url::to(['/shared-reports/get-academic-years']);
-$getProgrammesUrl = Url::to(['/shared-reports/get-programmes']);
-$getLevelsOfStudyUrl = Url::to(['/shared-reports/get-levels-of-study']);
-$getSemesterUrl = Url::to(['/shared-reports/get-semesters']);
-$getGroupsUrl = Url::to(['/shared-reports/get-groups']);
-
-$this->registerJs(
-    "
-    var academicYearsUrl = '$getAcademicYearsUrl';
-    var programmesUrl = '$getProgrammesUrl';
-    var levelsUrl = '$getLevelsOfStudyUrl';
-    var semestersUrl = '$getSemesterUrl';
-    var groupsUrl = '$getGroupsUrl';
-    ",
-    View::POS_HEAD
-);
-?>
-
-

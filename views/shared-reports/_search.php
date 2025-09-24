@@ -11,6 +11,7 @@ use yii\widgets\ActiveForm;
 <div class="course-analysis-filter-search">
 
     <?php $form = ActiveForm::begin([
+        'id' => 'course-analysis-filters-form',
         'action' => ['course-analysis'],
         'method' => 'get',
     ]); ?>
@@ -19,28 +20,43 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'restrictedTo')->hiddenInput()->label(false) ?>
 
-    <div class="row">
+    <div class="row g-3">
         <div class="col-md-4">
-            <?= $form->field($model, 'academicYear')->dropDownList([], ['prompt' => 'Select Academic Year']) ?>
+            <?= $form->field($model, 'academicYear')->dropDownList([], [
+                'prompt' => 'Select Academic Year',
+                'id' => 'academic-year',
+            ]) ?>
         </div>
         <div class="col-md-4">
-            <?= $form->field($model, 'degreeCode')->dropDownList([], ['prompt' => 'Select Programme']) ?>
+            <?= $form->field($model, 'degreeCode')->dropDownList([], [
+                'prompt' => 'Select Programme',
+                'id' => 'programme',
+            ]) ?>
         </div>
         <div class="col-md-4">
-            <?= $form->field($model, 'levelOfStudy')->dropDownList([], ['prompt' => 'Select Level of Study']) ?>
+            <?= $form->field($model, 'levelOfStudy')->dropDownList([], [
+                'prompt' => 'Select Level of Study',
+                'id' => 'level-of-study',
+            ]) ?>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
         <div class="col-md-4">
-            <?= $form->field($model, 'group')->dropDownList([], ['prompt' => 'Select Group']) ?>
+            <?= $form->field($model, 'group')->dropDownList([], [
+                'prompt' => 'Select Group',
+                'id' => 'group',
+            ]) ?>
         </div>
         <div class="col-md-4">
-            <?= $form->field($model, 'semester')->dropDownList([], ['prompt' => 'Select Semester']) ?>
+            <?= $form->field($model, 'semester')->dropDownList([], [
+                'prompt' => 'Select Semester',
+                'id' => 'semester',
+            ]) ?>
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group mt-2">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
     </div>
