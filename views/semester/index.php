@@ -27,38 +27,62 @@ use app\models\EmpVerifyView;
 $code = $deptCode;
 // dd($dataProvider->query->createCommand()->rawSql);
 echo BreadcrumbHelper::generate([
-    ['label' => 'Programme Timetables']
+    [
+        'label' => 'HOD',
+        'url' => [
+            '/site/hod',
+            'filtersFor' => Yii::$app->request->get('CourseAllocationFilter')['purpose'] ?? Yii::$app->request->get('filtersFor')
+        ]
+    ],
+    'Courses'
 ]);
-$data = $dataProvider->query->all();
+
+// Create a query to fetch all relevant MarksheetDef records for filter options
+$filterQuery = MarksheetDef::find()->joinWith(['course']);
+
+// Apply the same filters as the main data provider, but without pagination
+// This ensures that the filter options are relevant to the current search context
+$searchModel->search(Yii::$app->request->queryParams, '')->query->andWhere('1=1'); // Apply search model filters
+$filterQuery->andWhere($searchModel->search(Yii::$app->request->queryParams, '')->query->where);
+
+$allMarksheetDefs = $filterQuery->all();
 
 $courseCodeFilter = [];
 $courseNameFilter = [];
+$courseCodeNameFilter = [];
 
-foreach ($data as $model) {
+foreach ($allMarksheetDefs as $model) {
     $course = $model->course ?? null;
     if ($course === null) {
         continue;
     }
 
     $code = trim((string) ($course->COURSE_CODE ?? ''));
-    $name = trim((string) ($course->COURSE_NAME ?? ''));
-    $codename = ($code !== '' && $name !== '') ? $code . ' - ' . $name : $code;
-
     if ($code !== '') {
-        // Key = COURSE_CODE, Value = "COURSE_CODE - COURSE_NAME"
-        $courseCodeFilter[$code] = $codename;
+        $courseCodeFilter[$code] = $code;
     }
 
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
     if ($name !== '') {
         $courseNameFilter[$name] = $name;
     }
+
+    $concatenated = $code . ' - ' . $name;
+    if ($code !== '' || $name !== '') {
+        $courseCodeNameFilter[$concatenated] = $concatenated;
+    }
 }
 
-
-
-
-
-
+// Sort the filter arrays
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseCodeNameFilter)) {
+    ksort($courseCodeNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
 
 $selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
 if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
@@ -70,11 +94,9 @@ if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $course
     $courseNameFilter[$selectedCourseName] = $selectedCourseName;
 }
 
-if (!empty($courseCodeFilter)) {
-    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
-if (!empty($courseNameFilter)) {
-    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+$selectedCourseCodeName = trim((string) ($searchModel->courseCodeName ?? ''));
+if ($selectedCourseCodeName !== '' && !array_key_exists($selectedCourseCodeName, $courseCodeNameFilter)) {
+    $courseCodeNameFilter[$selectedCourseCodeName] = $selectedCourseCodeName;
 }
 
 $lecturersList = ArrayHelper::map(

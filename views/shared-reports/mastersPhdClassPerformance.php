@@ -14,7 +14,7 @@
 use yii\helpers\Url;
 
 
-require_once Yii::getAlias('@views') . '/shared-reports/classPerfomanceHelpers.php';
+require_once Yii::getAlias('@app/views') . '/shared-reports/classPerfomanceHelpers.php';
 ?>
 
 <div class="lecturer-reports-class-performance-analysis">
