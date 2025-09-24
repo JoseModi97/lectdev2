@@ -34,9 +34,10 @@ $reportSummary = [
                 <?= Html::encode($reportDetails['courseCode']); ?> · <?= Html::encode($reportDetails['degreeName']); ?>
             </p>
         </div>
-        <button type="button" onclick="generatePDF()" id="generate-analysis-pdf" class="btn btn-primary">
+        <a href="<?= Url::to(['/shared-reports/class-performance-download', 'marksheetId' => $reportDetails['marksheetId']]); ?>"
+           id="download-analysis-report" class="btn btn-primary" target="_blank" rel="noopener">
             Download report
-        </button>
+        </a>
     </div>
 
     <div id="class-performance-report" class="bg-white rounded-3 shadow-sm p-3 p-md-4">
@@ -435,25 +436,5 @@ $analysisScript = <<< JS
     })
     .fail(function(data){});
 
-    /** Generate report in pdf format */
-    function generatePDF() {
-        let element = document.getElementById("class-performance-report");
-        let options = {
-            margin: [10, 10, 0, 10],
-            filename : 'class_performance_report',
-            pagebreak: {
-                mode: 'css',
-                before: '.page-break'
-            },
-            jsPDF: {
-                orientation: 'p',
-                unit: 'mm',
-                format: 'a4',
-                putOnlyUsedFonts:true,
-                floatPrecision: 16 // or "smart", default is 16
-            }
-        }
-        html2pdf().set(options).from(element).save();
-    }
 JS;
 $this->registerJs($analysisScript, yii\web\View::POS_END);

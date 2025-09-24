@@ -305,52 +305,15 @@ class SharedReportsController extends BaseController
     public function actionClassPerformance(): string
     {
         try{
-            $params = Yii::$app->request->queryParams;
-            $marksheetId = $params['marksheetId'];
-
-            // Get grading system
-            $marksheet = MarksheetDef::find()->alias('MD')
-                ->select([
-                    'MD.MRKSHEET_ID',
-                    'MD.SEMESTER_ID'
-                ])
-                ->joinWith(['semester SM' => function(ActiveQuery $q){
-                    $q->select([
-                        'SM.SEMESTER_ID',
-                        'SM.DEGREE_CODE'
-                    ]);
-                }], true, 'INNER JOIN')
-                ->joinWith(['semester.degreeProgramme DEG' => function(ActiveQuery $q){
-                    $q->select([
-                        'DEG.DEGREE_CODE',
-                        'DEG.GRADINGSYSTEM'
-                    ]);
-                }], true, 'INNER JOIN')
-                ->joinWith(['semester.degreeProgramme.gradingSystem GS' => function(ActiveQuery $q){
-                    $q->select(['GS.GRADINGCODE', 'GS.GRADINGNAME']);
-                }], true, 'INNER JOIN')
-                ->where(['MD.MRKSHEET_ID' => $marksheetId])
-                ->asArray()
-                ->one();
-
-            $gradingName = $marksheet['semester']['degreeProgramme']['gradingSystem']['GRADINGNAME'];
-
-            if($gradingName === 'MASTERS' || $gradingName === 'PhD'){
-                $view = 'mastersPhdClassPerformance';
-            }elseif ($gradingName === 'DEGREE'){
-                $view = 'degreeClassPerformance';
-            }elseif($gradingName === 'DIPLOMA'){
-                $view = 'diplomaClassPerformance';
-            }else{
-                throw new Exception('The grading system for the programme has not been configured.');
-            }
+            $marksheetId = Yii::$app->request->get('marksheetId');
+            $config = $this->resolveClassPerformanceConfig($marksheetId);
 
             $reportDetails = SmisHelper::performanceReportDetails($marksheetId);
 
             $user = Yii::$app->user->identity->EMP_TITLE . ' ' . Yii::$app->user->identity->SURNAME . ' ' .
                 Yii::$app->user->identity->OTHER_NAMES;
 
-            return $this->render($view, [
+            return $this->render($config['view'], [
                 'title' => 'class Performance report',
                 'reportDetails' => $reportDetails,
                 'user' => $user,
@@ -372,39 +335,12 @@ class SharedReportsController extends BaseController
     public function actionClassPerformanceStats(string $marksheetId)
     {
         try{
-            $totalStudents = Marksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->count();
-
-            // Average total marks
-            $totalFinalMarks = TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('FINAL_MARKS');
-            $avgFinalMarks = round(($totalFinalMarks / $totalStudents), 2);
-
-            // Average exam marks
-            $totalExamMarks = TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('EXAM_MARKS');
-            $avgExamMarks = round(($totalExamMarks / $totalStudents), 2);
-
-            // Average course works marks
-            $totalCourseMarks = TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('COURSE_MARKS');
-            $avgCourseMarks = round(($totalCourseMarks / $totalStudents), 2);
-
-            // Get grades count
-            $gradesDistribution = TempMarksheet::find()->select(['GRADE', 'COUNT(*) AS cnt'])
-                ->where(['MRKSHEET_ID' => $marksheetId])->groupBy(['GRADE'])->orderBy(['GRADE' => SORT_ASC])
-                ->asArray()->all();
+            $stats = $this->buildClassPerformanceStats($marksheetId);
 
             return Yii::createObject([
                 'class' => 'yii\web\Response',
                 'format' => Response::FORMAT_JSON,
-                'data' => [
-                    'status' => true,
-                    'totalStudents' => $totalStudents,
-                    'totalFinalMarks' => $totalFinalMarks,
-                    'totalExamMarks' => $totalExamMarks,
-                    'totalCourseMarks' => $totalCourseMarks,
-                    'avgFinalMarks' => $avgFinalMarks,
-                    'avgExamMarks' => $avgExamMarks,
-                    'avgCourseMarks' => $avgCourseMarks,
-                    'gradesDistribution' => $gradesDistribution
-                ]
+                'data' => array_merge(['status' => true], $stats)
             ]);
         } catch(Exception $ex){
             $message = $ex->getMessage();
@@ -420,6 +356,243 @@ class SharedReportsController extends BaseController
                 ]
             ]);
         }
+    }
+
+    /**
+     * @throws ServerErrorHttpException
+     */
+    public function actionClassPerformanceDownload(string $marksheetId)
+    {
+        try {
+            $config = $this->resolveClassPerformanceConfig($marksheetId);
+            $reportDetails = SmisHelper::performanceReportDetails($marksheetId);
+            $user = Yii::$app->user->identity->EMP_TITLE . ' ' . Yii::$app->user->identity->SURNAME . ' ' .
+                Yii::$app->user->identity->OTHER_NAMES;
+            $date = date('d-M-Y');
+
+            $stats = $this->buildClassPerformanceStats($marksheetId);
+            $gradeCounts = $this->mapGradeCounts($stats['gradesDistribution']);
+            $totalStudents = (int)$stats['totalStudents'];
+            $totalStudents = $totalStudents < 0 ? 0 : $totalStudents;
+
+            $gradeRows = [];
+            foreach ($config['gradeRows'] as $row) {
+                $count = $gradeCounts[$row['gradeKey']] ?? 0;
+                $percentage = $totalStudents > 0 ? round(($count / $totalStudents) * 100, 1) : 0;
+                $gradeRows[] = array_merge($row, [
+                    'count' => $count,
+                    'percentage' => $percentage,
+                ]);
+            }
+
+            $highestGrade = null;
+            $lowestGrade = null;
+            foreach ($gradeRows as $row) {
+                if ($row['count'] > 0) {
+                    if ($highestGrade === null) {
+                        $highestGrade = $row['label'];
+                    }
+                    $lowestGrade = $row['label'];
+                }
+            }
+
+            if ($highestGrade === null) {
+                $highestGrade = 'N/A';
+                $lowestGrade = 'N/A';
+            }
+
+            $content = $this->renderPartial('@app/views/shared-reports/_classPerformancePdf', [
+                'reportDetails' => $reportDetails,
+                'user' => $user,
+                'date' => $date,
+                'gradeRows' => $gradeRows,
+                'totalStudents' => $totalStudents,
+                'averages' => [
+                    'coursework' => $stats['avgCourseMarks'],
+                    'exam' => $stats['avgExamMarks'],
+                    'final' => $stats['avgFinalMarks'],
+                ],
+                'highestGrade' => $highestGrade,
+                'lowestGrade' => $lowestGrade,
+            ]);
+
+            $fileName = $this->buildClassPerformanceFilename($reportDetails);
+
+            $pdf = new Pdf([
+                'mode' => Pdf::MODE_CORE,
+                'format' => Pdf::FORMAT_A4,
+                'orientation' => Pdf::ORIENT_PORTRAIT,
+                'destination' => Pdf::DEST_DOWNLOAD,
+                'content' => $content,
+                'filename' => $fileName,
+                'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
+                'cssInline' => $this->classPerformanceCss(),
+                'options' => [
+                    'title' => 'Class Performance Report',
+                ],
+                'methods' => [
+                    'SetHeader' => ['Class Performance Report||Printed on: ' . date('d M Y H:i')],
+                    'SetFooter' => ['|Page {PAGENO}|'],
+                ],
+            ]);
+
+            return $pdf->render();
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, '500');
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function resolveClassPerformanceConfig(string $marksheetId): array
+    {
+        $marksheet = MarksheetDef::find()->alias('MD')
+            ->select([
+                'MD.MRKSHEET_ID',
+                'MD.SEMESTER_ID'
+            ])
+            ->joinWith(['semester SM' => function(ActiveQuery $q){
+                $q->select([
+                    'SM.SEMESTER_ID',
+                    'SM.DEGREE_CODE'
+                ]);
+            }], true, 'INNER JOIN')
+            ->joinWith(['semester.degreeProgramme DEG' => function(ActiveQuery $q){
+                $q->select([
+                    'DEG.DEGREE_CODE',
+                    'DEG.GRADINGSYSTEM'
+                ]);
+            }], true, 'INNER JOIN')
+            ->joinWith(['semester.degreeProgramme.gradingSystem GS' => function(ActiveQuery $q){
+                $q->select(['GS.GRADINGCODE', 'GS.GRADINGNAME']);
+            }], true, 'INNER JOIN')
+            ->where(['MD.MRKSHEET_ID' => $marksheetId])
+            ->asArray()
+            ->one();
+
+        $gradingName = $marksheet['semester']['degreeProgramme']['gradingSystem']['GRADINGNAME'] ?? null;
+
+        if($gradingName === 'MASTERS' || $gradingName === 'PhD'){
+            $view = 'mastersPhdClassPerformance';
+            $gradeRows = [
+                ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
+                ['range' => '60 - 69.99', 'label' => 'B', 'gradeKey' => 'B'],
+                ['range' => '50 - 59.99', 'label' => 'C', 'gradeKey' => 'C'],
+                ['range' => '0 - 49.99', 'label' => 'F', 'gradeKey' => 'F'],
+                ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
+                ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
+            ];
+        }elseif ($gradingName === 'DEGREE'){
+            $view = 'degreeClassPerformance';
+            $gradeRows = [
+                ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
+                ['range' => '60 - 69.99', 'label' => 'B', 'gradeKey' => 'B'],
+                ['range' => '50 - 59.99', 'label' => 'C', 'gradeKey' => 'C'],
+                ['range' => '40 - 49.99', 'label' => 'D', 'gradeKey' => 'D'],
+                ['range' => '0 - 39.99', 'label' => 'E', 'gradeKey' => 'E'],
+                ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
+                ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
+            ];
+        }elseif($gradingName === 'DIPLOMA'){
+            $view = 'diplomaClassPerformance';
+            $gradeRows = [
+                ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
+                ['range' => '56 - 69.99', 'label' => 'B', 'gradeKey' => 'B'],
+                ['range' => '40 - 55.99', 'label' => 'C', 'gradeKey' => 'C'],
+                ['range' => '0 - 39.99', 'label' => 'D', 'gradeKey' => 'D'],
+                ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
+                ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
+            ];
+        }else{
+            throw new Exception('The grading system for the programme has not been configured.');
+        }
+
+        return [
+            'view' => $view,
+            'gradingName' => $gradingName,
+            'gradeRows' => $gradeRows,
+        ];
+    }
+
+    private function buildClassPerformanceStats(string $marksheetId): array
+    {
+        $totalStudents = (int)Marksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->count();
+
+        $totalFinalMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('FINAL_MARKS');
+        $avgFinalMarks = $totalStudents > 0 ? round(($totalFinalMarks / $totalStudents), 2) : 0;
+
+        $totalExamMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('EXAM_MARKS');
+        $avgExamMarks = $totalStudents > 0 ? round(($totalExamMarks / $totalStudents), 2) : 0;
+
+        $totalCourseMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('COURSE_MARKS');
+        $avgCourseMarks = $totalStudents > 0 ? round(($totalCourseMarks / $totalStudents), 2) : 0;
+
+        $gradesDistribution = TempMarksheet::find()->select(['GRADE', 'COUNT(*) AS cnt'])
+            ->where(['MRKSHEET_ID' => $marksheetId])->groupBy(['GRADE'])->orderBy(['GRADE' => SORT_ASC])
+            ->asArray()->all();
+
+        return [
+            'totalStudents' => $totalStudents,
+            'totalFinalMarks' => $totalFinalMarks,
+            'totalExamMarks' => $totalExamMarks,
+            'totalCourseMarks' => $totalCourseMarks,
+            'avgFinalMarks' => $avgFinalMarks,
+            'avgExamMarks' => $avgExamMarks,
+            'avgCourseMarks' => $avgCourseMarks,
+            'gradesDistribution' => $gradesDistribution,
+        ];
+    }
+
+    private function mapGradeCounts(array $gradesDistribution): array
+    {
+        $counts = [];
+        foreach ($gradesDistribution as $gradeRow) {
+            $grade = $gradeRow['GRADE'];
+            $normalized = $grade === null ? 'X' : trim((string)$grade);
+            if ($normalized === '') {
+                $normalized = 'X';
+            }
+            $counts[$normalized] = (int)$gradeRow['cnt'];
+        }
+
+        return $counts;
+    }
+
+    private function buildClassPerformanceFilename(array $reportDetails): string
+    {
+        $courseCode = $this->sanitizeForFilename($reportDetails['courseCode'] ?? 'course');
+        $marksheetId = $this->sanitizeForFilename($reportDetails['marksheetId'] ?? 'report');
+
+        return strtolower("class-performance-{$courseCode}-{$marksheetId}.pdf");
+    }
+
+    private function sanitizeForFilename(string $value): string
+    {
+        $sanitized = preg_replace('/[^A-Za-z0-9\-]+/', '-', $value);
+        $sanitized = trim($sanitized ?? '', '-');
+
+        return $sanitized === '' ? 'report' : $sanitized;
+    }
+
+    private function classPerformanceCss(): string
+    {
+        return <<<CSS
+.class-performance-pdf { font-size: 11pt; }
+.class-performance-pdf .report-header { background-color: #0d6efd; color: #fff; }
+.class-performance-pdf .report-header span { font-weight: 600; }
+.class-performance-pdf .section-title { font-size: 11pt; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #495057; }
+.class-performance-pdf .summary-table th { width: 40%; }
+.class-performance-pdf .bar-track { background-color: #e9ecef; border-radius: 4px; height: 6px; }
+.class-performance-pdf .bar-fill { background-color: #0d6efd; border-radius: 4px; height: 6px; }
+.class-performance-pdf .signatory-block { min-height: 90px; }
+.class-performance-pdf .signatory-block .label { text-transform: uppercase; font-size: 9pt; font-weight: 600; color: #6c757d; }
+.class-performance-pdf .notes { font-size: 9.5pt; color: #6c757d; }
+CSS;
     }
 
     /**
