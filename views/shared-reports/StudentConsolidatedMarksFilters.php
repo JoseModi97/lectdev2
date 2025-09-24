@@ -174,7 +174,15 @@ $('#level-of-study').on('change', function (e){
     }
 });
 
-// Get levels of study
+// Read selected group
+$('#group').on('change', function (e){
+    group = $(this).val();
+     if(academicYear !== '' && programmeCode !== '' && levelOfStudy !== '' && group !== ''){
+        getSemesters();
+    }
+});
+
+// Get levels of study 
 getLevelsOfStudy = function (){
     $('#level-of-study').find('option').not(':first').remove();
     axios.get(levelsUrl, {
