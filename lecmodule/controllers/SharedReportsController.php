@@ -588,6 +588,9 @@ class SharedReportsController extends BaseController
         return <<<CSS
 .class-performance-pdf { font-size: 10pt; color: #1f2933; line-height: 1.35; }
 .class-performance-pdf * { box-sizing: border-box; }
+.page-section { padding: 12px 0 20px; page-break-inside: avoid; }
+.page-section + .page-section { page-break-before: always; }
+.page-header { margin-bottom: 18px; }
 .letterhead { display: table; width: 100%; }
 .letterhead .logo { width: 75px; height: auto; display: table-cell; vertical-align: middle; }
 .letterhead .institution { display: table-cell; vertical-align: middle; padding-left: 14px; }
