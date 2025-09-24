@@ -25,8 +25,17 @@ $reportSummary = [
 ];
 
 $courseLabel = trim(($reportDetails['courseCode'] ?? '') . ' · ' . ($reportDetails['degreeName'] ?? ''));
+$logo = Yii::getAlias('@webroot') . '/img/UoN_Logo.png';
 ?>
 <div class="class-performance-pdf">
+    <div class="letterhead">
+        <img src="<?= $logo ?>" alt="UoN Logo" class="logo">
+        <div class="school-details">
+            <h1 class="school-name">UNIVERSITY OF NAIROBI</h1>
+            <p class="school-address">P.O. Box 30197, G.P.O., Nairobi, 00100, Kenya</p>
+        </div>
+    </div>
+
     <div class="mb-3">
         <h1 class="fs-4 mb-1">Class Performance Report</h1>
         <p class="text-muted mb-0">
@@ -176,18 +185,21 @@ $courseLabel = trim(($reportDetails['courseCode'] ?? '') . ' · ' . ($reportDeta
         <tr>
             <td class="signatory-block">
                 <div class="label mb-2">Internal Examiner</div>
-                <div>Signature: ________________________________</div>
-                <div>Date: _____________________________________</div>
+                <div class="signature-line"></div>
+                <div class="signatory-name">[Name]</div>
+                <div class="signatory-date">Date:</div>
             </td>
             <td class="signatory-block">
                 <div class="label mb-2">External Examiner</div>
-                <div>Signature: ________________________________</div>
-                <div>Date: _____________________________________</div>
+                <div class="signature-line"></div>
+                <div class="signatory-name">[Name]</div>
+                <div class="signatory-date">Date:</div>
             </td>
             <td class="signatory-block">
                 <div class="label mb-2">Dean/Director</div>
-                <div>Signature: ________________________________</div>
-                <div>Date: _____________________________________</div>
+                <div class="signature-line"></div>
+                <div class="signatory-name">[Name]</div>
+                <div class="signatory-date">Date:</div>
             </td>
         </tr>
         </tbody>

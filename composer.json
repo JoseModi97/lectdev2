@@ -39,7 +39,8 @@
     "raoul2000/yii2-bootswatch-asset": "^1.2",
     "kartik-v/yii2-widget-datepicker": "@dev",
     "neconix/yii2-oci8": "1.1",
-    "kartik-v/yii2-widget-select2": "dev-master"
+    "kartik-v/yii2-widget-select2": "dev-master",
+    "tecnickcom/tcpdf": "^6.7.5"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  * @desc Generate shared reports for the lecturer/hod/dean/administrators
@@ -30,6 +31,10 @@ use yii\filters\AccessControl;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
+
+require_once('tecnickcom/tcpdf/tcpdf_autoconfig.php');
+require_once('tecnickcom/tcpdf/tcpdf.php');
+
 
 class SharedReportsController extends BaseController
 {
@@ -67,12 +72,12 @@ class SharedReportsController extends BaseController
      */
     public function actionGetAcademicYears(): Response
     {
-        try{
+        try {
             return $this->asJson(['status' => 200, 'academicYears' => Yii::$app->params['academicYears']]);
-        }catch (Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
@@ -84,16 +89,16 @@ class SharedReportsController extends BaseController
      */
     public function actionGetProgrammes(): Response
     {
-        try{
+        try {
             $degreeProgrammes = DegreeProgramme::find()->select(['DEGREE_NAME', 'DEGREE_CODE'])
                 ->where(['FACUL_FAC_CODE' => $this->facCode])
                 ->orderBy(['DEGREE_CODE' => SORT_ASC])->asArray()->all();
 
             return $this->asJson(['programmes' => $degreeProgrammes]);
-        }catch (Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
@@ -105,11 +110,11 @@ class SharedReportsController extends BaseController
      */
     public function actionGetLevelsOfStudy(): Response
     {
-        try{
+        try {
             $get = Yii::$app->request->get();
             $levels = Semester::find()->alias('SM')->select(['SM.LEVEL_OF_STUDY'])->distinct()
                 ->where(['SM.ACADEMIC_YEAR' => $get['year'], 'SM.DEGREE_CODE' => $get['degreeCode']])
-                ->joinWith(['levelOfStudy LVL' => function(ActiveQuery $q){
+                ->joinWith(['levelOfStudy LVL' => function (ActiveQuery $q) {
                     $q->select([
                         'LVL.LEVEL_OF_STUDY',
                         'LVL.NAME'
@@ -118,10 +123,10 @@ class SharedReportsController extends BaseController
                 ->orderBy(['SM.LEVEL_OF_STUDY' => SORT_ASC])->asArray()->all();
 
             return $this->asJson(['levels' => $levels]);
-        }catch (Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
@@ -133,11 +138,11 @@ class SharedReportsController extends BaseController
      */
     public function actionGetGroups(): Response
     {
-        try{
+        try {
             $get = Yii::$app->request->get();
             $groups = Semester::find()->alias('SM')
                 ->select(['SM.GROUP_CODE'])
-                ->joinWith(['group GR' => function($q){
+                ->joinWith(['group GR' => function ($q) {
                     $q->select([
                         'GR.GROUP_CODE',
                         'GR.GROUP_NAME'
@@ -152,10 +157,10 @@ class SharedReportsController extends BaseController
                 ->orderBy(['SM.GROUP_CODE' => SORT_ASC])
                 ->asArray()->all();
             return $this->asJson(['groups' => $groups]);
-        }catch (Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
@@ -167,11 +172,11 @@ class SharedReportsController extends BaseController
      */
     public function actionGetSemesters(): Response
     {
-        try{
+        try {
             $get = Yii::$app->request->get();
             $semesters = Semester::find()->alias('SM')
                 ->select(['SM.SEMESTER_ID', 'SM.SEMESTER_CODE', 'SM.DESCRIPTION_CODE'])
-                ->joinWith(['semesterDescription SD' => function($q){
+                ->joinWith(['semesterDescription SD' => function ($q) {
                     $q->select([
                         'SD.DESCRIPTION_CODE',
                         'SD.SEMESTER_DESC'
@@ -187,10 +192,10 @@ class SharedReportsController extends BaseController
                 ->orderBy(['SM.SEMESTER_CODE' => SORT_ASC])
                 ->asArray()->all();
             return $this->asJson(['semesters' => $semesters]);
-        }catch (Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
         }
@@ -202,10 +207,10 @@ class SharedReportsController extends BaseController
      * @return string page to set filters
      * @throws ServerErrorHttpException
      */
-    public function actionCourseAnalysisFilters(string $level, string $restrictedTo=''): string
+    public function actionCourseAnalysisFilters(string $level, string $restrictedTo = ''): string
     {
-        try{
-            if($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean'){
+        try {
+            if ($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean') {
                 throw new Exception('You must provide the correct access level.');
             }
 
@@ -218,10 +223,10 @@ class SharedReportsController extends BaseController
                 'title' => 'Course analysis report filters',
                 'filter' => $filter,
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -233,17 +238,17 @@ class SharedReportsController extends BaseController
      */
     public function actionCourseAnalysis(): string
     {
-        try{
+        try {
             $courseFilter = new CourseAnalysisFilter();
 
             $session = Yii::$app->session;
 
             // Save course filters in the session for retrieval on page redirects
-            if(!empty(Yii::$app->request->get()['CourseAnalysisFilter'])){
+            if (!empty(Yii::$app->request->get()['CourseAnalysisFilter'])) {
                 $session['CourseAnalysisFilter'] = Yii::$app->request->get();
             }
 
-            if(!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()){
+            if (!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()) {
                 throw new Exception('Failed to load filters for course analysis report.');
             }
 
@@ -256,10 +261,10 @@ class SharedReportsController extends BaseController
                 'dataProvider' => $dataProvider,
                 'filter' => $courseFilter,
             ]);
-        } catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -271,7 +276,7 @@ class SharedReportsController extends BaseController
      */
     public function actionConsolidatedMarks(): string
     {
-        try{
+        try {
             $params = Yii::$app->request->queryParams;
             $marksheetId = $params['marksheetId'];
 
@@ -290,10 +295,10 @@ class SharedReportsController extends BaseController
                 'panelHeading' => $panelHeading,
                 'reportDetails' => $reportDetails
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -304,7 +309,7 @@ class SharedReportsController extends BaseController
      */
     public function actionClassPerformance(): string
     {
-        try{
+        try {
             $marksheetId = Yii::$app->request->get('marksheetId');
             $config = $this->resolveClassPerformanceConfig($marksheetId);
 
@@ -319,10 +324,10 @@ class SharedReportsController extends BaseController
                 'user' => $user,
                 'date' => date('d-M-Y')
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -334,7 +339,7 @@ class SharedReportsController extends BaseController
      */
     public function actionClassPerformanceStats(string $marksheetId)
     {
-        try{
+        try {
             $stats = $this->buildClassPerformanceStats($marksheetId);
 
             return Yii::createObject([
@@ -342,10 +347,10 @@ class SharedReportsController extends BaseController
                 'format' => Response::FORMAT_JSON,
                 'data' => array_merge(['status' => true], $stats)
             ]);
-        } catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return Yii::createObject([
                 'class' => 'yii\web\Response',
@@ -440,7 +445,7 @@ class SharedReportsController extends BaseController
         } catch (Exception $ex) {
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -456,19 +461,19 @@ class SharedReportsController extends BaseController
                 'MD.MRKSHEET_ID',
                 'MD.SEMESTER_ID'
             ])
-            ->joinWith(['semester SM' => function(ActiveQuery $q){
+            ->joinWith(['semester SM' => function (ActiveQuery $q) {
                 $q->select([
                     'SM.SEMESTER_ID',
                     'SM.DEGREE_CODE'
                 ]);
             }], true, 'INNER JOIN')
-            ->joinWith(['semester.degreeProgramme DEG' => function(ActiveQuery $q){
+            ->joinWith(['semester.degreeProgramme DEG' => function (ActiveQuery $q) {
                 $q->select([
                     'DEG.DEGREE_CODE',
                     'DEG.GRADINGSYSTEM'
                 ]);
             }], true, 'INNER JOIN')
-            ->joinWith(['semester.degreeProgramme.gradingSystem GS' => function(ActiveQuery $q){
+            ->joinWith(['semester.degreeProgramme.gradingSystem GS' => function (ActiveQuery $q) {
                 $q->select(['GS.GRADINGCODE', 'GS.GRADINGNAME']);
             }], true, 'INNER JOIN')
             ->where(['MD.MRKSHEET_ID' => $marksheetId])
@@ -477,7 +482,7 @@ class SharedReportsController extends BaseController
 
         $gradingName = $marksheet['semester']['degreeProgramme']['gradingSystem']['GRADINGNAME'] ?? null;
 
-        if($gradingName === 'MASTERS' || $gradingName === 'PhD'){
+        if ($gradingName === 'MASTERS' || $gradingName === 'PhD') {
             $view = 'mastersPhdClassPerformance';
             $gradeRows = [
                 ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
@@ -487,7 +492,7 @@ class SharedReportsController extends BaseController
                 ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
                 ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
             ];
-        }elseif ($gradingName === 'DEGREE'){
+        } elseif ($gradingName === 'DEGREE') {
             $view = 'degreeClassPerformance';
             $gradeRows = [
                 ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
@@ -498,7 +503,7 @@ class SharedReportsController extends BaseController
                 ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
                 ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
             ];
-        }elseif($gradingName === 'DIPLOMA'){
+        } elseif ($gradingName === 'DIPLOMA') {
             $view = 'diplomaClassPerformance';
             $gradeRows = [
                 ['range' => '70 - 100', 'label' => 'A', 'gradeKey' => 'A'],
@@ -508,7 +513,7 @@ class SharedReportsController extends BaseController
                 ['range' => '--', 'label' => 'E*', 'gradeKey' => 'E*'],
                 ['range' => 'Not Graded', 'label' => 'X', 'gradeKey' => 'X'],
             ];
-        }else{
+        } else {
             throw new Exception('The grading system for the programme has not been configured.');
         }
 
@@ -523,13 +528,13 @@ class SharedReportsController extends BaseController
     {
         $totalStudents = (int)Marksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->count();
 
-        $totalFinalMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('FINAL_MARKS');
+        $totalFinalMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->sum('FINAL_MARKS');
         $avgFinalMarks = $totalStudents > 0 ? round(($totalFinalMarks / $totalStudents), 2) : 0;
 
-        $totalExamMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('EXAM_MARKS');
+        $totalExamMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->sum('EXAM_MARKS');
         $avgExamMarks = $totalStudents > 0 ? round(($totalExamMarks / $totalStudents), 2) : 0;
 
-        $totalCourseMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID'=>$marksheetId])->sum('COURSE_MARKS');
+        $totalCourseMarks = (float)TempMarksheet::find()->where(['MRKSHEET_ID' => $marksheetId])->sum('COURSE_MARKS');
         $avgCourseMarks = $totalStudents > 0 ? round(($totalCourseMarks / $totalStudents), 2) : 0;
 
         $gradesDistribution = TempMarksheet::find()->select(['GRADE', 'COUNT(*) AS cnt'])
@@ -583,15 +588,23 @@ class SharedReportsController extends BaseController
     {
         return <<<CSS
 .class-performance-pdf { font-size: 11pt; }
+.letterhead { display: flex; align-items: center; margin-bottom: 20px; }
+.logo { width: 80px; height: auto; margin-right: 20px; }
+.school-details { text-align: center; }
+.school-name { font-size: 16pt; font-weight: bold; margin: 0; }
+.school-address { font-size: 10pt; margin: 0; }
 .class-performance-pdf .report-header { background-color: #0d6efd; color: #fff; }
 .class-performance-pdf .report-header span { font-weight: 600; }
 .class-performance-pdf .section-title { font-size: 11pt; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #495057; }
 .class-performance-pdf .summary-table th { width: 40%; }
 .class-performance-pdf .bar-track { background-color: #e9ecef; border-radius: 4px; height: 6px; }
 .class-performance-pdf .bar-fill { background-color: #0d6efd; border-radius: 4px; height: 6px; }
-.class-performance-pdf .signatory-block { min-height: 90px; }
+.class-performance-pdf .signatory-block { min-height: 120px; padding: 10px; text-align: left; vertical-align: bottom; }
 .class-performance-pdf .signatory-block .label { text-transform: uppercase; font-size: 9pt; font-weight: 600; color: #6c757d; }
 .class-performance-pdf .notes { font-size: 9.5pt; color: #6c757d; }
+.class-performance-pdf .signature-line { border-bottom: 1px solid #999; margin-top: 40px; }
+.class-performance-pdf .signatory-name { font-size: 9pt; color: #6c757d; }
+.class-performance-pdf .signatory-date { font-size: 9pt; color: #6c757d; margin-top: 5px; }
 CSS;
     }
 
@@ -602,8 +615,8 @@ CSS;
      */
     public function actionAssessments(string $marksheetId): string
     {
-        try{
-            if(empty($marksheetId)){
+        try {
+            if (empty($marksheetId)) {
                 throw new Exception('A course marksheet must be provided.');
             }
 
@@ -612,7 +625,7 @@ CSS;
 
             $reportDetails = SmisHelper::performanceReportDetails($marksheetId);
 
-            $panelHeading = 'ASSESSMENTS IN ' . $reportDetails['courseName'] .' ('. $reportDetails['courseCode'] .')';
+            $panelHeading = 'ASSESSMENTS IN ' . $reportDetails['courseName'] . ' (' . $reportDetails['courseCode'] . ')';
 
             return $this->render('assessments', [
                 'title' => 'Course assessments',
@@ -620,9 +633,9 @@ CSS;
                 'assessmentsDataProvider' => $assessmentsDataProvider,
                 'reportDetails' => $reportDetails,
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
+            if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, 500);
@@ -636,8 +649,8 @@ CSS;
      */
     public function actionMissingMarks(string $assessmentId): string
     {
-        try{
-            if(empty($assessmentId)){
+        try {
+            if (empty($assessmentId)) {
                 throw new Exception('An assessment id must be provided.');
             }
 
@@ -652,16 +665,16 @@ CSS;
             $reportDetails = SmisHelper::performanceReportDetails($cwModel->MARKSHEET_ID, $assessmentId);
             $panelHeading = 'Missing marks in ' . $reportDetails['courseCode'] . ' | ' . $reportDetails['assessmentName'];
 
-            return $this->render('missingMarks',[
+            return $this->render('missingMarks', [
                 'title' => 'Missing marks report',
                 'searchModel' => $searchModel,
                 'missingMarksProvider' => $missingMarksProvider,
                 'panelHeading' => $panelHeading,
                 'reportDetails' => $reportDetails
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
+            if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, 500);
@@ -675,8 +688,8 @@ CSS;
      */
     public function actionStudentConsolidatedMarksFilters(string $level): string
     {
-        try{
-            if($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean'){
+        try {
+            if ($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean') {
                 throw new Exception('You may not have permissions to access these reports.');
             }
 
@@ -688,10 +701,10 @@ CSS;
                 'title' => 'Student consolidated marks filters',
                 'filter' => $filter
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
-                $message = $ex->getMessage().' File: '.$ex->getFile().' Line: '.$ex->getLine();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, '500');
         }
@@ -704,17 +717,17 @@ CSS;
      */
     public function actionConsolidatedMarksPerStudent(): string
     {
-        try{
+        try {
             $filter = new StudentConsolidatedMarksFilter();
 
             $session = Yii::$app->session;
 
             // Save the filters in the session for retrieval on page redirects
-            if(!empty(Yii::$app->request->get()['StudentConsolidatedMarksFilter'])){
+            if (!empty(Yii::$app->request->get()['StudentConsolidatedMarksFilter'])) {
                 $session['StudentConsolidatedMarksFilter'] = Yii::$app->request->get();
             }
 
-            if(!$filter->load($session->get('StudentConsolidatedMarksFilter')) || !$filter->validate()){
+            if (!$filter->load($session->get('StudentConsolidatedMarksFilter')) || !$filter->validate()) {
                 throw new Exception('Failed to load filters for course analysis report.');
             }
 
@@ -757,9 +770,9 @@ CSS;
                 'panelHeading' => $panelHeading,
                 'filter' => $filter
             ]);
-        }catch(Exception $ex){
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
-            if(YII_ENV_DEV){
+            if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             throw new ServerErrorHttpException($message, 500);
@@ -842,31 +855,31 @@ CSS;
             'options' => ['title' => 'Krajee Report Title'],
             // call mPDF methods on the fly
             'methods' => [
-                'SetHeader'=>['Krajee Report Header'],
-                'SetFooter'=>['{PAGENO}'],
+                'SetHeader' => ['Krajee Report Header'],
+                'SetFooter' => ['{PAGENO}'],
             ]
         ]);
 
         // return the pdf output as per the destination setting
         return $pdf->render();
-//        Yii::$app->response->format = Response::FORMAT_RAW;
-//        $pdf = new Pdf([
-//            'mode' => Pdf::MODE_CORE, // leaner size using standard fonts
-//            'destination' => Pdf::DEST_BROWSER,
-//            'content' => $content,
-//            'options' => [
-//                // any mpdf options you wish to set
-//            ],
-//            'methods' => [
-//                'SetTitle' => 'Privacy Policy - Krajee.com',
-//                'SetSubject' => 'Generating PDF files via yii2-mpdf extension has never been easy',
-//                'SetHeader' => ['Krajee Privacy Policy||Generated On: ' . date("r")],
-//                'SetFooter' => ['|Page {PAGENO}|'],
-//                'SetAuthor' => 'Kartik Visweswaran',
-//                'SetCreator' => 'Kartik Visweswaran',
-//                'SetKeywords' => 'Krajee, Yii2, Export, PDF, MPDF, Output, Privacy, Policy, yii2-mpdf',
-//            ]
-//        ]);
+        //        Yii::$app->response->format = Response::FORMAT_RAW;
+        //        $pdf = new Pdf([
+        //            'mode' => Pdf::MODE_CORE, // leaner size using standard fonts
+        //            'destination' => Pdf::DEST_BROWSER,
+        //            'content' => $content,
+        //            'options' => [
+        //                // any mpdf options you wish to set
+        //            ],
+        //            'methods' => [
+        //                'SetTitle' => 'Privacy Policy - Krajee.com',
+        //                'SetSubject' => 'Generating PDF files via yii2-mpdf extension has never been easy',
+        //                'SetHeader' => ['Krajee Privacy Policy||Generated On: ' . date("r")],
+        //                'SetFooter' => ['|Page {PAGENO}|'],
+        //                'SetAuthor' => 'Kartik Visweswaran',
+        //                'SetCreator' => 'Kartik Visweswaran',
+        //                'SetKeywords' => 'Krajee, Yii2, Export, PDF, MPDF, Output, Privacy, Policy, yii2-mpdf',
+        //            ]
+        //        ]);
         return $pdf->render();
     }
 }
