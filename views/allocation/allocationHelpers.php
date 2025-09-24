@@ -77,9 +77,25 @@ $deptCoursesScript = <<< JS
     // Allocate a course lecturer from within the department or 
     // Request for a course lecturer from another department or both.
     function assignLecturer(){
-        requestId = $(this).attr("data-id");
-        marksheetId = $(this).attr("data-marksheetId");
-        courseType = $(this).attr("data-type");  
+        const $trigger = $(this);
+
+        requestId = $trigger.data('id');
+        if (typeof requestId === 'undefined') {
+            requestId = $trigger.attr('data-id') || null;
+        }
+
+        marksheetId = $trigger.data('marksheetId');
+        if (typeof marksheetId === 'undefined') {
+            marksheetId = $trigger.data('marksheetid');
+        }
+        if (typeof marksheetId === 'undefined') {
+            marksheetId = $trigger.attr('data-marksheet-id') || $trigger.attr('data-marksheetid') || null;
+        }
+
+        courseType = $trigger.data('type');
+        if (typeof courseType === 'undefined') {
+            courseType = $trigger.attr('data-type') || null;
+        }
         getCourseDetails();
         $('#allocate-course-lecturers-form').trigger("reset");
         $('.select-lecturers').show();

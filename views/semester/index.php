@@ -39,17 +39,33 @@ foreach ($data as $model) {
         continue;
     }
 
-    if (!empty($course->COURSE_CODE)) {
-        $courseCodeFilter[$course->COURSE_CODE] = $course->COURSE_CODE;
+    $code = trim((string) ($course->COURSE_CODE ?? ''));
+    if ($code !== '') {
+        $courseCodeFilter[$code] = $code;
     }
 
-    if (!empty($course->COURSE_NAME)) {
-        $courseNameFilter[$course->COURSE_NAME] = $course->COURSE_NAME;
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    if ($name !== '') {
+        $courseNameFilter[$name] = $name;
     }
 }
 
-ksort($courseCodeFilter);
-asort($courseNameFilter);
+$selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
+if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
+    $courseCodeFilter[$selectedCourseCode] = $selectedCourseCode;
+}
+
+$selectedCourseName = trim((string) ($searchModel->courseName ?? ''));
+if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $courseNameFilter)) {
+    $courseNameFilter[$selectedCourseName] = $selectedCourseName;
+}
+
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
 
 $lecturersList = ArrayHelper::map(
     EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
@@ -76,11 +92,12 @@ $actionColumn = [
 
     'buttons' => [
         'allocate' => function ($url, $model, $key) {
-            return Html::a('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate</span>', '#', [
+            return Html::button('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate</span>', [
+                'type' => 'button',
                 'title' => 'Allocate lecturer',
-                'class' => 'assign-lecturer text-decoration-none',
+                'class' => 'assign-lecturer btn btn-link p-0 text-decoration-none',
                 'data-id' => 'NULL',
-                'data-marksheetid' => $model->MRKSHEET_ID,
+                'data-marksheet-id' => $model->MRKSHEET_ID,
                 'data-type' => 'departmental',
             ]);
         },
@@ -166,6 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filter' => $courseCodeFilter,
                         'filterWidgetOptions' => [
                             'options' => ['placeholder' => 'Any course code'],
+                            'initValueText' => $selectedCourseCode,
                             'pluginOptions' => ['allowClear' => true],
                         ],
                         'filterInputOptions' => ['placeholder' => 'Any course code'],
@@ -178,6 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'filter' => $courseNameFilter,
                         'filterWidgetOptions' => [
                             'options' => ['placeholder' => 'Any course name'],
+                            'initValueText' => $selectedCourseName,
                             'pluginOptions' => ['allowClear' => true],
                         ],
                         'filterInputOptions' => ['placeholder' => 'Any course name'],
