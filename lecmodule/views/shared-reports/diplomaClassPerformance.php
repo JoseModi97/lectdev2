@@ -11,121 +11,211 @@
  * @var string $date
  */
 
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 require_once Yii::getAlias('@views') . '/shared-reports/classPerfomanceHelpers.php';
+
+$reportSummary = [
+    'Academic Year' => $reportDetails['academicYear'],
+    'Programme' => $reportDetails['degreeName'] . ' (' . $reportDetails['degreeCode'] . ')',
+    'Level of Study' => strtoupper($reportDetails['level']),
+    'Semester' => $reportDetails['semesterFullName'],
+    'Group' => strtoupper($reportDetails['group']),
+];
 ?>
 
-<div class="class-performance-analysis">
-    <div class ="class-performance-statistics">
-        <p id ="marksheetId" hidden><?= $reportDetails['marksheetId']; ?></p>
-        <button type="button" onclick="generatePDF()" id="generate-analysis-pdf" class="btn btn-primary">
+<div class="class-performance-analysis container-fluid py-3">
+    <p id="marksheetId" hidden><?= Html::encode($reportDetails['marksheetId']); ?></p>
+    <div class="class-performance-statistics d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h2 class="h4 mb-1">Class Performance Report</h2>
+            <p class="text-muted mb-0 small">
+                <?= Html::encode($reportDetails['courseCode']); ?> · <?= Html::encode($reportDetails['degreeName']); ?>
+            </p>
+        </div>
+        <a href="<?= Url::to(['/shared-reports/class-performance-download', 'marksheetId' => $reportDetails['marksheetId']]); ?>"
+           id="download-analysis-report" class="btn btn-primary" target="_blank" rel="noopener">
             Download report
-        </button>
+        </a>
     </div>
 
-    <div id="class-performance-report" style="padding-top: 10px;">
-        <div style="padding: 10px;">
-            <p class="bg-primary" style="padding: 10px;" style="color:#333333; font-weight: bold">
-                University of Nairobi | <?= $reportDetails['courseCode']; ?> | Printed by <?= $user; ?> | <?= $date; ?>
-            </p>
-
-            <div>
-                <div class="row">
-                    <div class="col-lg-12 col-md-12">
-                        <?php
-                        $contentBefore = '<p style="color:#333333; font-weight: bold;">ACADEMIC YEAR: ' . $reportDetails['academicYear'] . '</p>';
-                        $contentBefore .= '<p style="color:#333333; font-weight: bold;">PROGRAMME: ' . $reportDetails['degreeName'] . ' (' . $reportDetails['degreeCode'] . ') </p>';
-                        $contentBefore .= '<p style="color:#333333; font-weight: bold;">LEVEL OF STUDY: ' . strtoupper($reportDetails['level']) . '</p>';
-                        $contentBefore .= '<p style="color:#333333; font-weight: bold;">SEMESTER: ' . $reportDetails['semesterFullName'] . '</p>';
-                        $contentBefore .= '<p style="color:#333333; font-weight: bold;">GROUP: ' . strtoupper($reportDetails['group']) . '</p>';
-                        echo $contentBefore;
-                        ?>
-                    </div>
+    <div id="class-performance-report" class="bg-white rounded-3 shadow-sm p-3 p-md-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 small text-uppercase">
+                    <span class="fw-semibold">University of Nairobi</span>
+                    <span><?= Html::encode($reportDetails['courseCode']); ?></span>
+                    <span>Printed by <?= Html::encode($user); ?></span>
+                    <span><?= Html::encode($date); ?></span>
                 </div>
-
-                <br><br>
-
-                <div class="row" style="padding-top: 10px;">
-                    <div class="col-lg-4 col-md-4">
-                        <table id ="grading-system-table" class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th scope="col">% RANGE</th>
-                                <th scope="col">GRADE</th>
-                                <th scope="col"># OF STUDENTS</th>
-                            </tr>
-                            </thead>
-                            <tbody id="grading-system-tbody">
-                            <tr class="table-info">
-                                <td>70 - 100</td>
-                                <td>A</td>
-                                <td id="grade-A-count"></td>
-                            </tr>
-                            <tr class="table-info">
-                                <td>56 - 69.99</td>
-                                <td>B</td>
-                                <td id="grade-B-count"></td>
-                            </tr>
-                            <tr class="table-info">
-                                <td>40 - 55.99</td>
-                                <td>C</td>
-                                <td id="grade-C-count"></td>
-                            </tr>
-                            <tr class="table-info">
-                                <td>0 - 39.99</td>
-                                <td>D</td>
-                                <td id="grade-D-count"></td>
-                            </tr>
-                            <tr class="table-info">
-                                <td>--</td>
-                                <td>E*</td>
-                                <td id="grade-E-star-count"></td>
-                            </tr>
-                            <tr>
-                                <td>Not Graded</td>
-                                <td>X</td>
-                                <td id="grade-X-count"></td>
-                            </tr>
-                            <tr>
-                                <td>Class size</td>
-                                <td></td>
-                                <td id="students-count"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-lg-4 col-md-4">
-                        <div id ="grade-distribution-loader">
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <?php foreach ($reportSummary as $label => $value): ?>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="text-muted text-uppercase small fw-semibold"><?= Html::encode($label); ?></div>
+                            <div class="fw-semibold text-dark"><?= Html::encode($value); ?></div>
                         </div>
-                        <canvas id="grade-distribution" width="100" height="100"></canvas>
-                    </div>
-                    <div class="col-lg-4 col-md-4 "></div>
+                    <?php endforeach; ?>
                 </div>
+            </div>
+        </div>
 
-                <br><br>
-
-                <div class="row">
-                    <div class="col-lg-4 col-md-4">
-                        <div id ="average-scores-loader"></div>
-                        <canvas id="average-scores" width="100" height="100"></canvas>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-5 col-xl-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Grade distribution</div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table id="grading-system-table" class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="text-uppercase small text-muted">% Range</th>
+                                        <th scope="col" class="text-uppercase small text-muted">Grade</th>
+                                        <th scope="col" class="text-uppercase small text-muted text-end"># of students</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="grading-system-tbody">
+                                    <tr>
+                                        <td>70 - 100</td>
+                                        <td>A</td>
+                                        <td class="text-end" id="grade-A-count"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>56 - 69.99</td>
+                                        <td>B</td>
+                                        <td class="text-end" id="grade-B-count"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>40 - 55.99</td>
+                                        <td>C</td>
+                                        <td class="text-end" id="grade-C-count"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>0 - 39.99</td>
+                                        <td>D</td>
+                                        <td class="text-end" id="grade-D-count"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>--</td>
+                                        <td>E*</td>
+                                        <td class="text-end" id="grade-E-star-count"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Not Graded</td>
+                                        <td>X</td>
+                                        <td class="text-end" id="grade-X-count"></td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td>Class size</td>
+                                        <td></td>
+                                        <td class="text-end fw-semibold" id="students-count"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="col-lg-4 col-md-4 page-break" style="padding-top: 10px;">
-                        <h4>Average scores summary: </h4><hr>
-                        <P>Coursework: <span id="avg-cw-score"></span></P>
-                        <P>Exam: <span id="avg-exam-score"></span></P>
-                        <P>Final: <span id="avg-final-score"></span></P>
-                    </div>
-                    <div class="col-lg-4 col-md-4"></div>
                 </div>
+            </div>
+            <div class="col-lg-4 col-xl-4">
+                <div class="card h-100 shadow-sm text-center">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Grade distribution chart</div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="w-100" style="max-width: 320px;">
+                            <div id="grade-distribution-loader" class="py-4"></div>
+                            <canvas id="grade-distribution" class="w-100" height="220"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-xl-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Key figures</div>
+                    <div class="card-body">
+                        <p class="mb-2 text-muted small">Quick reference for print and review.</p>
+                        <ul class="list-unstyled mb-0 small">
+                            <li class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted text-uppercase">Highest grade</span>
+                                <span class="fw-semibold">A</span>
+                            </li>
+                            <li class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted text-uppercase">Lowest grade</span>
+                                <span class="fw-semibold">D / X</span>
+                            </li>
+                            <li class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted text-uppercase">Report date</span>
+                                <span class="fw-semibold"><?= Html::encode($date); ?></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                <br><br>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6 col-xl-5">
+                <div class="card h-100 shadow-sm text-center">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Average scores chart</div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="w-100" style="max-width: 320px;">
+                            <div id="average-scores-loader" class="py-4"></div>
+                            <canvas id="average-scores" class="w-100" height="220"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-4 page-break">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Average scores summary</div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted text-uppercase small">Coursework</span>
+                                <span class="fw-semibold" id="avg-cw-score"></span>
+                            </li>
+                            <li class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted text-uppercase small">Exam</span>
+                                <span class="fw-semibold" id="avg-exam-score"></span>
+                            </li>
+                            <li class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted text-uppercase small">Final</span>
+                                <span class="fw-semibold" id="avg-final-score"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light fw-semibold text-uppercase small">Notes</div>
+                    <div class="card-body">
+                        <p class="mb-0 small text-muted">
+                            Use this report to highlight key trends and share quick talking points before meetings or when exporting the PDF.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                <div class="row">
-                    <div class="col-lg-12 col-md-12">
-                        <P>Internal Examiner    (Signature) ......................................... (Date) ...........................</P><br><br>
-                        <P>External Examiner    (Signature) ......................................... (Date) ...........................</P><br><br>
-                        <P>Dean/Director        (Signature) ......................................... (Date) ...........................</P>
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-semibold text-uppercase small">Signatories</div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-muted text-uppercase small fw-semibold">Internal Examiner</div>
+                        <p class="mb-1">Signature: ________________________________</p>
+                        <p class="mb-0">Date: _____________________________________</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted text-uppercase small fw-semibold">External Examiner</div>
+                        <p class="mb-1">Signature: ________________________________</p>
+                        <p class="mb-0">Date: _____________________________________</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted text-uppercase small fw-semibold">Dean/Director</div>
+                        <p class="mb-1">Signature: ________________________________</p>
+                        <p class="mb-0">Date: _____________________________________</p>
                     </div>
                 </div>
             </div>
@@ -331,25 +421,5 @@ $analysisScript = <<< JS
     })
     .fail(function(data){});
 
-    /** Generate report in pdf format */
-    function generatePDF() {
-        let element = document.getElementById("class-performance-report");
-        let options = {
-            margin: [10, 10, 0, 10],
-            filename : 'class_performance_report',
-            pagebreak: {
-                mode: 'css',
-                before: '.page-break'
-            },
-            jsPDF: {
-                orientation: 'p',
-                unit: 'mm',
-                format: 'a4',
-                putOnlyUsedFonts:true,
-                floatPrecision: 16 // or "smart", default is 16
-            }
-        }
-        html2pdf().set(options).from(element).save();
-    }
 JS;
 $this->registerJs($analysisScript, yii\web\View::POS_END);
