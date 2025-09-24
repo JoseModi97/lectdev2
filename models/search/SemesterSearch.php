@@ -27,7 +27,7 @@ class SemesterSearch extends Semester
         return [
             [['SEMESTER_ID', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'INTAKE_CODE', 'START_DATE', 'END_DATE', 'FIRST_SEMESTER', 'SEMESTER_NAME', 'CLOSING_DATE', 'ADMIN_USER', 'GROUP_CODE', 'REGISTRATION_DEADLINE', 'DESCRIPTION_CODE', 'SESSION_TYPE', 'DISPLAY_DATE', 'REGISTRATION_DATE', 'SEMESTER_TYPE', 'purpose', 'courseCode', 'courseName'], 'safe'],
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
-            [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE'], 'required'],
+            [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
         ];
     }
 

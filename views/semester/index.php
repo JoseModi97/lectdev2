@@ -25,11 +25,48 @@ use app\models\EmpVerifyView;
 /** @var bool $searchPerformed */
 // dd(array_column($dataProvider->getModels(), 'ACADEMIC_YEAR'));
 $code = $deptCode;
-
+// dd($dataProvider->query->createCommand()->rawSql);
 echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
 $data = $dataProvider->getModels();
+$data = $dataProvider->getModels();
+$courseCodeFilter = [];
+$courseNameFilter = [];
+
+foreach ($data as $model) {
+    $course = $model->course ?? null;
+    if ($course === null) {
+        continue;
+    }
+
+    $code = trim((string) ($course->COURSE_CODE ?? ''));
+    if ($code !== '') {
+        $courseCodeFilter[$code] = $code;
+    }
+
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    if ($name !== '') {
+        $courseNameFilter[$name] = $name;
+    }
+}
+
+$selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
+if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
+    $courseCodeFilter[$selectedCourseCode] = $selectedCourseCode;
+}
+
+$selectedCourseName = trim((string) ($searchModel->courseName ?? ''));
+if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $courseNameFilter)) {
+    $courseNameFilter[$selectedCourseName] = $selectedCourseName;
+}
+
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
 
 $lecturersList = ArrayHelper::map(
     EmpVerifyView::find()->where(['DEPT_CODE' => $deptCode, 'STATUS_DESC' => 'ACTIVE', 'JOB_CADRE' => 'ACADEMIC'])->orderBy('SURNAME')->all(),
@@ -104,8 +141,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
             <?php
             if (!empty(Yii::$app->request->get('SemesterSearch'))) {
+                $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY']]);
             ?>
                 <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
+                <p><?= Html::encode($level['NAME']) ?>, SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE']) ?></p>
             <?php
             }
             ?>
@@ -123,38 +162,56 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
+                    // [
+                    //     'label' => 'Level of Study',
+                    //     'value' => function ($model) {
+                    //         $semDesc = $model->semester->semesterDescription;
+                    //         return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC;
+                    //     },
+                    //     'group' => true,
+                    //     'groupedRow' => true,
+                    //     'contentOptions' => [
+                    //         'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+                    //         'class' => 'py-3'
+                    //     ],
+                    // ],
                     [
-                        'label' => 'Level of Study',
+                        'attribute' => 'courseCode',
+                        'label' => 'Course Code',
+                        'value' => 'course.COURSE_CODE',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseCodeFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course code'],
+                            'initValueText' => $selectedCourseCode,
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course code'],
+                    ],
+                    [
+                        'attribute' => 'courseName',
+                        'label' => 'Course Name',
+                        'value' => 'course.COURSE_NAME',
+                        'filterType' => GridView::FILTER_SELECT2,
+                        'filter' => $courseNameFilter,
+                        'filterWidgetOptions' => [
+                            'options' => ['placeholder' => 'Any course name'],
+                            'initValueText' => $selectedCourseName,
+                            'pluginOptions' => ['allowClear' => true],
+                        ],
+                        'filterInputOptions' => ['placeholder' => 'Any course name'],
+                    ],
+                    [
+                        'label' => 'Group Name',
                         'value' => function ($model) {
                             $semDesc = $model->semester->semesterDescription;
-                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC . ' - ' . $model->semester->group->GROUP_NAME;
+                            return $model->semester->group->GROUP_NAME;
                         },
-
-                        // 'value' => function ($model) {
-                        //     if ($model->SEMESTER_CODE === null) {
-                        //         return ucfirst('(not set)');
-                        //     }
-
-                        //     $semDesc = SemesterDescription::findOne(['DESCRIPTION_CODE' => $model->semester->DESCRIPTION_CODE]);
-
-                        //     $words = $model->SEMESTER_CODE . ' - ' . $semDesc['SEMESTER_DESC'];
-                        //     return $words;
-                        // },
                         'group' => true,
-                        'groupedRow' => true,
-                        'contentOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;'],
-                    ],
-                    [
-                        'attribute' => 'course.COURSE_CODE',
-                        'label' => 'Course Code',
-                    ],
-                    [
-                        'attribute' => 'course.COURSE_NAME',
-                        'label' => 'Course Name',
                     ],
                     [
                         'attribute' => 'PAYROLL_NO', // Attribute to filter on
-                        'label' => 'Assigned Lecturer(s)',
+                        'header' => 'Assigned Lecturer(s)',
                         'format' => 'raw',
                         'vAlign' => 'middle',
                         'width' => '25%',
@@ -220,6 +277,8 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
 </div>
+
+<?php echo $this->render('@app/views/allocation/allocationHelpers', ['deptCode' => $deptCode]); ?>
 
 <?php
 
