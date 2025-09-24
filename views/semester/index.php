@@ -29,8 +29,8 @@ $code = $deptCode;
 echo BreadcrumbHelper::generate([
     ['label' => 'Programme Timetables']
 ]);
-$data = $dataProvider->getModels();
-$data = $dataProvider->getModels();
+$data = $dataProvider->query->all();
+
 $courseCodeFilter = [];
 $courseNameFilter = [];
 
@@ -41,15 +41,24 @@ foreach ($data as $model) {
     }
 
     $code = trim((string) ($course->COURSE_CODE ?? ''));
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    $codename = ($code !== '' && $name !== '') ? $code . ' - ' . $name : $code;
+
     if ($code !== '') {
-        $courseCodeFilter[$code] = $code;
+        // Key = COURSE_CODE, Value = "COURSE_CODE - COURSE_NAME"
+        $courseCodeFilter[$code] = $codename;
     }
 
-    $name = trim((string) ($course->COURSE_NAME ?? ''));
     if ($name !== '') {
         $courseNameFilter[$name] = $name;
     }
 }
+
+
+
+
+
+
 
 $selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
 if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
@@ -179,28 +188,33 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'courseCode',
                         'label' => 'Course Code',
                         'value' => 'course.COURSE_CODE',
+                        'value' => function ($model) {
+                            $courseCode = $model->course->COURSE_CODE ?? '';
+                            $courseName = $model->course->COURSE_NAME ?? '';
+                            return $courseCode . ' - ' . $courseName;
+                        },
                         'filterType' => GridView::FILTER_SELECT2,
                         'filter' => $courseCodeFilter,
                         'filterWidgetOptions' => [
-                            'options' => ['placeholder' => 'Any course code'],
+                            'options' => ['placeholder' => 'Any course'],
                             'initValueText' => $selectedCourseCode,
                             'pluginOptions' => ['allowClear' => true],
                         ],
-                        'filterInputOptions' => ['placeholder' => 'Any course code'],
+                        'filterInputOptions' => ['placeholder' => 'Any course'],
                     ],
-                    [
-                        'attribute' => 'courseName',
-                        'label' => 'Course Name',
-                        'value' => 'course.COURSE_NAME',
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $courseNameFilter,
-                        'filterWidgetOptions' => [
-                            'options' => ['placeholder' => 'Any course name'],
-                            'initValueText' => $selectedCourseName,
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => ['placeholder' => 'Any course name'],
-                    ],
+                    // [
+                    //     'attribute' => 'courseName',
+                    //     'label' => 'Course Name',
+                    //     'value' => 'course.COURSE_NAME',
+                    //     'filterType' => GridView::FILTER_SELECT2,
+                    //     'filter' => $courseNameFilter,
+                    //     'filterWidgetOptions' => [
+                    //         'options' => ['placeholder' => 'Any course name'],
+                    //         'initValueText' => $selectedCourseName,
+                    //         'pluginOptions' => ['allowClear' => true],
+                    //     ],
+                    //     'filterInputOptions' => ['placeholder' => 'Any course name'],
+                    // ],
                     [
                         'label' => 'Group Name',
                         'value' => function ($model) {
