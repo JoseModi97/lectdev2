@@ -28,6 +28,7 @@ class SemesterSearch extends Semester
             [['SEMESTER_ID', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'INTAKE_CODE', 'START_DATE', 'END_DATE', 'FIRST_SEMESTER', 'SEMESTER_NAME', 'CLOSING_DATE', 'ADMIN_USER', 'GROUP_CODE', 'REGISTRATION_DEADLINE', 'DESCRIPTION_CODE', 'SESSION_TYPE', 'DISPLAY_DATE', 'REGISTRATION_DATE', 'SEMESTER_TYPE', 'purpose', 'courseCode', 'courseName'], 'safe'],
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
+            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE'], 'required'],
         ];
     }
 
@@ -57,9 +58,18 @@ class SemesterSearch extends Semester
 
 
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+
+
+        if (empty($params['DEGREE_CODE']) || empty($params['SEMESTER_CODE']) || empty($params['LEVEL_OF_STUDY'])) {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query->limit(100),
+                'pagination' => false,
+            ]);
+        } elseif (!empty($params)) {
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+            ]);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -81,14 +91,11 @@ class SemesterSearch extends Semester
 
 
 
-
-
         // if ($params['filtersFor'] === 'nonSuppCourses') {
         //     $query->andWhere(['NOT', ['MUTHONI.SEMESTERS.SEMESTER_TYPE' => 'SUPPLEMENTARY']]);
         // } elseif ($params['filtersFor'] === 'suppCourses') {
         //     $query->andWhere(['MUTHONI.SEMESTERS.SEMESTER_TYPE' => 'SUPPLEMENTARY']);
         // }
-
 
         return $dataProvider;
     }
