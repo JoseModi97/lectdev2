@@ -27,62 +27,40 @@ use app\models\EmpVerifyView;
 $code = $deptCode;
 // dd($dataProvider->query->createCommand()->rawSql);
 echo BreadcrumbHelper::generate([
-    [
-        'label' => 'HOD',
-        'url' => [
-            '/site/hod',
-            'filtersFor' => Yii::$app->request->get('CourseAllocationFilter')['purpose'] ?? Yii::$app->request->get('filtersFor')
-        ]
-    ],
-    'Courses'
+    ['label' => 'Programme Timetables']
 ]);
+$data = $dataProvider->query->all();
 
-// Create a query to fetch all relevant MarksheetDef records for filter options
-$filterQuery = MarksheetDef::find()->joinWith(['course']);
-
-// Apply the same filters as the main data provider, but without pagination
-// This ensures that the filter options are relevant to the current search context
-$searchModel->search(Yii::$app->request->queryParams, '')->query->andWhere('1=1'); // Apply search model filters
-$filterQuery->andWhere($searchModel->search(Yii::$app->request->queryParams, '')->query->where);
-
-$allMarksheetDefs = $filterQuery->all();
+//dd($dataProvider->query->createCommand()->getRawSql());
 
 $courseCodeFilter = [];
 $courseNameFilter = [];
-$courseCodeNameFilter = [];
 
-foreach ($allMarksheetDefs as $model) {
+foreach ($data as $model) {
     $course = $model->course ?? null;
     if ($course === null) {
         continue;
     }
 
     $code = trim((string) ($course->COURSE_CODE ?? ''));
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    $codename = ($code !== '' && $name !== '') ? $code . ' - ' . $name : $code;
+
     if ($code !== '') {
-        $courseCodeFilter[$code] = $code;
+        // Key = COURSE_CODE, Value = "COURSE_CODE - COURSE_NAME"
+        $courseCodeFilter[$code] = $codename;
     }
 
-    $name = trim((string) ($course->COURSE_NAME ?? ''));
     if ($name !== '') {
         $courseNameFilter[$name] = $name;
     }
-
-    $concatenated = $code . ' - ' . $name;
-    if ($code !== '' || $name !== '') {
-        $courseCodeNameFilter[$concatenated] = $concatenated;
-    }
 }
 
-// Sort the filter arrays
-if (!empty($courseCodeFilter)) {
-    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
-if (!empty($courseNameFilter)) {
-    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
-if (!empty($courseCodeNameFilter)) {
-    ksort($courseCodeNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
+
+
+
+
+
 
 $selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
 if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
@@ -94,9 +72,11 @@ if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $course
     $courseNameFilter[$selectedCourseName] = $selectedCourseName;
 }
 
-$selectedCourseCodeName = trim((string) ($searchModel->courseCodeName ?? ''));
-if ($selectedCourseCodeName !== '' && !array_key_exists($selectedCourseCodeName, $courseCodeNameFilter)) {
-    $courseCodeNameFilter[$selectedCourseCodeName] = $selectedCourseCodeName;
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
 }
 
 $lecturersList = ArrayHelper::map(
@@ -175,7 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY']]);
             ?>
                 <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
-                <p><?= Html::encode($level['NAME']) ?>, SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE']) ?></p>
+                <p><?= Html::encode($level['NAME'] ?? '') ?>, SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '') ?></p>
             <?php
             }
             ?>
@@ -206,6 +186,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     //         'class' => 'py-3'
                     //     ],
                     // ],
+[
+                        'label' => 'Level of Study',
+                        'value' => function ($model) {
+                            $semDesc = $model->semester->semesterDescription;
+                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC;
+                        },
+                        'group' => true,
+                        'groupedRow' => true,
+                        'contentOptions' => [
+                            'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+                            'class' => 'py-3'
+                        ],
+                    ],
                     [
                         'attribute' => 'courseCode',
                         'label' => 'Course Code',
