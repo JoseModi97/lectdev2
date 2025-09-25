@@ -160,17 +160,29 @@ $this->params['breadcrumbs'][] = $this->title;
             }
             ?>
 
-            <?= GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'pjax' => false,
+            <div id="semester-grid-container">
+                <?= GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    'pjax' => false,
+                    'layout' => "{items}\n{pager}",
+                    'options' => [
+                        'class' => 'grid-view table-responsive',
+                        'id' => 'semester-grid'
+                    ],
+                    'pager' => [
+                        'options' => [
+                            'class' => 'pagination d-none',
+                            'id' => 'semester-grid-pagination'
+                        ],
+                    ],
 
-                'responsiveWrap' => false,
-                'condensed' => true,
-                'hover' => true,
-                'striped' => false,
-                'bordered' => true,
-                'columns' => [
+                    'responsiveWrap' => false,
+                    'condensed' => true,
+                    'hover' => true,
+                    'striped' => false,
+                    'bordered' => true,
+                    'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
                     // [
@@ -298,9 +310,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'filterInputOptions' => ['placeholder' => 'Any lecturer'],
                     ],
-                    $actionColumn,
-                ],
-            ]); ?>
+                        $actionColumn,
+                    ],
+                ]); ?>
+                <div id="semester-grid-loader" class="text-center py-3 d-none">
+                    <span class="spinner-border text-primary" role="status" aria-hidden="true"></span>
+                    <span class="ms-2">Loading more courses…</span>
+                </div>
+                <div id="semester-grid-end" class="text-center text-muted py-3 d-none">
+                    You have reached the end of the list.
+                </div>
+            </div>
         </div>
 
     </div>
@@ -316,55 +336,146 @@ $this->params['breadcrumbs'][] = $this->title;
 $this->registerJs("
 $(document).ready(function() {
     $('#academic-year-filter').on('change', function() {
-        var form = $('#academic-year-filter-form');
         var selectedValue = $(this).val();
-        
+
         var baseUrl = '" . Url::current([]) . "';
         var newUrl = baseUrl;
-        
+
         if (selectedValue && selectedValue !== '') {
             var separator = baseUrl.indexOf('?') !== -1 ? '&' : '?';
             newUrl = baseUrl + separator + 'CourseAssignmentSearch%5BacademicYear%5D=' + encodeURIComponent(selectedValue);
         }
-        
+
         window.location.href = newUrl;
     });
-    
+
     $('#programme-filter').on('change', function() {
         var selectedProgramme = $(this).val();
         var currentUrl = new URL(window.location.href);
         var params = new URLSearchParams(currentUrl.search);
-        
+
         params.delete('CourseAssignmentSearch[programme]');
-        
+
         if (selectedProgramme && selectedProgramme !== '') {
             params.set('CourseAssignmentSearch[programme]', selectedProgramme);
         }
-        
+
         var newUrl = currentUrl.pathname + '?' + params.toString();
-        
+
         if (params.toString() === '') {
             newUrl = currentUrl.pathname;
         }
-        
+
         window.location.href = newUrl;
     });
-    
-    $('.kv-grouped-row').each(function() {
-        var groupText = $(this).find('td').text();
-        
-        if (groupText.indexOf('|') !== -1 && !groupText.includes('SEMESTER')) {
-            $(this).addClass('group-programme-header');
-        } 
-        else if (groupText.indexOf('SEMESTER') !== -1 || groupText.indexOf('YEAR') !== -1) {
-            $(this).addClass('group-level-header');
+
+    function applyGroupEnhancements(context) {
+        var rows = context.find('.kv-grouped-row');
+        rows.each(function() {
+            var $row = $(this);
+            var $cell = $row.find('td').first();
+
+            $row.removeClass('group-programme-header group-level-header');
+            $cell.find('.course-count-badge').remove();
+
+            var groupText = $.trim($cell.clone().children().remove().end().text());
+
+            if (groupText.indexOf('|') !== -1 && groupText.indexOf('SEMESTER') === -1) {
+                $row.addClass('group-programme-header');
+            } else if (groupText.indexOf('SEMESTER') !== -1 || groupText.indexOf('YEAR') !== -1) {
+                $row.addClass('group-level-header');
+            }
+
+            var nextRows = $row.nextUntil('.kv-grouped-row');
+            var count = nextRows.length;
+
+            if (count >= 0) {
+                var badge = $('<span>', {
+                    'class': 'badge badge-light ml-2 course-count-badge',
+                    'text': count + ' course(s)'
+                });
+                $cell.append(' ').append(badge);
+            }
+        });
+    }
+
+    var $grid = $('#semester-grid');
+    var $window = $(window);
+    var $loader = $('#semester-grid-loader');
+    var $endMessage = $('#semester-grid-end');
+
+    if (!$grid.length) {
+        if ($endMessage.length) {
+            $endMessage.removeClass('d-none');
         }
-        
-        var nextRows = $(this).nextUntil('.kv-grouped-row');
-        var count = nextRows.length;
-        var headerText = $(this).find('td').html();
-        $(this).find('td').html(headerText + ' <span class=\"badge badge-light ml-2\">' + count + ' course(s)</span>');
-    });
+        return;
+    }
+
+    applyGroupEnhancements($grid);
+
+    var $tableBody = $grid.find('table tbody');
+    if (!$tableBody.length) {
+        if ($endMessage.length) {
+            $endMessage.removeClass('d-none');
+        }
+        return;
+    }
+    var nextUrl = $('#semester-grid-pagination li.next a').attr('href') || null;
+    var isLoading = false;
+
+    function loadNextPage() {
+        if (!nextUrl || isLoading) {
+            return;
+        }
+
+        isLoading = true;
+        $loader.removeClass('d-none');
+
+        $.get(nextUrl, function(response) {
+            var $response = $('<div>').append($.parseHTML(response));
+            var $newRows = $response.find('#semester-grid table tbody tr');
+
+            if ($newRows.length) {
+                $tableBody.append($newRows);
+                applyGroupEnhancements($grid);
+            }
+
+            var $newPagination = $response.find('#semester-grid-pagination');
+            var updatedNextUrl = $newPagination.find('li.next a').attr('href');
+
+            nextUrl = updatedNextUrl ? updatedNextUrl : null;
+
+            if (!nextUrl) {
+                $window.off('scroll.semesterInfinite');
+                $endMessage.removeClass('d-none');
+            }
+        }).always(function() {
+            $loader.addClass('d-none');
+            isLoading = false;
+        });
+    }
+
+    function shouldLoadMore() {
+        if (!nextUrl || isLoading) {
+            return;
+        }
+
+        var scrollPosition = $window.scrollTop() + $window.height();
+        var threshold = $(document).height() - 200;
+
+        if (scrollPosition >= threshold) {
+            loadNextPage();
+        }
+    }
+
+    if (nextUrl) {
+        $window.on('scroll.semesterInfinite', shouldLoadMore);
+        shouldLoadMore();
+    } else {
+        if ($endMessage.length) {
+            $endMessage.removeClass('d-none');
+        }
+    }
 });
 ");
 ?>
