@@ -27,62 +27,40 @@ use app\models\EmpVerifyView;
 $code = $deptCode;
 // dd($dataProvider->query->createCommand()->rawSql);
 echo BreadcrumbHelper::generate([
-    [
-        'label' => 'HOD',
-        'url' => [
-            '/site/hod',
-            'filtersFor' => Yii::$app->request->get('CourseAllocationFilter')['purpose'] ?? Yii::$app->request->get('filtersFor')
-        ]
-    ],
-    'Courses'
+    ['label' => 'Programme Timetables']
 ]);
+$data = $dataProvider->query->all();
 
-// Create a query to fetch all relevant MarksheetDef records for filter options
-$filterQuery = MarksheetDef::find()->joinWith(['course']);
-
-// Apply the same filters as the main data provider, but without pagination
-// This ensures that the filter options are relevant to the current search context
-$searchModel->search(Yii::$app->request->queryParams, '')->query->andWhere('1=1'); // Apply search model filters
-$filterQuery->andWhere($searchModel->search(Yii::$app->request->queryParams, '')->query->where);
-
-$allMarksheetDefs = $filterQuery->all();
+//dd($dataProvider->query->createCommand()->getRawSql());
 
 $courseCodeFilter = [];
 $courseNameFilter = [];
-$courseCodeNameFilter = [];
 
-foreach ($allMarksheetDefs as $model) {
+foreach ($data as $model) {
     $course = $model->course ?? null;
     if ($course === null) {
         continue;
     }
 
     $code = trim((string) ($course->COURSE_CODE ?? ''));
+    $name = trim((string) ($course->COURSE_NAME ?? ''));
+    $codename = ($code !== '' && $name !== '') ? $code . ' - ' . $name : $code;
+
     if ($code !== '') {
-        $courseCodeFilter[$code] = $code;
+        // Key = COURSE_CODE, Value = "COURSE_CODE - COURSE_NAME"
+        $courseCodeFilter[$code] = $codename;
     }
 
-    $name = trim((string) ($course->COURSE_NAME ?? ''));
     if ($name !== '') {
         $courseNameFilter[$name] = $name;
     }
-
-    $concatenated = $code . ' - ' . $name;
-    if ($code !== '' || $name !== '') {
-        $courseCodeNameFilter[$concatenated] = $concatenated;
-    }
 }
 
-// Sort the filter arrays
-if (!empty($courseCodeFilter)) {
-    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
-if (!empty($courseNameFilter)) {
-    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
-if (!empty($courseCodeNameFilter)) {
-    ksort($courseCodeNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
-}
+
+
+
+
+
 
 $selectedCourseCode = trim((string) ($searchModel->courseCode ?? ''));
 if ($selectedCourseCode !== '' && !array_key_exists($selectedCourseCode, $courseCodeFilter)) {
@@ -94,9 +72,11 @@ if ($selectedCourseName !== '' && !array_key_exists($selectedCourseName, $course
     $courseNameFilter[$selectedCourseName] = $selectedCourseName;
 }
 
-$selectedCourseCodeName = trim((string) ($searchModel->courseCodeName ?? ''));
-if ($selectedCourseCodeName !== '' && !array_key_exists($selectedCourseCodeName, $courseCodeNameFilter)) {
-    $courseCodeNameFilter[$selectedCourseCodeName] = $selectedCourseCodeName;
+if (!empty($courseCodeFilter)) {
+    ksort($courseCodeFilter, SORT_NATURAL | SORT_FLAG_CASE);
+}
+if (!empty($courseNameFilter)) {
+    asort($courseNameFilter, SORT_NATURAL | SORT_FLAG_CASE);
 }
 
 $lecturersList = ArrayHelper::map(
@@ -169,13 +149,12 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <div class="card shadow-sm rounded-0 w-100">
         <div class="card-body row g-3">
-            <h5><?= $filtertype[Yii::$app->request->get('filtersFor')] ?? $filtertype[Yii::$app->request->get('SemesterSearch')['purpose']] ?? '' ?></h5>
             <?php
             if (!empty(Yii::$app->request->get('SemesterSearch'))) {
-                $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY']]);
+                $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '']);
             ?>
-                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> | <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> | <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME) ?></h5>
-                <p><?= Html::encode($level['NAME']) ?>, SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE']) ?></p>
+                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME ?? '') ?></h5>
+                <p><?= Html::encode($level['NAME'] ?? '') ?> SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '') ?></p>
             <?php
             }
             ?>
@@ -206,6 +185,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     //         'class' => 'py-3'
                     //     ],
                     // ],
+                    [
+                        'label' => 'Level of Study',
+                        'value' => function ($model) {
+                            $semDesc = $model->semester->semesterDescription;
+                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
+                        },
+                        'group' => true,
+                        'groupedRow' => true,
+                        'contentOptions' => [
+                            'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+                            'class' => 'py-3'
+                        ],
+                    ],
                     [
                         'attribute' => 'courseCode',
                         'label' => 'Course Code',
@@ -244,59 +236,65 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->semester->group->GROUP_NAME;
                         },
                         'group' => true,
+                        'subGroupOf' => 1,
                     ],
                     [
-                        'attribute' => 'PAYROLL_NO', // Attribute to filter on
+                        'attribute' => 'PAYROLL_NO',
                         'header' => 'Assigned Lecturer(s)',
                         'format' => 'raw',
                         'vAlign' => 'middle',
                         'width' => '25%',
                         'value' => function ($d) {
-                            $assignments = CourseAssignment::find()->select(['PAYROLL_NO'])
-                                ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])->all();
-                            $leadLecturer = '';
-                            $otherLecturers = '';
+                            $assignments = CourseAssignment::find()
+                                ->select(['PAYROLL_NO'])
+                                ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])
+                                ->all();
+
+                            if (empty($assignments)) {
+                                return '<span class="badge bg-secondary">No lecturer assigned</span>';
+                            }
+
+                            $output = '';
                             $courseLeaderFound = false;
-                            $courseLeader = null;
-                            if (!empty($assignments)) {
-                                foreach ($assignments as $assignment) {
-                                    $lecturer = EmpVerifyView::find()
-                                        ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
-                                        ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
-                                        ->one();
 
-                                    if (is_null($lecturer)) {
-                                        continue;
-                                    }
+                            foreach ($assignments as $assignment) {
+                                $lecturer = EmpVerifyView::find()
+                                    ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
+                                    ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
+                                    ->one();
 
-                                    $lecturerName = '';
-                                    if (!empty($lecturer->EMP_TITLE)) {
-                                        $lecturerName .= $lecturer->EMP_TITLE;
-                                    }
+                                if (!$lecturer) {
+                                    continue;
+                                }
 
-                                    if (!empty($lecturer->OTHER_NAMES)) {
-                                        $lecturerName .= ' ' . $lecturer->OTHER_NAMES;
-                                    }
+                                $lecturerName = trim(($lecturer->EMP_TITLE ? $lecturer->EMP_TITLE . ' ' : '') .
+                                    $lecturer->SURNAME . ' ' . $lecturer->OTHER_NAMES);
 
-                                    if (empty($lecturerName)) {
-                                        continue;
-                                    }
+                                // Check if this lecturer is the course leader
+                                $isLeader = MarksheetDef::find()
+                                    ->where([
+                                        'MRKSHEET_ID' => $d->MRKSHEET_ID,
+                                        'PAYROLL_NO' => $lecturer->PAYROLL_NO
+                                    ])
+                                    ->exists();
 
-                                    if (!$courseLeaderFound) {
-                                        $courseLeader = MarksheetDef::find()
-                                            ->select(['PAYROLL_NO'])
-                                            ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID, 'PAYROLL_NO' => $lecturer->PAYROLL_NO])->one();
-                                    }
-
-                                    if (!$courseLeaderFound && $courseLeader) {
-                                        $courseLeaderFound = true;
-                                        $leadLecturer = '<div class="lecturer-badge course-leader">' . Html::encode($lecturerName) . ' <span class="badge bg-success">Leader</span></div>';
-                                    } else {
-                                        $otherLecturers .= '<div class="lecturer-badge not-course-leader">' . Html::encode($lecturerName) . '</div>';
-                                    }
+                                if ($isLeader && !$courseLeaderFound) {
+                                    $courseLeaderFound = true;
+                                    $output .= '<div class="mb-1">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-user-tie"></i> ' . Html::encode($lecturerName) . ' (Leader)
+                                        </span>
+                                    </div>';
+                                } else {
+                                    $output .= '<div class="mb-1">
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fas fa-user"></i> ' . Html::encode($lecturerName) . '
+                                        </span>
+                                    </div>';
                                 }
                             }
-                            return $leadLecturer . $otherLecturers;
+
+                            return $output;
                         },
                         'filterType' => GridView::FILTER_SELECT2,
                         'filter' => $lecturersList,
@@ -305,6 +303,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         'filterInputOptions' => ['placeholder' => 'Any lecturer'],
                     ],
+
                     $actionColumn,
                 ],
             ]); ?>

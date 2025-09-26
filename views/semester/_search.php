@@ -19,36 +19,34 @@ use yii\db\Query;
  * @var yii\widgets\ActiveForm $form
  */
 
-
-
 $data = (new Query())
     ->select([
+        'MUTHONI.SEMESTERS.DESCRIPTION_CODE',
         'MUTHONI.SEMESTERS.SEMESTER_CODE',
         new \yii\db\Expression(
             "MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC AS SEMESTER_CODE_DESC"
         )
     ])
     ->distinct()
-    ->from('MUTHONI.MARKSHEET_DEF')
-    ->leftJoin(
-        'MUTHONI.SEMESTERS',
-        'MUTHONI.MARKSHEET_DEF.SEMESTER_ID = MUTHONI.SEMESTERS.SEMESTER_ID'
-    )
+    ->from('MUTHONI.SEMESTERS')
     ->innerJoin(
         'MUTHONI.SEMESTER_DESCRIPTIONS',
         'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
-    )
-    ->leftJoin(
-        'MUTHONI.COURSES',
-        "MUTHONI.MARKSHEET_DEF.COURSE_ID = MUTHONI.COURSES.COURSE_ID 
-      AND NOT (MUTHONI.SEMESTERS.SEMESTER_TYPE = 'SUPPLEMENTARY')"
-    )
-    ->orderBy([
-        'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
-    ])
-    ->all();
+    )->all();
 
-$semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_CODE_DESC');
+$semesterLists = [];
+foreach ($data as $row) {
+    $semesterLists[] = [
+        'SEMESTER_CODE' => $row['SEMESTER_CODE'],
+        'DESC' => $row['SEMESTER_CODE'] . ' - ' . $row['SEMESTER_CODE_DESC'],
+    ];
+}
+
+// dd($semesterLists);
+
+$semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_CODE');
+
+
 
 
 
@@ -67,16 +65,28 @@ $semester = Semester::find()
 $rows = (new Query())
     ->select([
         'MUTHONI.SEMESTERS.SEMESTER_CODE',
+        'MUTHONI.SEMESTERS.SEMESTER_TYPE',
     ])
     ->distinct()
     ->from('MUTHONI.SEMESTERS')
     ->all();
 
 // dd($model);
-
+$semType = (new Query())
+    ->select([
+        'MUTHONI.SEMESTERS.SEMESTER_TYPE',
+    ])
+    ->distinct()
+    ->from('MUTHONI.SEMESTERS')
+    ->all();
+$semesterTypeList = [
+    'REGULAR' => 'REGULAR',
+    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+    '' => '',
+];
 $semesterList = ArrayHelper::map($rows, 'SEMESTER_CODE', 'SEMESTER_CODE');
 
-// dd($semesterList);
+
 
 $searchDegreeCodes = array_unique(array_column($semester, 'DEGREE_CODE'));
 
@@ -203,13 +213,13 @@ $this->registerCss(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-        <div class="col-md-6">
-            <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                'data' => $levels,
-                'options' => ['placeholder' => 'Select Level of Study...'],
-                'pluginOptions' => ['allowClear' => true],
-            ]) ?>
-        </div>
+        <!-- <div class="col-md-6"> -->
+        <?php $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+            'data' => $levels,
+            'options' => ['placeholder' => 'Select Level of Study...'],
+            'pluginOptions' => ['allowClear' => true],
+        ]) ?>
+        <!-- </div> -->
         <div class="col-md-6">
             <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
                 'data' => $semesterLists,

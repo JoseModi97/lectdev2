@@ -93,17 +93,18 @@ class SemesterController extends BaseController
             !empty($params['SemesterSearch']['DEGREE_CODE'])
         );
 
-        if ($searchSubmitted) {
-            $dataProvider = $searchModel->search($params);
-            $searchPerformed = true;
-        } else {
-            // No search performed, or search form cleared
-            $query = Semester::find()->where('0=1');
-            $dataProvider = new \yii\data\ActiveDataProvider([
-                'query' => $query,
-            ]);
-        }
+        // if ($searchSubmitted) {
+        //     $dataProvider = $searchModel->search($params);
+        //     $searchPerformed = true;
+        // } else {
+        //     // No search performed, or search form cleared
+        //     $query = Semester::find()->where('0=1');
+        //     $dataProvider = new \yii\data\ActiveDataProvider([
+        //         'query' => $query,
+        //     ]);
+        // }
 
+        $dataProvider = $searchModel->search($params);
         $distinctDegreeCodes = DegreeProgramme::find()->select('DEGREE_CODE')->distinct()->column();
 
         return $this->render('index', [
