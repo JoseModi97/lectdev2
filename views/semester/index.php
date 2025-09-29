@@ -226,6 +226,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'TEACHING' => 'TEACHING',
             ];
 
+            // Disable panel filters until a search with required parents is made
+            // Require both Academic Year and Degree Code present in the query string
+            $panelDisabled = (empty($academicYear) || empty($degreeCode));
+
             ob_start();
             $form = ActiveForm::begin([
                 'action' => ['index'],
@@ -241,36 +245,38 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo '<div class="row g-3 align-items-end">';
             echo '<div class="col-md-6">';
-                    echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                        'data' => $yearLists,
-                        'options' => [
-                            'placeholder' => 'Select Level of Study...',
-                            'id' => 'levelSelect',
-                            'required' => true,
-                        ],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                        ],
-                        'pluginEvents' => [
-                            'select2:select' => 'function (e) { this.form.submit(); }',
-                        ],
-                    ]);
-                    echo '</div>';
-                    echo '<div class="col-md-6">';
-                    echo $form->field($searchModel, 'SEMESTER_TYPE')->widget(Select2::class, [
-                        'data' => $semesterTypeOptions,
-                        'options' => [
-                            'placeholder' => 'Select Semester Type...',
-                            'id' => 'semesterTypeSelect',
-                            'required' => true,
-                        ],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                        ],
-                        'pluginEvents' => [
-                            'select2:select' => 'function (e) { this.form.submit(); }',
-                        ],
-                    ]);
+            echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                'data' => $yearLists,
+                'options' => [
+                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
+                    'id' => 'levelSelect',
+                    'required' => !$panelDisabled,
+                    'disabled' => $panelDisabled,
+                ],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ],
+                'pluginEvents' => [
+                    'select2:select' => 'function (e) { this.form.submit(); }',
+                ],
+            ]);
+            echo '</div>';
+            echo '<div class="col-md-6">';
+            echo $form->field($searchModel, 'SEMESTER_TYPE')->widget(Select2::class, [
+                'data' => $semesterTypeOptions,
+                'options' => [
+                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Semester Type...',
+                    'id' => 'semesterTypeSelect',
+                    'required' => !$panelDisabled,
+                    'disabled' => $panelDisabled,
+                ],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ],
+                'pluginEvents' => [
+                    'select2:select' => 'function (e) { this.form.submit(); }',
+                ],
+            ]);
             echo '</div>';
             echo '</div>';
 
@@ -301,16 +307,16 @@ $this->params['breadcrumbs'][] = $this->title;
             echo '</div>';
             $heading = ob_get_clean();
 
-                    return [
-                        'heading' => $heading,
-                        'type' => 'default',
-                        'before' => $before,
-                        'headingOptions' => [
-                            'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white; padding-left: 12px; padding-right: 12px;',
-                            'class' => 'text-white',
-                        ],
-                    ];
-                })(),
+            return [
+                'heading' => $heading,
+                'type' => 'default',
+                'before' => $before,
+                'headingOptions' => [
+                    'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white; padding-left: 12px; padding-right: 12px;',
+                    'class' => 'text-white',
+                ],
+            ];
+        })(),
 
         'responsiveWrap' => false,
         'condensed' => true,
@@ -347,6 +353,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
+                'label' => 'Semester Type',
+                'attribute' => 'SEMESTER_TYPE',
+                'value' => 'semester.SEMESTER_TYPE',
+                'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+                'filter' => [
+                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+                    'TEACHING' => 'TEACHING',
+                ],
+                'group' => true,
+                'groupedRow' => true,
+                'subGroupOf' => 1,
+                'filterWidgetOptions' => [
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'placeholder' => 'Select Semester Type...',
+                    ],
+                ],
+            ],
+
+            [
                 'attribute' => 'courseCode',
                 'label' => 'Course Code',
                 'value' => 'course.COURSE_CODE',
@@ -377,23 +403,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //     ],
             //     'filterInputOptions' => ['placeholder' => 'Any course name'],
             // ],
-            [
-                'label' => 'Semester Type',
-                'attribute' => 'SEMESTER_TYPE',
-                'value' => 'semester.SEMESTER_TYPE',
-                'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
-                'filter' => [
-                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
-                    'TEACHING' => 'TEACHING',
-                ],
-                'filterWidgetOptions' => [
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'placeholder' => 'Select Semester Type...',
-                    ],
-                ],
-            ],
-
 
             [
                 'label' => 'Group Name',

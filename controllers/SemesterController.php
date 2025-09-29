@@ -88,6 +88,8 @@ class SemesterController extends BaseController
         $searchModel = new SemesterSearch();
         $params = $this->request->queryParams;
         $searchPerformed = false;
+        // Load params so validation errors can render in the form
+        $searchModel->load($params);
 
         if (!empty(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE_DESC'])) {
             $desc = Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE_DESC'];
@@ -97,7 +99,24 @@ class SemesterController extends BaseController
             $searchModel->DESCRIPTION_CODE = $sd['DESCRIPTION_CODE'];
             $searchModel->SEMESTER_CODE = $parts[0];
         }
-        $dataProvider = $searchModel->search($params);
+        // Gate heavy search until base filters from _search are provided
+        $ss = $params['SemesterSearch'] ?? [];
+        $baseFiltersProvided = !empty($ss['ACADEMIC_YEAR']) && !empty($ss['DEGREE_CODE']) && !empty($ss['SEMESTER_CODE']);
+
+        if ($baseFiltersProvided) {
+            $dataProvider = $searchModel->search($params);
+            $searchPerformed = true;
+        } else {
+            $dataProvider = new \yii\data\ActiveDataProvider([
+                'query' => Semester::find()->where('0=1'),
+            ]);
+            $searchPerformed = false;
+        }
+        // If user attempted a search but required base filters are missing,
+        // validate to populate "cannot be blank" errors on the form
+        if (isset($params['SemesterSearch']) && !$baseFiltersProvided) {
+            $searchModel->validate();
+        }
         $distinctDegreeCodes = DegreeProgramme::find()->select('DEGREE_CODE')->distinct()->column();
 
         return $this->render('index', [

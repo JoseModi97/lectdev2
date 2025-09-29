@@ -200,6 +200,7 @@ $this->registerCss(
     <?php $form = ActiveForm::begin([
         'action' => ['index', 'filtersFor' => $filter],
         'method' => 'get',
+        'options' => ['id' => 'semester-search-form'],
     ]); ?>
 
     <div class="card-body row g-3">
@@ -283,10 +284,6 @@ $this->registerCss(
         </div>
     </div>
     <div class="card-footer d-flex justify-content-start gap-2">
-        <?= Html::submitButton('Search', [
-            'class' => 'btn text-white px-4',
-            'style' => "background-image: linear-gradient(#455492, #304186, #455492)",
-        ]) ?>
         <?= Html::button('Reset', [
             'class' => 'btn btn-outline-secondary px-4',
             'onclick' => 'window.location.href = "' . \yii\helpers\Url::to([
@@ -302,3 +299,22 @@ $this->registerCss(
 
     <?php ActiveForm::end(); ?>
 </div>
+
+<?php
+$this->registerJs(<<<JS
+(function(){
+  function tryAutoSubmitSemesterSearch(){
+    var ay = $('#academicYearSelect').val();
+    var dc = $('#degreeCodeSelect').val();
+    var sc = $('#semesterCodeSelect').val();
+    if (ay && dc && sc) {
+      var form = document.getElementById('semester-search-form');
+      if (form) form.submit();
+    }
+  }
+  $('#academicYearSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
+  $('#degreeCodeSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
+  $('#semesterCodeSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
+})();
+JS);
+?>
