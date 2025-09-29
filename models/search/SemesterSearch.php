@@ -12,12 +12,14 @@ use Yii;
  */
 
 use app\models\MarksheetDef;
+use app\models\SemesterDescription;
 
 class SemesterSearch extends Semester
 {
     public $purpose; // New property
     public $courseCode;
     public $courseName;
+    public $SEMESTER_CODE_DESC;
 
     /**
      * {@inheritdoc}
@@ -27,6 +29,7 @@ class SemesterSearch extends Semester
         return [
             [['SEMESTER_ID', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'INTAKE_CODE', 'START_DATE', 'END_DATE', 'FIRST_SEMESTER', 'SEMESTER_NAME', 'CLOSING_DATE', 'ADMIN_USER', 'GROUP_CODE', 'REGISTRATION_DEADLINE', 'DESCRIPTION_CODE', 'SESSION_TYPE', 'DISPLAY_DATE', 'REGISTRATION_DATE', 'SEMESTER_TYPE', 'purpose', 'courseCode', 'courseName'], 'safe'],
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
+            [['SEMESTER_CODE_DESC'], 'safe'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
             [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE'], 'required'],
         ];
@@ -56,7 +59,31 @@ class SemesterSearch extends Semester
         $query = MarksheetDef::find();
         $query->joinWith(['semester', 'course']);
 
+        $query->andFilterWhere([
+            'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $this->ACADEMIC_YEAR,
+            'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => $this->LEVEL_OF_STUDY,
+            'MUTHONI.SEMESTERS.DEGREE_CODE' => $this->DEGREE_CODE,
+        ])
+            ->orderBy([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => SORT_ASC,
+                'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => SORT_ASC,
+                'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
+            ]);
 
+
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            // 'MUTHONI.SEMESTERS.DEGREE_CODE' => $this->DEGREE_CODE,
+            // 'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $this->ACADEMIC_YEAR,
+            'MUTHONI.SEMESTERS.SEMESTER_CODE' => $this->SEMESTER_CODE,
+            'MUTHONI.SEMESTERS.GROUP_CODE' => $this->GROUP_CODE,
+            'MUTHONI.SEMESTERS.DESCRIPTION_CODE' => $this->DESCRIPTION_CODE,
+            'MUTHONI.SEMESTERS.SEMESTER_TYPE' => $this->SEMESTER_TYPE,
+        ]);
+
+        $query->andFilterWhere(['like', 'MUTHONI.COURSES.COURSE_CODE', $this->courseCode])
+            ->andFilterWhere(['like', 'MUTHONI.COURSES.COURSE_NAME', $this->courseName]);
 
 
 
@@ -77,17 +104,9 @@ class SemesterSearch extends Semester
             return $dataProvider;
         }
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => $this->LEVEL_OF_STUDY,
-            'MUTHONI.SEMESTERS.SEMESTER_CODE' => $this->SEMESTER_CODE,
-            'MUTHONI.SEMESTERS.DEGREE_CODE' => $this->DEGREE_CODE,
-            'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $this->ACADEMIC_YEAR,
-            'MUTHONI.SEMESTERS.GROUP_CODE' => $this->GROUP_CODE,
-        ]);
 
-        $query->andFilterWhere(['like', 'MUTHONI.COURSES.COURSE_CODE', $this->courseCode])
-            ->andFilterWhere(['like', 'MUTHONI.COURSES.COURSE_NAME', $this->courseName]);
+
+
 
 
 
@@ -96,7 +115,6 @@ class SemesterSearch extends Semester
         // } elseif ($params['filtersFor'] === 'suppCourses') {
         //     $query->andWhere(['MUTHONI.SEMESTERS.SEMESTER_TYPE' => 'SUPPLEMENTARY']);
         // }
-
         return $dataProvider;
     }
 

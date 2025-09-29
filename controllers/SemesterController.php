@@ -6,10 +6,12 @@ use app\models\Semester;
 use app\models\search\SemesterSearch;
 use app\models\DegreeProgramme; // Added
 use app\models\search\CourseAssignmentSearch;
+use app\models\SemesterDescription;
 use Exception;
 use yii\helpers\ArrayHelper; // Added
 use Yii; // Added
 use yii\db\Expression;
+use yii\db\Query;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -87,23 +89,14 @@ class SemesterController extends BaseController
         $params = $this->request->queryParams;
         $searchPerformed = false;
 
-        // Check if the search form has been submitted with any values
-        $searchSubmitted = isset($params['SemesterSearch']) && (
-            !empty($params['SemesterSearch']['ACADEMIC_YEAR']) &&
-            !empty($params['SemesterSearch']['DEGREE_CODE'])
-        );
+        if (!empty(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE_DESC'])) {
+            $desc = Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE_DESC'];
+            $parts = explode(' - ', $desc);
 
-        // if ($searchSubmitted) {
-        //     $dataProvider = $searchModel->search($params);
-        //     $searchPerformed = true;
-        // } else {
-        //     // No search performed, or search form cleared
-        //     $query = Semester::find()->where('0=1');
-        //     $dataProvider = new \yii\data\ActiveDataProvider([
-        //         'query' => $query,
-        //     ]);
-        // }
-
+            $sd = SemesterDescription::findOne(['SEMESTER_DESC' => $parts[1]]);
+            $searchModel->DESCRIPTION_CODE = $sd['DESCRIPTION_CODE'];
+            $searchModel->SEMESTER_CODE = $parts[0];
+        }
         $dataProvider = $searchModel->search($params);
         $distinctDegreeCodes = DegreeProgramme::find()->select('DEGREE_CODE')->distinct()->column();
 
@@ -112,7 +105,7 @@ class SemesterController extends BaseController
             'dataProvider' => $dataProvider,
             'facCode' => $this->facCode,
             'deptCode' => $this->deptCode,
-            'distinctDegreeCodes' => $distinctDegreeCodes, // Added
+            'distinctDegreeCodes' => $distinctDegreeCodes,
             'searchPerformed' => $searchPerformed,
         ]);
     }
@@ -255,20 +248,84 @@ class SemesterController extends BaseController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionDegcode($ACADEMIC_YEAR)
+    public function actionSemcode($ACADEMIC_YEAR, $DEGREE_CODE)
     {
-        $degCode = Semester::find()
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        // $semCode = Semester::find()
+        //     ->select([
+        //         'MUTHONI.SEMESTERS.SEMESTER_CODE',
+        //         'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC'
+        //     ])
+        //     ->innerJoinWith(['semesterDescription'])
+        //     ->where([
+        //         'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
+        //         'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
+        //     ])
+        //     ->all();
+        $semCode = (new \yii\db\Query())
             ->select([
-                'MUTHONI.DEGREE_PROGRAMMES.DEGREE_CODE',
-                'MUTHONI.DEGREE_PROGRAMMES.DEGREE_NAME',
+                'MUTHONI.SEMESTERS.SEMESTER_CODE',
+                'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
+                'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
             ])
             ->distinct()
-            ->joinWith(['degreeProgramme'])
-            ->where(['MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR])->all();
+            ->from('MUTHONI.SEMESTERS')
+            ->innerJoin(
+                'MUTHONI.SEMESTER_DESCRIPTIONS',
+                'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
+            )
+            ->where([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
+                'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
+            ])->orderBy([
+                'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
+                'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC' => SORT_ASC,
+            ])
+            ->all();
+
+        $levels = (new \yii\db\Query())
+            ->select([
+                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
+                'MUTHONI.LEVEL_OF_STUDY.NAME',
+            ])
+            ->distinct()
+            ->from('MUTHONI.SEMESTERS')
+            ->innerJoin(
+                'MUTHONI.LEVEL_OF_STUDY',
+                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
+            )
+            ->where([
+                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
+                'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
+            ])->orderBy([
+                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
+                'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
+            ])
+            ->all();
 
 
-        foreach ($degCode as $deg) {
-            echo "<option value='" . $deg->DEGREE_CODE . "'>" . $deg->DEGREE_CODE . ' - ' . $deg->degreeProgramme->DEGREE_NAME . "</option>";
+
+        $semesterOptions = [];
+        foreach ($semCode as $sem) {
+            $semesterOptions[] = [
+                'id'   => $sem['SEMESTER_CODE'],
+                'text' => $sem['SEMESTER_CODE'] . ' - ' . $sem['SEMESTER_DESC'],
+            ];
         }
+
+        $levelOptions = [];
+        foreach ($levels as $lvl) {
+            $levelOptions[] = [
+                'id'   => $lvl['LEVEL_OF_STUDY'],
+                'text' => $lvl['NAME'],
+            ];
+        }
+
+
+        return [
+            'semesters' => $semesterOptions,
+            'levels'    => $levelOptions,
+        ];
     }
 }

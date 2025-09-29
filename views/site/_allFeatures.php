@@ -7,7 +7,7 @@ use yii\helpers\Url;
 
 JstreeAsset::register($this);
 $this->title = '';
-
+$currentAcademicYear = (date('Y') - 1) . '/' . date('Y');
 ?>
 
 <style>
@@ -105,7 +105,16 @@ $this->title = '';
                     Menu::link('View uploaded results (interface 2)', '/gr', 'fa fa-file-upload'),
                     Menu::link('View uploaded results (interface 3)', '/gr', 'fa fa-file-upload'),
                     Menu::parent('Allocate lecturers', [
-                        Menu::link('Programme timetables', '/semester/index?filtersFor=nonSuppCourses', 'fa fa-calendar-alt'),
+                        Menu::link(
+                            'Programme timetables',
+                            Url::to([
+                                'semester/index',
+                                'SemesterSearch' => [
+                                    'ACADEMIC_YEAR' => $currentAcademicYear,
+                                ],
+                            ]),
+                            'fa fa-calendar-alt'
+                        ),
                         Menu::link('Supplementary timetables', '/semester/index?filtersFor=suppCourses', 'fa fa-calendar-plus'),
                         Menu::parent('Departmental requests', [
                             Menu::link(

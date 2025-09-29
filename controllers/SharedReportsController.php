@@ -244,14 +244,17 @@ class SharedReportsController extends BaseController
             $session = Yii::$app->session;
 
             // Save course filters in the session for retrieval on page redirects
-            if (!empty(Yii::$app->request->get()['CourseAnalysisFilter'])) {
-                $session['CourseAnalysisFilter'] = Yii::$app->request->get();
-            }
-
-            if (!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()) {
-                throw new Exception('Failed to load filters for course analysis report.');
-            }
-
+                    if (!empty(Yii::$app->request->get()['CourseAnalysisFilter'])) {
+                        $session['CourseAnalysisFilter'] = Yii::$app->request->get();
+                        Yii::warning('Session CourseAnalysisFilter set: ' . print_r($session['CourseAnalysisFilter'], true));
+                    }
+            
+                    if (!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()) {
+                        Yii::warning('CourseAnalysisFilter failed to load or validate. Session data: ' . print_r($session->get('CourseAnalysisFilter'), true));
+                        Yii::warning('CourseAnalysisFilter errors: ' . print_r($courseFilter->errors, true));
+                        throw new Exception('Failed to load filters for course analysis report.');
+                    }
+                    Yii::warning('CourseAnalysisFilter loaded: ' . print_r($courseFilter->toArray(), true));
             $searchModel = new CourseAnalysisSearch();
             $dataProvider = $searchModel->search($courseFilter, $this->deptCode, $this->facCode);
 
@@ -260,6 +263,7 @@ class SharedReportsController extends BaseController
                 'panelHeading' => 'Grade analysis report',
                 'dataProvider' => $dataProvider,
                 'filter' => $courseFilter,
+                'facCode' => $this->facCode,
             ]);
         } catch (Exception $ex) {
             $message = $ex->getMessage();

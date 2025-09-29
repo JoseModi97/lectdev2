@@ -9,7 +9,7 @@ use app\models\MarksheetDef;
 use app\models\search\AllocationRequestsSearchNew;
 use app\models\search\MarksheetDefAllocationSearchNew;
 use app\models\Semester;
-use app\models\SemesterDescription;
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -18,6 +18,15 @@ use yii\helpers\ArrayHelper;
 use app\components\BreadcrumbHelper;
 use app\models\CourseAssignment;
 use app\models\EmpVerifyView;
+
+$searchAcademicYear = Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '';
+$searchDegreeCode = Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? '';
+$semCodeSearch = Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '';
+$semTypeSearch = Yii::$app->request->get('SemesterSearch')['SEMESTER_TYPE'] ?? '';
+$semLevelOfStudySearch = Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '';
+
+
+
 
 /** @var yii\web\View $this */
 /** @var app\models\search\SemesterSearch $searchModel */
@@ -31,7 +40,7 @@ echo BreadcrumbHelper::generate([
 ]);
 $data = $dataProvider->query->all();
 
-//dd($dataProvider->query->createCommand()->getRawSql());
+// dd($dataProvider->query->createCommand()->getRawSql());
 
 $courseCodeFilter = [];
 $courseNameFilter = [];
@@ -56,9 +65,17 @@ foreach ($data as $model) {
     }
 }
 
+// if (empty($searchAcademicYear) || empty($searchDegreeCode) || empty($semCodeSearch) || empty($semLevelOfStudySearch)) {
 
 
-
+//     $this->registerCss(
+//         <<<CSS
+//     #w1-filters{
+//         display: none;
+//     }
+//     CSS
+//     );
+// }
 
 
 
@@ -153,7 +170,25 @@ $this->params['breadcrumbs'][] = $this->title;
             if (!empty(Yii::$app->request->get('SemesterSearch'))) {
                 $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '']);
             ?>
-                <h5><?= Html::encode(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) ?> <?= Html::encode(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']) ?> <?= Html::encode(DegreeProgramme::findOne(['DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE']])->DEGREE_NAME ?? '') ?></h5>
+                <?php
+                $semesterSearch = Yii::$app->request->get('SemesterSearch', []);
+
+                $academicYear = $semesterSearch['ACADEMIC_YEAR'] ?? '';
+                $degreeCode   = $semesterSearch['DEGREE_CODE'] ?? '';
+
+                $degreeName   = '';
+                if (!empty($degreeCode)) {
+                    $degree = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degreeCode]);
+                    $degreeName = $degree->DEGREE_NAME ?? '';
+                }
+                ?>
+
+                <h5>
+                    <?= Html::encode($academicYear) ?>
+                    <?= Html::encode($degreeCode) ?>
+                    <?= Html::encode($degreeName) ?>
+                </h5>
+
                 <p><?= Html::encode($level['NAME'] ?? '') ?> SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '') ?></p>
             <?php
             }
@@ -188,8 +223,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => 'Level of Study',
                         'value' => function ($model) {
-                            $semDesc = $model->semester->semesterDescription;
-                            return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
+                            $semDesc = $model->semester->semesterDescription ?? '';
+                            return $model->semester->ACADEMIC_YEAR . ' - ' . $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
                         },
                         'group' => true,
                         'groupedRow' => true,
@@ -229,6 +264,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     //     ],
                     //     'filterInputOptions' => ['placeholder' => 'Any course name'],
                     // ],
+                    [
+                        'label' => 'Semester Type',
+                        'attribute' => 'SEMESTER_TYPE',
+                        'value' => 'semester.SEMESTER_TYPE',
+                        'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+                        'filter' => [
+                            'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+                            'TEACHING' => 'TEACHING',
+                        ],
+                        'filterWidgetOptions' => [
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'placeholder' => 'Select Semester Type...',
+                            ],
+                        ],
+                    ],
+
+
                     [
                         'label' => 'Group Name',
                         'value' => function ($model) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -39,7 +40,7 @@ $semesterId = $filter->academicYear . '_' . $filter->degreeCode . '_' . $filter-
 
 $semester = Semester::find()->alias('SM')
     ->select(['SM.SEMESTER_ID', 'SM.SEMESTER_CODE', 'SM.DESCRIPTION_CODE'])
-    ->joinWith(['semesterDescription SD' => function($q){
+    ->joinWith(['semesterDescription SD' => function ($q) {
         $q->select(['SD.DESCRIPTION_CODE', 'SD.SEMESTER_DESC']);
     }], true, 'INNER JOIN')
     ->where(['SM.SEMESTER_ID' => $semesterId])
@@ -70,7 +71,7 @@ $courseNameColumn = [
 ];
 $gradeAColumn = [
     'label' => 'A',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'A     '
@@ -79,7 +80,7 @@ $gradeAColumn = [
 ];
 $gradeBColumn = [
     'label' => 'B',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'B     '
@@ -88,7 +89,7 @@ $gradeBColumn = [
 ];
 $gradeCColumn = [
     'label' => 'C',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'C     '
@@ -97,7 +98,7 @@ $gradeCColumn = [
 ];
 $gradeCStarColumn = [
     'label' => 'C*',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'C*    '
@@ -106,7 +107,7 @@ $gradeCStarColumn = [
 ];
 $gradeDColumn = [
     'label' => 'D',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'D     '
@@ -115,7 +116,7 @@ $gradeDColumn = [
 ];
 $gradeEColumn = [
     'label' => 'E',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'E     '
@@ -124,7 +125,7 @@ $gradeEColumn = [
 ];
 $gradeEStarColumn = [
     'label' => 'E*',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'E*    '
@@ -133,7 +134,7 @@ $gradeEStarColumn = [
 ];
 $gradeFColumn = [
     'label' => 'F',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => 'F     '
@@ -143,7 +144,7 @@ $gradeFColumn = [
 $gradeNullColumn = [
     'label' => 'NOT GRADED',
     'width' => '7%',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where([
             'MRKSHEET_ID' => $model['MRKSHEET_ID'],
             'GRADE' => null
@@ -157,37 +158,37 @@ $totalCount = null;
 $averageScoreColumn = [
     'label' => 'AVG SCORE',
     'width' => '7%',
-    'value' => function($model){
+    'value' => function ($model) {
         $sumScore = TempMarksheet::find()->where(['MRKSHEET_ID' => $model['MRKSHEET_ID']])
             ->andWhere(['NOT', ['FINAL_MARKS' => NULL]])->sum('FINAL_MARKS');
         $totalCount = TempMarksheet::find()->where(['MRKSHEET_ID' => $model['MRKSHEET_ID']])
             ->andWhere(['NOT', ['FINAL_MARKS' => NULL]])->count();
 
-        if(intval($sumScore) === 0 || intval($totalCount) === 0){
+        if (intval($sumScore) === 0 || intval($totalCount) === 0) {
             return '--';
         }
 
-        return round(($sumScore/$totalCount), 2);
+        return round(($sumScore / $totalCount), 2);
     }
 ];
 $averageGradeColumn = [
     'label' => 'AVG GRADE',
     'width' => '7%',
-    'value' => function($model){
+    'value' => function ($model) {
         $averageGrade = '--';
         $sumScore = TempMarksheet::find()->where(['MRKSHEET_ID' => $model['MRKSHEET_ID']])
             ->andWhere(['NOT', ['FINAL_MARKS' => NULL]])->sum('FINAL_MARKS');
         $totalCount = TempMarksheet::find()->where(['MRKSHEET_ID' => $model['MRKSHEET_ID']])
             ->andWhere(['NOT', ['FINAL_MARKS' => NULL]])->count();
 
-        if(intval($sumScore) === 0 || intval($totalCount) === 0){
+        if (intval($sumScore) === 0 || intval($totalCount) === 0) {
             return '--';
         }
 
-        $averageScore = round(($sumScore/$totalCount), 2);
+        $averageScore = round(($sumScore / $totalCount), 2);
         $grades = SmisHelper::getGradingDetails($model['MRKSHEET_ID']);
         foreach ($grades as $grade) {
-            if ($averageScore >= $grade['lowerBound'] && $averageScore <= $grade['upperBound']){
+            if ($averageScore >= $grade['lowerBound'] && $averageScore <= $grade['upperBound']) {
                 $averageGrade = $grade['grade'];
                 break;
             }
@@ -198,7 +199,7 @@ $averageGradeColumn = [
 $totalCountColumn = [
     'label' => 'TOTAL STUDENTS',
     'width' => '10%',
-    'value' => function($model){
+    'value' => function ($model) {
         return TempMarksheet::find()->where(['MRKSHEET_ID' => $model['MRKSHEET_ID']])->count();
     }
 ];
@@ -206,10 +207,11 @@ $actionColumn = [
     'class' => 'kartik\grid\ActionColumn',
     'header' => 'ADDITIONAL REPORTS',
     'template' => '{consolidated-marks} {class-performance-graphical} {missing-marks}',
-    'contentOptions' => ['style'=>'white-space:nowrap;','class'=>'kartik-sheet-style kv-align-middle'],
+    'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
     'buttons' => [
-        'consolidated-marks' => function($url, $model){
-            return Html::a('<i class="fas fa-eye"></i> Consolidated marks ',
+        'consolidated-marks' => function ($url, $model) {
+            return Html::a(
+                '<i class="fas fa-eye"></i> Consolidated marks ',
                 Url::to(['/shared-reports/consolidated-marks', 'marksheetId' => $model['MRKSHEET_ID']]),
                 [
                     'title' => 'View consolidated marks report',
@@ -217,8 +219,9 @@ $actionColumn = [
                 ]
             );
         },
-        'class-performance-graphical' => function($url, $model){
-            return Html::a('<i class="fas fa-eye"></i> Class performance',
+        'class-performance-graphical' => function ($url, $model) {
+            return Html::a(
+                '<i class="fas fa-eye"></i> Class performance',
                 Url::to(['/shared-reports/class-performance', 'marksheetId' => $model['MRKSHEET_ID']]),
                 [
                     'title' => 'View class performance report',
@@ -226,8 +229,9 @@ $actionColumn = [
                 ]
             );
         },
-        'missing-marks' => function($url, $model){
-            return Html::a('<i class="fas fa-eye"></i> Missing marks',
+        'missing-marks' => function ($url, $model) {
+            return Html::a(
+                '<i class="fas fa-eye"></i> Missing marks',
                 Url::to(['/shared-reports/assessments', 'marksheetId' => $model['MRKSHEET_ID']]),
                 [
                     'title' => 'View missing marks report',
@@ -237,6 +241,14 @@ $actionColumn = [
         }
     ]
 ];
+
+$this->registerCSS(
+    <<<CSS
+    .bg-primary{
+        background-image: linear-gradient(#455492, #304186, #455492);
+    }
+    CSS
+);
 ?>
 
 <div class="row">
@@ -246,9 +258,11 @@ $actionColumn = [
             <div class="panel-body">
                 <p>
                     1. You can update these reports by clicking on the link
-                    <?= Html::a('<i class="fas fa-eye"></i> Consolidated marks ',
+                    <?= Html::a(
+                        '<i class="fas fa-eye"></i> Consolidated marks ',
                         '#',
-                        ['title' => 'View consolidated marks report', 'class' => 'btn btn-xs'])
+                        ['title' => 'View consolidated marks report', 'class' => 'btn btn-xs']
+                    )
                     ?>
                     in the table below and then returning to this page.
                 </p>
@@ -351,4 +365,3 @@ try {
     }
     throw new ServerErrorHttpException($message, 500);
 }
-

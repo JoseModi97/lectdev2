@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -30,6 +31,7 @@ class CourseAnalysisFilter extends Model
     public $courseName;
     public $approvalLevel;
     public $restrictedTo;
+    public $semesterType;
 
     /**
      * @return array the validation rules.
@@ -37,12 +39,42 @@ class CourseAnalysisFilter extends Model
     public function rules(): array
     {
         return [
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName',
-                'approvalLevel', 'restrictedTo'], 'string'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName',
-                'approvalLevel', 'restrictedTo'], 'trim'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName',
-                'approvalLevel', 'restrictedTo'], 'default'],
+            [[
+                'academicYear',
+                'degreeCode',
+                'group',
+                'levelOfStudy',
+                'semester',
+                'courseCode',
+                'courseName',
+                'approvalLevel',
+                'restrictedTo',
+                'semesterType'
+            ], 'string'],
+            [[
+                'academicYear',
+                'degreeCode',
+                'group',
+                'levelOfStudy',
+                'semester',
+                'courseCode',
+                'courseName',
+                'approvalLevel',
+                'restrictedTo',
+                'semesterType'
+            ], 'trim'],
+            [[
+                'academicYear',
+                'degreeCode',
+                'group',
+                'levelOfStudy',
+                'semester',
+                'courseCode',
+                'courseName',
+                'approvalLevel',
+                'restrictedTo',
+                'semesterType'
+            ], 'default'],
             [['academicYear', 'degreeCode', 'approvalLevel'], 'required'],
         ];
     }
@@ -61,7 +93,8 @@ class CourseAnalysisFilter extends Model
             'courseCode' => 'Course code',
             'courseName' => 'Course name',
             'approvalLevel' => 'Approval level',
-            'restrictedTo' => 'Restricted to'
+            'restrictedTo' => 'Restricted to',
+            'semesterType' => 'Semester Type',
         ];
     }
 }

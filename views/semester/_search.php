@@ -13,44 +13,57 @@ use app\models\SemesterDescription;
 use yii\db\Expression;
 use yii\db\Query;
 
+$currentAcademicYear = (date('Y') - 1) . '/' . date('Y');
 /**
  * @var yii\web\View $this
  * @var app\models\search\SemesterSearch $model
  * @var yii\widgets\ActiveForm $form
  */
-
-$data = (new Query())
+$data = (new \yii\db\Query())
     ->select([
-        'MUTHONI.SEMESTERS.DESCRIPTION_CODE',
         'MUTHONI.SEMESTERS.SEMESTER_CODE',
-        new \yii\db\Expression(
-            "MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC AS SEMESTER_CODE_DESC"
-        )
+        'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
+        new \yii\db\Expression("MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC AS SEMESTER_LABEL")
     ])
     ->distinct()
     ->from('MUTHONI.SEMESTERS')
     ->innerJoin(
         'MUTHONI.SEMESTER_DESCRIPTIONS',
         'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
-    )->all();
+    )
+    ->andFilterWhere([
+        'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? null,
+        'MUTHONI.SEMESTERS.DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? null,
+    ])
+    ->all();
 
-$semesterLists = [];
-foreach ($data as $row) {
-    $semesterLists[] = [
-        'SEMESTER_CODE' => $row['SEMESTER_CODE'],
-        'DESC' => $row['SEMESTER_CODE'] . ' - ' . $row['SEMESTER_CODE_DESC'],
-    ];
+$levels = (new \yii\db\Query())
+    ->select([
+        'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
+        'MUTHONI.LEVEL_OF_STUDY.NAME',
+    ])
+    ->distinct()
+    ->from('MUTHONI.SEMESTERS')
+    ->innerJoin(
+        'MUTHONI.LEVEL_OF_STUDY',
+        'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
+    )
+    ->andFilterWhere([
+        'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? null,
+        'MUTHONI.SEMESTERS.DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? null,
+    ])
+    ->orderBy([
+        'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
+        'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
+    ])
+    ->all();
+
+$semesterLists = '';
+$yearLists = '';
+if (!empty(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) && !empty(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'])) {
+    $semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_LABEL');
+    $yearLists = ArrayHelper::map($levels, 'LEVEL_OF_STUDY', 'NAME');
 }
-
-// dd($semesterLists);
-
-$semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_CODE');
-
-
-
-
-
-
 
 
 
@@ -155,6 +168,8 @@ $academicYears = ArrayHelper::map(
 
 $levels = ArrayHelper::map(LevelOfStudy::find()->all(), 'LEVEL_OF_STUDY', 'NAME');
 
+
+
 $semesterCodes = ArrayHelper::map(
     Semester::find()
         ->select(['MUTHONI.SEMESTERS.DESCRIPTION_CODE', 'MUTHONI.SEMESTERS.SEMESTER_CODE', 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC'])
@@ -193,12 +208,7 @@ $this->registerCss(
                 'data' => $academicYears,
                 'options' => [
                     'placeholder' => 'Select Academic Year...',
-                    // 'onchange' => <<<JS
-                    //     $.post("/semester/degcode?ACADEMIC_YEAR=" + $(this).val(), function(data) {
-                    //         console.log(data);
-                    //         $("select#degreeCodeSelect").html(data).val(null).trigger("change");
-                    //     });
-                    // JS,
+                    'id' => 'academicYearSelect',
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
@@ -209,21 +219,61 @@ $this->registerCss(
                 'options' => [
                     'placeholder' => 'Select Degree Code...',
                     'id' => 'degreeCodeSelect',
+                    'onchange' => <<<JS
+                        const queryString = window.location.search;
+                        const urlParams = new URLSearchParams(queryString);
+                        const academicYear = $('#academicYearSelect').val();
+                        $.post("/semester/semcode?DEGREE_CODE=" + $(this).val()+'&ACADEMIC_YEAR='+academicYear, function(data) {
+                            // console.log(data);
+                            // $("select#semesterCodeSelect").html(data).val(null).trigger("change");
+
+                            let semOptions = '';
+                            data.semesters.forEach(function(item) {
+                                semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
+                            });
+                            $("#semesterCodeSelect").html(semOptions).val(null).trigger("change");
+
+
+
+                            let lvlOptions = '<option value="">-- Select Level --</option>';
+                            data.levels.forEach(function(item) {
+                                lvlOptions += '<option value="' + item.id + '">' + item.text + '</option>';
+                            });
+                            $("#levelSelect").html(lvlOptions).val(null).trigger("change");
+                            
+                        });
+                    JS,
                 ],
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
         <!-- <div class="col-md-6"> -->
-        <?php $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-            'data' => $levels,
-            'options' => ['placeholder' => 'Select Level of Study...'],
+        <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+            'data' => $yearLists,
+            'options' => [
+                'placeholder' => 'Select Level of Study...',
+                'id' => 'levelSelect',
+            ],
             'pluginOptions' => ['allowClear' => true],
         ]) ?>
         <!-- </div> -->
         <div class="col-md-6">
             <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
                 'data' => $semesterLists,
-                'options' => ['placeholder' => 'Select Semester...'],
+                'options' => [
+                    'placeholder' => 'Select Semester...',
+                    'id' => 'semesterCodeSelect',
+                ],
+                'pluginOptions' => ['allowClear' => true],
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'SEMESTER_TYPE')->widget(Select2::class, [
+                'data' => [
+                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+                    'TEACHING' => 'TEACHING',
+                ],
+                'options' => ['placeholder' => 'Select Semester Type...'],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
         </div>
@@ -254,7 +304,13 @@ $this->registerCss(
         ]) ?>
         <?= Html::button('Reset', [
             'class' => 'btn btn-outline-secondary px-4',
-            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to(['index?filtersFor=' . $filter]) . '";'
+            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to([
+                'index',
+                'SemesterSearch' => [
+                    'ACADEMIC_YEAR' => $currentAcademicYear,
+                ],
+            ]) . '";'
+
         ]) ?>
     </div>
 
