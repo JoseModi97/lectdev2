@@ -209,6 +209,7 @@ $this->registerCss(
                 'options' => [
                     'placeholder' => 'Select Academic Year...',
                     'id' => 'academicYearSelect',
+                    'required' => true,
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
@@ -219,6 +220,7 @@ $this->registerCss(
                 'options' => [
                     'placeholder' => 'Select Degree Code...',
                     'id' => 'degreeCodeSelect',
+                    'required' => true,
                     'onchange' => <<<JS
                         const queryString = window.location.search;
                         const urlParams = new URLSearchParams(queryString);
@@ -247,36 +249,19 @@ $this->registerCss(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-        <!-- <div class="col-md-6"> -->
-        <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-            'data' => $yearLists,
-            'options' => [
-                'placeholder' => 'Select Level of Study...',
-                'id' => 'levelSelect',
-            ],
-            'pluginOptions' => ['allowClear' => true],
-        ]) ?>
-        <!-- </div> -->
+        <!-- Level of Study moved to GridView panel -->
         <div class="col-md-6">
             <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
                 'data' => $semesterLists,
                 'options' => [
                     'placeholder' => 'Select Semester...',
                     'id' => 'semesterCodeSelect',
+                    'required' => true,
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
         </div>
-        <div class="col-md-6">
-            <?= $form->field($model, 'SEMESTER_TYPE')->widget(Select2::class, [
-                'data' => [
-                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
-                    'TEACHING' => 'TEACHING',
-                ],
-                'options' => ['placeholder' => 'Select Semester Type...'],
-                'pluginOptions' => ['allowClear' => true],
-            ]) ?>
-        </div>
+        <!-- Semester Type moved to GridView panel -->
 
         <div class="col-md-6">
             <?php $form->field($model, 'courseName') ?>

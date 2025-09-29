@@ -14,6 +14,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use kartik\grid\GridView;
+use kartik\select2\Select2;
+use yii\widgets\ActiveForm;
+use yii\db\Query;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use app\components\BreadcrumbHelper;
 use app\models\CourseAssignment;
@@ -25,7 +29,13 @@ $semCodeSearch = Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '
 $semTypeSearch = Yii::$app->request->get('SemesterSearch')['SEMESTER_TYPE'] ?? '';
 $semLevelOfStudySearch = Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '';
 
-
+$this->registerCss(
+    <<<CSS
+    .bg-primary{
+        color: white;
+    }
+    CSS
+);
 
 
 /** @var yii\web\View $this */
@@ -164,211 +174,314 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
 
     </div>
-    <div class="card shadow-sm rounded-0 w-100">
-        <div class="card-body row g-3">
-            <?php
-            if (!empty(Yii::$app->request->get('SemesterSearch'))) {
-                $level = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '']);
-            ?>
-                <?php
-                $semesterSearch = Yii::$app->request->get('SemesterSearch', []);
 
-                $academicYear = $semesterSearch['ACADEMIC_YEAR'] ?? '';
-                $degreeCode   = $semesterSearch['DEGREE_CODE'] ?? '';
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'pjax' => false,
 
-                $degreeName   = '';
-                if (!empty($degreeCode)) {
-                    $degree = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degreeCode]);
-                    $degreeName = $degree->DEGREE_NAME ?? '';
-                }
-                ?>
+        // Add panel with Level of Study and Semester Type filters
+        'panel' => (function () use ($searchModel) {
+            $semesterSearch = Yii::$app->request->get('SemesterSearch', []);
+            $academicYear = $semesterSearch['ACADEMIC_YEAR'] ?? '';
+            $degreeCode   = $semesterSearch['DEGREE_CODE'] ?? '';
 
-                <h5>
-                    <?= Html::encode($academicYear) ?>
-                    <?= Html::encode($degreeCode) ?>
-                    <?= Html::encode($degreeName) ?>
-                </h5>
+            // Build dynamic Level of Study options (same logic as in _search.php)
+            $levelsQuery = (new Query())
+                ->select([
+                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
+                    'MUTHONI.LEVEL_OF_STUDY.NAME',
+                ])
+                ->distinct()
+                ->from('MUTHONI.SEMESTERS')
+                ->innerJoin(
+                    'MUTHONI.LEVEL_OF_STUDY',
+                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
+                )
+                ->andFilterWhere([
+                    'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $academicYear ?: null,
+                    'MUTHONI.SEMESTERS.DEGREE_CODE' => $degreeCode ?: null,
+                ])
+                ->orderBy([
+                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
+                    'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
+                ])
+                ->all();
 
-                <p><?= Html::encode($level['NAME'] ?? '') ?> SEMESTER <?= Html::encode(Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '') ?></p>
-            <?php
+            $yearLists = [];
+            if (!empty($academicYear) && !empty($degreeCode)) {
+                $yearLists = \yii\helpers\ArrayHelper::map($levelsQuery, 'LEVEL_OF_STUDY', 'NAME');
             }
-            ?>
+            // Ensure currently selected Level Of Study remains selectable/searchable
+            $selectedLevel = $semesterSearch['LEVEL_OF_STUDY'] ?? '';
+            if (!empty($selectedLevel) && !array_key_exists($selectedLevel, $yearLists)) {
+                $lvl = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $selectedLevel]);
+                if ($lvl) {
+                    $yearLists[$selectedLevel] = $lvl->NAME;
+                }
+            }
 
-            <?= GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'pjax' => false,
+            $semesterTypeOptions = [
+                'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+                'TEACHING' => 'TEACHING',
+            ];
 
-                'responsiveWrap' => false,
-                'condensed' => true,
-                'hover' => true,
-                'striped' => false,
-                'bordered' => true,
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+            ob_start();
+            $form = ActiveForm::begin([
+                'action' => ['index'],
+                'method' => 'get',
+                'options' => ['class' => 'mb-0'],
+            ]);
 
-                    // [
-                    //     'label' => 'Level of Study',
-                    //     'value' => function ($model) {
-                    //         $semDesc = $model->semester->semesterDescription;
-                    //         return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC;
-                    //     },
-                    //     'group' => true,
-                    //     'groupedRow' => true,
-                    //     'contentOptions' => [
-                    //         'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
-                    //         'class' => 'py-3'
-                    //     ],
-                    // ],
-                    [
-                        'label' => 'Level of Study',
-                        'value' => function ($model) {
-                            $semDesc = $model->semester->semesterDescription ?? '';
-                            return $model->semester->ACADEMIC_YEAR . ' - ' . $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
-                        },
-                        'group' => true,
-                        'groupedRow' => true,
-                        'contentOptions' => [
-                            'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
-                            'class' => 'py-3'
+            // Preserve other SemesterSearch params when submitting from panel
+            echo Html::hiddenInput('SemesterSearch[ACADEMIC_YEAR]', $academicYear);
+            echo Html::hiddenInput('SemesterSearch[DEGREE_CODE]', $degreeCode);
+            echo Html::hiddenInput('SemesterSearch[SEMESTER_CODE]', $semesterSearch['SEMESTER_CODE'] ?? '');
+            echo Html::hiddenInput('filtersFor', Yii::$app->request->get('filtersFor', ''));
+
+            echo '<div class="row g-3 align-items-end">';
+            echo '<div class="col-md-6">';
+                    echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                        'data' => $yearLists,
+                        'options' => [
+                            'placeholder' => 'Select Level of Study...',
+                            'id' => 'levelSelect',
+                            'required' => true,
                         ],
-                    ],
-                    [
-                        'attribute' => 'courseCode',
-                        'label' => 'Course Code',
-                        'value' => 'course.COURSE_CODE',
-                        'value' => function ($model) {
-                            $courseCode = $model->course->COURSE_CODE ?? '';
-                            $courseName = $model->course->COURSE_NAME ?? '';
-                            return $courseCode . ' - ' . $courseName;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $courseCodeFilter,
-                        'filterWidgetOptions' => [
-                            'options' => ['placeholder' => 'Any course'],
-                            'initValueText' => $selectedCourseCode,
-                            'pluginOptions' => ['allowClear' => true],
+                        'pluginOptions' => [
+                            'allowClear' => true,
                         ],
-                        'filterInputOptions' => ['placeholder' => 'Any course'],
-                    ],
-                    // [
-                    //     'attribute' => 'courseName',
-                    //     'label' => 'Course Name',
-                    //     'value' => 'course.COURSE_NAME',
-                    //     'filterType' => GridView::FILTER_SELECT2,
-                    //     'filter' => $courseNameFilter,
-                    //     'filterWidgetOptions' => [
-                    //         'options' => ['placeholder' => 'Any course name'],
-                    //         'initValueText' => $selectedCourseName,
-                    //         'pluginOptions' => ['allowClear' => true],
-                    //     ],
-                    //     'filterInputOptions' => ['placeholder' => 'Any course name'],
-                    // ],
-                    [
-                        'label' => 'Semester Type',
-                        'attribute' => 'SEMESTER_TYPE',
-                        'value' => 'semester.SEMESTER_TYPE',
-                        'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
-                        'filter' => [
-                            'SUPPLEMENTARY' => 'SUPPLEMENTARY',
-                            'TEACHING' => 'TEACHING',
+                        'pluginEvents' => [
+                            'select2:select' => 'function (e) { this.form.submit(); }',
                         ],
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => [
-                                'allowClear' => true,
-                                'placeholder' => 'Select Semester Type...',
-                            ],
+                    ]);
+                    echo '</div>';
+                    echo '<div class="col-md-6">';
+                    echo $form->field($searchModel, 'SEMESTER_TYPE')->widget(Select2::class, [
+                        'data' => $semesterTypeOptions,
+                        'options' => [
+                            'placeholder' => 'Select Semester Type...',
+                            'id' => 'semesterTypeSelect',
+                            'required' => true,
                         ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
+                        'pluginEvents' => [
+                            'select2:select' => 'function (e) { this.form.submit(); }',
+                        ],
+                    ]);
+            echo '</div>';
+            echo '</div>';
+
+            ActiveForm::end();
+            $before = ob_get_clean();
+
+            // Build panel heading preserving title and description
+            $degreeName = '';
+            if (!empty($degreeCode)) {
+                $degree = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degreeCode]);
+                $degreeName = $degree->DEGREE_NAME ?? '';
+            }
+            $levelModel = null;
+            if (!empty($semesterSearch)) {
+                $levelModel = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $semesterSearch['LEVEL_OF_STUDY'] ?? '']);
+            }
+            ob_start();
+            echo '<div class="d-flex flex-column">';
+            echo '<h5>'
+                . Html::encode($academicYear) . ' '
+                . Html::encode($degreeCode) . ' '
+                . Html::encode($degreeName)
+                . '</h5>';
+            echo '<p>'
+                . Html::encode($levelModel->NAME ?? '') . ' SEMESTER '
+                . Html::encode($semesterSearch['SEMESTER_CODE'] ?? '')
+                . '</p>';
+            echo '</div>';
+            $heading = ob_get_clean();
+
+                    return [
+                        'heading' => $heading,
+                        'type' => 'default',
+                        'before' => $before,
+                        'headingOptions' => [
+                            'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white; padding-left: 12px; padding-right: 12px;',
+                            'class' => 'text-white',
+                        ],
+                    ];
+                })(),
+
+        'responsiveWrap' => false,
+        'condensed' => true,
+        'hover' => true,
+        'striped' => false,
+        'bordered' => true,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            // [
+            //     'label' => 'Level of Study',
+            //     'value' => function ($model) {
+            //         $semDesc = $model->semester->semesterDescription;
+            //         return $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC;
+            //     },
+            //     'group' => true,
+            //     'groupedRow' => true,
+            //     'contentOptions' => [
+            //         'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+            //         'class' => 'py-3'
+            //     ],
+            // ],
+            [
+                'label' => 'Level of Study',
+                'value' => function ($model) {
+                    $semDesc = $model->semester->semesterDescription ?? '';
+                    return $model->semester->ACADEMIC_YEAR . ' - ' . $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
+                },
+                'group' => true,
+                'groupedRow' => true,
+                'contentOptions' => [
+                    'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white;padding-top: 10px; padding-bottom: 10px;',
+                    'class' => 'py-3'
+                ],
+            ],
+            [
+                'attribute' => 'courseCode',
+                'label' => 'Course Code',
+                'value' => 'course.COURSE_CODE',
+                'value' => function ($model) {
+                    $courseCode = $model->course->COURSE_CODE ?? '';
+                    $courseName = $model->course->COURSE_NAME ?? '';
+                    return $courseCode . ' - ' . $courseName;
+                },
+                'filterType' => GridView::FILTER_SELECT2,
+                'filter' => $courseCodeFilter,
+                'filterWidgetOptions' => [
+                    'options' => ['placeholder' => 'Any course'],
+                    'initValueText' => $selectedCourseCode,
+                    'pluginOptions' => ['allowClear' => true],
+                ],
+                'filterInputOptions' => ['placeholder' => 'Any course'],
+            ],
+            // [
+            //     'attribute' => 'courseName',
+            //     'label' => 'Course Name',
+            //     'value' => 'course.COURSE_NAME',
+            //     'filterType' => GridView::FILTER_SELECT2,
+            //     'filter' => $courseNameFilter,
+            //     'filterWidgetOptions' => [
+            //         'options' => ['placeholder' => 'Any course name'],
+            //         'initValueText' => $selectedCourseName,
+            //         'pluginOptions' => ['allowClear' => true],
+            //     ],
+            //     'filterInputOptions' => ['placeholder' => 'Any course name'],
+            // ],
+            [
+                'label' => 'Semester Type',
+                'attribute' => 'SEMESTER_TYPE',
+                'value' => 'semester.SEMESTER_TYPE',
+                'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+                'filter' => [
+                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+                    'TEACHING' => 'TEACHING',
+                ],
+                'filterWidgetOptions' => [
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'placeholder' => 'Select Semester Type...',
                     ],
+                ],
+            ],
 
 
-                    [
-                        'label' => 'Group Name',
-                        'value' => function ($model) {
-                            $semDesc = $model->semester->semesterDescription;
-                            return $model->semester->group->GROUP_NAME;
-                        },
-                        'group' => true,
-                        'subGroupOf' => 1,
-                    ],
-                    [
-                        'attribute' => 'PAYROLL_NO',
-                        'header' => 'Assigned Lecturer(s)',
-                        'format' => 'raw',
-                        'vAlign' => 'middle',
-                        'width' => '25%',
-                        'value' => function ($d) {
-                            $assignments = CourseAssignment::find()
-                                ->select(['PAYROLL_NO'])
-                                ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])
-                                ->all();
+            [
+                'label' => 'Group Name',
+                'value' => function ($model) {
+                    $semDesc = $model->semester->semesterDescription;
+                    return $model->semester->group->GROUP_NAME;
+                },
+                'group' => true,
+                'subGroupOf' => 1,
+            ],
+            [
+                'attribute' => 'PAYROLL_NO',
+                'header' => 'Assigned Lecturer(s)',
+                'format' => 'raw',
+                'vAlign' => 'middle',
+                'width' => '25%',
+                'value' => function ($d) {
+                    $assignments = CourseAssignment::find()
+                        ->select(['PAYROLL_NO'])
+                        ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])
+                        ->all();
 
-                            if (empty($assignments)) {
-                                return '<span class="badge bg-secondary">No lecturer assigned</span>';
-                            }
+                    if (empty($assignments)) {
+                        return '<span class="badge bg-secondary">No lecturer assigned</span>';
+                    }
 
-                            $output = '';
-                            $courseLeaderFound = false;
+                    $output = '';
+                    $courseLeaderFound = false;
 
-                            foreach ($assignments as $assignment) {
-                                $lecturer = EmpVerifyView::find()
-                                    ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
-                                    ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
-                                    ->one();
+                    foreach ($assignments as $assignment) {
+                        $lecturer = EmpVerifyView::find()
+                            ->select(['PAYROLL_NO', 'SURNAME', 'OTHER_NAMES', 'EMP_TITLE'])
+                            ->where(['PAYROLL_NO' => $assignment->PAYROLL_NO])
+                            ->one();
 
-                                if (!$lecturer) {
-                                    continue;
-                                }
+                        if (!$lecturer) {
+                            continue;
+                        }
 
-                                $lecturerName = trim(($lecturer->EMP_TITLE ? $lecturer->EMP_TITLE . ' ' : '') .
-                                    $lecturer->SURNAME . ' ' . $lecturer->OTHER_NAMES);
+                        $lecturerName = trim(($lecturer->EMP_TITLE ? $lecturer->EMP_TITLE . ' ' : '') .
+                            $lecturer->SURNAME . ' ' . $lecturer->OTHER_NAMES);
 
-                                // Check if this lecturer is the course leader
-                                $isLeader = MarksheetDef::find()
-                                    ->where([
-                                        'MRKSHEET_ID' => $d->MRKSHEET_ID,
-                                        'PAYROLL_NO' => $lecturer->PAYROLL_NO
-                                    ])
-                                    ->exists();
+                        // Check if this lecturer is the course leader
+                        $isLeader = MarksheetDef::find()
+                            ->where([
+                                'MRKSHEET_ID' => $d->MRKSHEET_ID,
+                                'PAYROLL_NO' => $lecturer->PAYROLL_NO
+                            ])
+                            ->exists();
 
-                                if ($isLeader && !$courseLeaderFound) {
-                                    $courseLeaderFound = true;
-                                    $output .= '<div class="mb-1">
+                        if ($isLeader && !$courseLeaderFound) {
+                            $courseLeaderFound = true;
+                            $output .= '<div class="mb-1">
                                         <span class="badge bg-primary">
                                             <i class="fas fa-user-tie"></i> ' . Html::encode($lecturerName) . ' (Leader)
                                         </span>
                                     </div>';
-                                } else {
-                                    $output .= '<div class="mb-1">
+                        } else {
+                            $output .= '<div class="mb-1">
                                         <span class="badge bg-light text-dark border">
                                             <i class="fas fa-user"></i> ' . Html::encode($lecturerName) . '
                                         </span>
                                     </div>';
-                                }
-                            }
+                        }
+                    }
 
-                            return $output;
-                        },
-                        'filterType' => GridView::FILTER_SELECT2,
-                        'filter' => $lecturersList,
-                        'filterWidgetOptions' => [
-                            'pluginOptions' => ['allowClear' => true],
-                        ],
-                        'filterInputOptions' => ['placeholder' => 'Any lecturer'],
-                    ],
-
-                    $actionColumn,
+                    return $output;
+                },
+                'filterType' => GridView::FILTER_SELECT2,
+                'filter' => $lecturersList,
+                'filterWidgetOptions' => [
+                    'pluginOptions' => ['allowClear' => true],
                 ],
-            ]); ?>
-        </div>
+                'filterInputOptions' => ['placeholder' => 'Any lecturer'],
+            ],
 
-    </div>
+            $actionColumn,
+        ],
+    ]); ?>
 
 </div>
 
 <?php echo $this->render('@app/views/allocation/allocationHelpers', ['deptCode' => $deptCode]); ?>
 
 <?php
+
+// Ensure panel heading and its right-aligned summary text are white
+$this->registerCss("\n.kv-panel .panel-heading,\n.kv-panel .panel-heading * {\n  color: #fff !important;\n}\n.kv-panel .panel-heading .summary {\n  color: #fff !important;\n}\n");
 
 
 
