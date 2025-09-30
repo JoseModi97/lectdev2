@@ -23,6 +23,7 @@ use yii\db\ActiveQuery;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\ServerErrorHttpException;
+use yii\helpers\ArrayHelper;
 
 use app\models\DegreeProgramme;
 use app\models\Group;
@@ -106,56 +107,84 @@ if ($filter->purpose === 'serviceCourses') {
         'attribute' => 'requestingDept.DEPT_NAME',
         'label' => 'REQUESTING DEPARTMENT',
         'vAlign' => 'middle',
+        'group' => true,
+        'groupedRow' => true,
+        'groupOddCssClass' => 'group-academic-year',
+        'groupEvenCssClass' => 'group-academic-year',
     ];
 } else {
     $departmentColumn = [
         'attribute' => 'servicingDept.DEPT_NAME',
         'label' => 'SERVICING DEPARTMENT',
         'vAlign' => 'middle',
+        'group' => true,
+        'groupedRow' => true,
+        'groupOddCssClass' => 'group-academic-year',
+        'groupEvenCssClass' => 'group-academic-year',
     ];
 }
 
-$courseCodeColumn = [
-    'attribute' => 'marksheet.course.COURSE_CODE',
-    'label' => 'COURSE CODE',
-    'vAlign' => 'middle',
-];
+$dataModels = $coursesProvider->getModels();
+$courseCodeOptions = [];
+if (!empty($dataModels)) {
+    foreach ($dataModels as $m) {
+        $code = $m->marksheet->course->COURSE_CODE ?? null;
+        $name = $m->marksheet->course->COURSE_NAME ?? '';
+        if ($code) {
+            $courseCodeOptions[$code] = trim($code . ($name ? ' - ' . $name : ''));
+        }
+    }
+    if (!empty($courseCodeOptions)) { ksort($courseCodeOptions, SORT_NATURAL | SORT_FLAG_CASE); }
+}
 
-$courseNameColumn = [
-    'attribute' => 'marksheet.course.COURSE_NAME',
-    'label' => 'COURSE NAME',
+$courseCodeColumn = [
+    'attribute' => 'courseCode',
+    'label' => 'COURSE',
     'vAlign' => 'middle',
+    'width' => '25%',
+    'value' => function ($model) {
+        $code = $model->marksheet->course->COURSE_CODE ?? '';
+        $name = $model->marksheet->course->COURSE_NAME ?? '';
+        return trim($code . ($name ? ' - ' . $name : ''));
+    },
+    'filterType' => GridView::FILTER_SELECT2,
+    'filter' => $courseCodeOptions,
+    'filterWidgetOptions' => [
+        'pluginOptions' => ['allowClear' => true],
+    ],
+    'filterInputOptions' => ['placeholder' => 'Any code'],
 ];
 
 $requestStatusColumn = [
     'label' => 'STATUS',
-    'attribute' => 'status.STATUS_NAME',
+    'attribute' => 'statusName',
     'format' => 'raw',
     'vAlign' => 'middle',
+    'filterType' => GridView::FILTER_SELECT2,
+    'filter' => (function () use ($dataModels) {
+        if (empty($dataModels)) return [];
+        $names = ArrayHelper::getColumn($dataModels, function ($m) {
+            return $m->status->STATUS_NAME ?? null;
+        });
+        $names = array_filter(array_unique($names));
+        return array_combine($names, $names);
+    })(),
+    'filterWidgetOptions' => [
+        'pluginOptions' => ['allowClear' => true],
+    ],
+    'filterInputOptions' => ['placeholder' => 'Any status'],
     'value' => function ($model) {
         $status = $model->status->STATUS_NAME;
-        $icon = '';
-        $badgeClass = '';
-
         switch ($status) {
             case 'APPROVED':
-                $icon = '<i class="fas fa-check-circle"></i>';
-                $badgeClass = 'badge bg-success';
-                break;
+                return '<strong><i class="fas fa-check-circle"></i> ' . Html::encode($status) . '</strong>';
             case 'PENDING':
-                $icon = '<i class="fas fa-clock"></i>';
-                $badgeClass = 'badge bg-warning text-dark';
-                break;
+                return '<i class="fas fa-clock"></i> ' . Html::encode($status);
             case 'NOT APPROVED':
-                $icon = '<i class="fas fa-times-circle"></i>';
-                $badgeClass = 'badge bg-danger';
-                break;
+                return '<i class="fas fa-times-circle"></i> ' . Html::encode($status);
             default:
-                $badgeClass = 'badge bg-secondary';
-                break;
+                return Html::encode($status);
         }
-
-        return '<span class="' . $badgeClass . '">' . $icon . ' ' . $status . '</span>';
     }
 ];
 
@@ -295,7 +324,7 @@ echo $this->render('moreFilters', ['filter' => $filter]);
             'columns' => [
                 ['class' => 'kartik\grid\SerialColumn', 'vAlign' => 'middle'],
                 $courseCodeColumn,
-                $courseNameColumn,
+
                 $departmentColumn,
                 $requestStatusColumn,
                 $allocatedLecturer,

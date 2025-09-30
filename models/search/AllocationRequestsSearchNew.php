@@ -13,12 +13,16 @@ use yii\db\ActiveQuery;
 
 class AllocationRequestsSearchNew extends AllocationRequest
 {
+    public $courseCode;
+    public $statusName;
     /**
      * {@inheritdoc}
      */
     public function rules(): array
     {
-        return [];
+        return [
+            [['courseCode', 'statusName'], 'safe'],
+        ];
     }
 
     /**
@@ -39,6 +43,8 @@ class AllocationRequestsSearchNew extends AllocationRequest
      */
     public function search(string $deptCode, CourseAllocationFilter $courseFilter): ActiveDataProvider
     {
+        $this->load(\Yii::$app->request->queryParams);
+
         $query = AllocationRequest::find()->alias('AR')
             ->select([
                 'AR.REQUEST_ID',
@@ -127,6 +133,14 @@ class AllocationRequestsSearchNew extends AllocationRequest
 
         if(!empty($courseFilter->courseName)){
             $query->andWhere(['like', 'CS.COURSE_NAME', $courseFilter->courseName]);
+        }
+
+        // Apply in-grid filters (optional) if provided
+        if (!empty($this->courseCode)) {
+            $query->andWhere(['like', 'CS.COURSE_CODE', $this->courseCode]);
+        }
+        if (!empty($this->statusName)) {
+            $query->andWhere(['ST.STATUS_NAME' => $this->statusName]);
         }
 
         $query->joinWith(['requestedBy REQ' => function(ActiveQuery $q){
