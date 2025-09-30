@@ -431,6 +431,9 @@ class AllocationController extends BaseController
                     $q->joinWith(['group GRP' => function (ActiveQuery $q4) {
                         $q4->select(['GRP.GROUP_CODE', 'GRP.GROUP_NAME']);
                     }], false);
+                    $q->joinWith(['degreeProgramme DEG' => function (ActiveQuery $q5) {
+                        $q5->select(['DEG.DEGREE_CODE', 'DEG.DEGREE_NAME']);
+                    }], false);
                 }], false, 'LEFT JOIN')
                 ->one();
 
@@ -443,8 +446,10 @@ class AllocationController extends BaseController
                     'academicYear' => $mkModel->semester->ACADEMIC_YEAR ?? '',
                     'levelOfStudyName' => $mkModel->semester->levelOfStudy->NAME ?? '',
                     'semesterDescription' => $mkModel->semester->semesterDescription->SEMESTER_DESC ?? '',
+                    'semesterCode' => $mkModel->semester->SEMESTER_CODE ?? '',
                     'groupName' => $mkModel->semester->group->GROUP_NAME ?? '',
                     'semesterType' => $mkModel->semester->SEMESTER_TYPE ?? '',
+                    'degreeName' => $mkModel->semester->degreeProgramme->DEGREE_NAME ?? '',
                 ]
             ]);
         } catch (Exception $ex) {

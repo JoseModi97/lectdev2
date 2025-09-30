@@ -20,6 +20,16 @@ use yii\widgets\ActiveForm;
 
 $this->title = $title;
 ?>
+<!-- contextual header (match Assign modal layout) -->
+<div class="card" style="padding:10px; margin-bottom:10px; border: 1px solid #008cba;border-radius: 5px;">
+    <div class="card-body">
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DEGREE: </span> <span class="lecturer-allocation-degree-name"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE CODE: </span> <span class="lecturer-allocation-course-code"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE NAME: </span> <span class="lecturer-allocation-course-name"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DESCRIPTION: </span> <span class="lecturer-allocation-description-full"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> GROUP: </span> <span class="lecturer-allocation-group"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER TYPE: </span> <span class="lecturer-allocation-semester-type"></span></p></div></div>
+    </div>
+</div>
+
 <!-- code from: https://codepen.io/lehonti/pen/OzoXVa -->
 <div class="lec-assign-form-fields form-border">
     <?php
@@ -128,8 +138,39 @@ $this->registerCss($removeLecturersCSS);
 
 /** PHP to JS variables */
 $removeLecturerAction = Url::to(['/allocation/remove-allocated-lecturer']);
+$courseDetailsAction = Url::to(['/allocation/course-details']);
 
 $removeLecturersScript = <<< JS
+    // Populate contextual header using marksheetId
+    (function(){
+        var marksheetId = $('#remove-lecturer-marksheet-id').val();
+        if(marksheetId){
+            $('#modal .shimmer-overlay').removeClass('d-none');
+            $.ajax({
+                type: 'POST',
+                url: '$courseDetailsAction',
+                data: { 'marksheetId': marksheetId },
+                dataType: 'json'
+            }).done(function(resp){
+                if(resp && resp.status === 200){
+                    $('.lecturer-allocation-marksheet-id').html(resp.data.marksheetId);
+                    $('.lecturer-allocation-course-name').html(resp.data.courseName);
+                    $('.lecturer-allocation-course-code').html(resp.data.courseCode);
+                    $('.lecturer-allocation-academic-year').html(resp.data.academicYear || '');
+                    $('.lecturer-allocation-level-of-study').html(resp.data.levelOfStudyName || '');
+                    $('.lecturer-allocation-semester-desc').html(resp.data.semesterDescription || '');
+                    $('.lecturer-allocation-group').html(resp.data.groupName || '');
+                    $('.lecturer-allocation-semester-type').html(resp.data.semesterType || '');
+                    $('.lecturer-allocation-degree-name').html(resp.data.degreeName || '');
+                    var desc = (resp.data.semesterCode ? resp.data.semesterCode : '') + (resp.data.semesterDescription ? ' - ' + resp.data.semesterDescription : '');
+                    $('.lecturer-allocation-description-full').html(desc);
+                }
+            }).always(function(){
+                $('#modal .shimmer-overlay').addClass('d-none');
+            });
+        }
+    })();
+
   if(typeof lecturerVals == 'undefined') {
         var lecturerVals = [];
     }else{

@@ -87,8 +87,11 @@ $deptCoursesScript = <<< JS
                 $('.lecturer-allocation-academic-year').html(response.data.academicYear || '');
                 $('.lecturer-allocation-level-of-study').html(response.data.levelOfStudyName || '');
                 $('.lecturer-allocation-semester-desc').html(response.data.semesterDescription || '');
+                var desc = (response.data.semesterCode ? response.data.semesterCode : '') + (response.data.semesterDescription ? ' - ' + response.data.semesterDescription : '');
+                $('.lecturer-allocation-description-full').html(desc);
                 $('.lecturer-allocation-group').html(response.data.groupName || '');
                 $('.lecturer-allocation-semester-type').html(response.data.semesterType || '');
+                $('.lecturer-allocation-degree-name').html(response.data.degreeName || '');
             }else{
                 $('.content-loader').addClass('alert-danger');
                 $('.content-loader').html('<p>' + response.message + '</p>');

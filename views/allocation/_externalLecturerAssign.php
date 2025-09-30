@@ -46,15 +46,10 @@ Modal::begin([
 <!-- course details -->
 <div class="card form-border">
     <div class="card-body">
-        <p class="card-text"><span class="text-primary">MARKSHEET: </span> <span class="lecturer-allocation-marksheet-id"> </span></p>
-        <div class="row">
-            <div class="col-md-8 col-lg-8">
-                <p class="card-text"><span class="text-primary"> COURSE NAME: </span> <span class="lecturer-allocation-course-name"></span> </p>
-            </div>
-            <div class="col-md-4 col-lg-4">
-                <p class="card-text text-center"><span class="text-primary"> COURSE CODE: </span> <span class="lecturer-allocation-course-code"></span></p>
-            </div>
-        </div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DEGREE: </span> <span class="lecturer-allocation-degree-name"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE CODE: </span> <span class="lecturer-allocation-course-code"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE NAME: </span> <span class="lecturer-allocation-course-name"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DESCRIPTION: </span> <span class="lecturer-allocation-description-full"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> GROUP: </span> <span class="lecturer-allocation-group"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER TYPE: </span> <span class="lecturer-allocation-semester-type"></span></p></div></div>
     </div>
 </div>
 <!-- end course details -->
