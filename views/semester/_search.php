@@ -234,7 +234,7 @@ $this->registerCss(
                             data.semesters.forEach(function(item) {
                                 semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
-                            $("#semesterCodeSelect").html(semOptions).val(null).trigger("change");
+                            $("#semesterCodeSelect").html(semOptions).val(null).trigger("change.select2");
 
 
 
@@ -242,7 +242,7 @@ $this->registerCss(
                             data.levels.forEach(function(item) {
                                 lvlOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
-                            $("#levelSelect").html(lvlOptions).val(null).trigger("change");
+                            $("#levelSelect").html(lvlOptions).val(null).trigger("change.select2");
                             
                         });
                     JS,
@@ -303,6 +303,7 @@ $this->registerCss(
 </div>
 
 <?php
+// Auto-submit only when Semester is selected (and parents already filled)
 $this->registerJs(<<<JS
 (function(){
   function tryAutoSubmitSemesterSearch(){
@@ -314,9 +315,8 @@ $this->registerJs(<<<JS
       if (form) form.submit();
     }
   }
-  $('#academicYearSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
-  $('#degreeCodeSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
-  $('#semesterCodeSelect').on('select2:select change', tryAutoSubmitSemesterSearch);
+  // Do not auto-submit on degree change; only when semester is selected
+  $('#semesterCodeSelect').on('select2:select', tryAutoSubmitSemesterSearch);
 })();
 JS);
 ?>
