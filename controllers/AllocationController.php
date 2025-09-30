@@ -402,7 +402,7 @@ class AllocationController extends BaseController
         try {
             $post = Yii::$app->request->post();
             $mkModel = MarksheetDef::find()->alias('MD')
-                ->select(['MD.MRKSHEET_ID', 'MD.COURSE_ID'])
+                ->select(['MD.MRKSHEET_ID', 'MD.COURSE_ID', 'MD.SEMESTER_ID'])
                 ->where(['MD.MRKSHEET_ID' => $post['marksheetId']])
                 ->joinWith(['course CS' => function (ActiveQuery $q) {
                     $q->select([
@@ -411,6 +411,27 @@ class AllocationController extends BaseController
                         'CS.COURSE_NAME',
                     ]);
                 }], true, 'INNER JOIN')
+                ->joinWith(['semester SM' => function (ActiveQuery $q) {
+                    $q->select([
+                        'SM.SEMESTER_ID',
+                        'SM.ACADEMIC_YEAR',
+                        'SM.LEVEL_OF_STUDY',
+                        'SM.SEMESTER_CODE',
+                        'SM.SEMESTER_TYPE',
+                        'SM.GROUP_CODE',
+                        'SM.DESCRIPTION_CODE',
+                    ]);
+                    // Join related lookup tables for names
+                    $q->joinWith(['levelOfStudy LVL' => function (ActiveQuery $q2) {
+                        $q2->select(['LVL.LEVEL_OF_STUDY', 'LVL.NAME']);
+                    }], false);
+                    $q->joinWith(['semesterDescription DESC' => function (ActiveQuery $q3) {
+                        $q3->select(['DESC.DESCRIPTION_CODE', 'DESC.SEMESTER_DESC']);
+                    }], false);
+                    $q->joinWith(['group GRP' => function (ActiveQuery $q4) {
+                        $q4->select(['GRP.GROUP_CODE', 'GRP.GROUP_NAME']);
+                    }], false);
+                }], false, 'LEFT JOIN')
                 ->one();
 
             return $this->asJson([
@@ -418,7 +439,12 @@ class AllocationController extends BaseController
                 'data' => [
                     'marksheetId' => $post['marksheetId'],
                     'courseCode' => $mkModel->course->COURSE_CODE,
-                    'courseName' => $mkModel->course->COURSE_NAME
+                    'courseName' => $mkModel->course->COURSE_NAME,
+                    'academicYear' => $mkModel->semester->ACADEMIC_YEAR ?? '',
+                    'levelOfStudyName' => $mkModel->semester->levelOfStudy->NAME ?? '',
+                    'semesterDescription' => $mkModel->semester->semesterDescription->SEMESTER_DESC ?? '',
+                    'groupName' => $mkModel->semester->group->GROUP_NAME ?? '',
+                    'semesterType' => $mkModel->semester->SEMESTER_TYPE ?? '',
                 ]
             ]);
         } catch (Exception $ex) {

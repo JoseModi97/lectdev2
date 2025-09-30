@@ -24,12 +24,31 @@ echo $this->render('_externalLecturerAssign', ['deptCode' => $deptCode]);
 Modal::begin([
     'title' => '<b>Allocated Lecturers</b>',
     'id' => 'modal',
-    'size' => 'modal-md',
+    'size' => 'modal-xl',
     'options' => ['data-backdrop' => "static", 'data-keyboard' => "false"],
+    'dialogOptions' => [
+        'class' => 'modal-dialog-scrollable modal-dialog-centered',
+        'style' => 'max-height: 90vh;'
+    ],
+    'headerOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492);'],
 ]);
-echo "<div id='modalContent'></div>";
-Modal::end();
-
+?>
+<style>
+/* Shimmer overlay for generic manage/remove modal */
+#modal .skeleton { position: relative; background-color: #e9ecef; overflow: hidden; border-radius: 4px; }
+#modal .skeleton::after { content: ''; position: absolute; top: 0; left: -150px; height: 100%; width: 150px; background: linear-gradient(90deg, rgba(233,236,239,0), rgba(255,255,255,0.6), rgba(233,236,239,0)); animation: shimmer 1.2s ease-in-out infinite; }
+@keyframes shimmer { 0% { transform: translateX(0); } 100% { transform: translateX(300%); } }
+@keyframes shimmer-sweep { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+</style>
+<div class="generic-modal-wrapper position-relative">
+  <div class="shimmer-overlay d-none" style="position:absolute; inset:0; z-index: 10; pointer-events:none;">
+      <div style="position:absolute; inset:0; background-color:#f1f3f5;"></div>
+      <div style="position:absolute; inset:0; background: linear-gradient(90deg, rgba(241,243,245,0) 0%, rgba(255,255,255,0.75) 50%, rgba(241,243,245,0) 100%); background-size: 300% 100%; animation: shimmer-sweep 1.2s ease-in-out infinite;"></div>
+  </div>
+  <div id="modalContent"></div>
+</div>
+<?php Modal::end(); ?>
+<?php
 // PHP to JS variables
 $allocateLecturerAction = Url::to(['/allocation/allocate-request-lecturer']);
 $courseDetailsAction = Url::to(['/allocation/course-details']);
@@ -43,10 +62,8 @@ $deptCoursesScript = <<< JS
 
     // Get course details 
     const getCourseDetails = function(){
-        $('.content-loader').html('');
-        $('.content-loader').removeClass('alert-danger');
-        $('.content-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;">'
-         + '<i class="fas fa-spinner fa-pulse"></i></h5>');
+        $('.content-loader').html('').removeClass('alert-danger');
+        $('#allocate-course-lecturers-modal .shimmer-overlay').removeClass('d-none');
         let courseDetailsAction = '$courseDetailsAction';
         let queryData = {
             'marksheetId' : marksheetId,
@@ -60,14 +77,22 @@ $deptCoursesScript = <<< JS
         })
         .done(function(response){
             $('.content-loader').html('');
+            $('#allocate-course-lecturers-modal .shimmer-overlay').addClass('d-none');
             if(response.status === 200){
                 $('.allocate-lecturer-loader').html('');
                 $('.lecturer-allocation-marksheet-id').html(response.data.marksheetId);
                 $('.lecturer-allocation-course-name').html(response.data.courseName);
                 $('.lecturer-allocation-course-code').html(response.data.courseCode); 
+                // Additional contextual details
+                $('.lecturer-allocation-academic-year').html(response.data.academicYear || '');
+                $('.lecturer-allocation-level-of-study').html(response.data.levelOfStudyName || '');
+                $('.lecturer-allocation-semester-desc').html(response.data.semesterDescription || '');
+                $('.lecturer-allocation-group').html(response.data.groupName || '');
+                $('.lecturer-allocation-semester-type').html(response.data.semesterType || '');
             }else{
                 $('.content-loader').addClass('alert-danger');
                 $('.content-loader').html('<p>' + response.message + '</p>');
+                $('#allocate-course-lecturers-modal .shimmer-overlay').addClass('d-none');
             }
         })
         .fail(function(){});
@@ -276,9 +301,13 @@ $deptCoursesScript = <<< JS
         e.preventDefault();
         var url = $(this).attr('href');
         $('#modal').modal('show');
-        $('#modalContent').html('<h1 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h1>');
+        $('#modal .shimmer-overlay').removeClass('d-none');
+        $('#modalContent').html('');
         $.get(url, function(data) {
             $('#modalContent').html(data);
+            $('#modal .shimmer-overlay').addClass('d-none');
+        }).fail(function(){
+            $('#modal .shimmer-overlay').addClass('d-none');
         });
     }
 
@@ -299,6 +328,12 @@ $deptCoursesScript = <<< JS
     // Remove lecturers assigned to a course
     $(document).on('click', '.remove-lecturer', function(e){
         loadModal.call(this, e);
+    });
+
+    // Reset shimmer on close
+    $('#modal').on('hidden.bs.modal', function () {
+        $('#modal .shimmer-overlay').addClass('d-none');
+        $('#modalContent').html('');
     });
 
 JS;

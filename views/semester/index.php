@@ -132,7 +132,7 @@ $actionColumn = [
     'buttons' => [
         'allocate' => function ($url, $model, $key) {
             return Html::a('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate</span>', '#', [
-                'title' => 'Allocate lecturer',
+                'title' => 'Allocate / Request',
                 'class' => 'assign-lecturer text-decoration-none',
                 'data-id' => 'NULL',
                 'data-marksheetid' => $model->MRKSHEET_ID,
@@ -306,22 +306,22 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo '<div class="row g-3 align-items-end">';
             echo '<div class="col-md-6">';
-                    echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                        'data' => $yearLists,
-                        'options' => [
-                            'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
-                            'id' => 'levelSelect',
-                            'required' => !$panelDisabled,
-                            'disabled' => $panelDisabled,
-                        ],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                        ],
-                        'pluginEvents' => [
-                            'select2:select' => 'function (e) { this.form.submit(); }',
-                            'select2:clear'  => 'function (e) { this.form.submit(); }',
-                        ],
-                    ]);
+            echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                'data' => $yearLists,
+                'options' => [
+                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
+                    'id' => 'levelSelect',
+                    'required' => !$panelDisabled,
+                    'disabled' => $panelDisabled,
+                ],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ],
+                'pluginEvents' => [
+                    'select2:select' => 'function (e) { this.form.submit(); }',
+                    'select2:clear'  => 'function (e) { this.form.submit(); }',
+                ],
+            ]);
             echo '</div>';
             echo '<div class="col-md-6">';
             echo $form->field($searchModel, 'GROUP_CODE')->widget(Select2::class, [
@@ -513,7 +513,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ->all();
 
                     if (empty($assignments)) {
-                        return '<span class="badge bg-secondary">No lecturer assigned</span>';
+                        return '<span class="badge bg-secondary fs-6 py-1">Not assigned</span>';
                     }
 
                     $output = '';
@@ -542,17 +542,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         if ($isLeader && !$courseLeaderFound) {
                             $courseLeaderFound = true;
-                            $output .= '<div class="mb-1">
-                                        <span class="badge bg-primary">
-                                            <i class="fas fa-user-tie"></i> ' . Html::encode($lecturerName) . ' (Leader)
-                                        </span>
-                                    </div>';
+                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user-tie"></i> ' . Html::encode($lecturerName) . ' <span class="text-success" style="font-weight: bold">(Leader)</span></div>';
                         } else {
-                            $output .= '<div class="mb-1">
-                                        <span class="badge bg-light text-dark border">
-                                            <i class="fas fa-user"></i> ' . Html::encode($lecturerName) . '
-                                        </span>
-                                    </div>';
+                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user"></i> ' . Html::encode($lecturerName) . '</div>';
                         }
                     }
 

@@ -42,19 +42,62 @@ $depts = ArrayHelper::map($depts, 'DEPT_CODE', function ($dept) {
 Modal::begin([
     'title' => '<b>Allocate or request course lecturer(s)</b>',
     'id' => 'allocate-course-lecturers-modal',
-    'size' => 'modal-md',
+    'size' => 'modal-xl',
     'options' => ['data-backdrop' => "static", 'data-keyboard' => "false"],
+    'dialogOptions' => [
+        'class' => 'modal-dialog-scrollable modal-dialog-centered',
+        'style' => 'max-height: 90vh;'
+    ],
     'headerOptions' => ['style' => 'background-image: linear-gradient(#455492, #304186, #455492);'],
 ]);
 ?>
 
-<div class="content-loader" style="border-radius: 5px;"></div>
+<style>
+/* Shimmer skeleton styles scoped to this modal */
+#allocate-course-lecturers-modal .skeleton {
+    position: relative;
+    background-color: #e9ecef;
+    overflow: hidden;
+    border-radius: 4px;
+}
+#allocate-course-lecturers-modal .skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150px;
+    height: 100%;
+    width: 150px;
+    background: linear-gradient(90deg, rgba(233,236,239,0), rgba(255,255,255,0.6), rgba(233,236,239,0));
+    animation: shimmer 1.2s ease-in-out infinite;
+}
+@keyframes shimmer {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(300%); }
+}
+@keyframes shimmer-sweep {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+</style>
+
+<div class="allocate-modal-wrapper position-relative">
+    <div class="shimmer-overlay d-none" style="position:absolute; inset:0; z-index: 10; pointer-events:none;">
+        <div style="position:absolute; inset:0; background-color:#f1f3f5;"></div>
+        <div style="position:absolute; inset:0; background: linear-gradient(90deg, rgba(241,243,245,0) 0%, rgba(255,255,255,0.75) 50%, rgba(241,243,245,0) 100%); background-size: 300% 100%; animation: shimmer-sweep 1.2s ease-in-out infinite;"></div>
+    </div>
+
+    <div class="content-loader" style="border-radius: 5px;"></div>
 <!-- course details -->
 <div class="card" style="padding:10px; margin-bottom:10px; border: 1px solid #008cba;border-radius: 5px;">
     <div class="card-body">
-        <p class="card-text"><span class="text-p">MARKSHEET: </span>
-            <span class="lecturer-allocation-marksheet-id"> </span>
-        </p>
+        <div class="d-flex flex-wrap align-items-center mb-2" style="gap: 16px;">
+            <div class="me-3"><span class="text-primary fw-semibold">MARKSHEET:</span> <span class="lecturer-allocation-marksheet-id"></span></div>
+            <div class="me-3"><span class="text-primary fw-semibold">ACADEMIC YEAR:</span> <span class="lecturer-allocation-academic-year"></span></div>
+            <div class="me-3"><span class="text-primary fw-semibold">LEVEL OF STUDY:</span> <span class="lecturer-allocation-level-of-study"></span></div>
+            <div class="me-3"><span class="text-primary fw-semibold">SEMESTER TYPE:</span> <span class="lecturer-allocation-semester-type"></span></div>
+            <div class="me-3"><span class="text-primary fw-semibold">GROUP:</span> <span class="lecturer-allocation-group"></span></div>
+            <div class="me-3"><span class="text-primary fw-semibold">DESCRIPTION:</span> <span class="lecturer-allocation-semester-desc"></span></div>
+        </div>
         <div class="row">
             <div class="col-md-8 col-lg-8">
                 <p class="card-text"><span class="text-primary"> COURSE NAME: </span>
@@ -143,4 +186,5 @@ Modal::begin([
     <?php ActiveForm::end(); ?>
 </div>
 <!-- end assign lecturers form -->
+</div>
 <?php Modal::end(); ?>
