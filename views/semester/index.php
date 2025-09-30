@@ -401,7 +401,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'd-block text-end mb-2',
         ],
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            [
+                'class' => 'kartik\grid\SerialColumn',
+                'width' => '4%',
+            ],
 
             // [
             //     'label' => 'Level of Study',
@@ -465,6 +468,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'courseCode',
                 'label' => 'Course Code',
+                'width' => '35%',
                 'value' => 'course.COURSE_CODE',
                 'value' => function ($model) {
                     $courseCode = $model->course->COURSE_CODE ?? '';
