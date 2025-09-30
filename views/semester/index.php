@@ -177,7 +177,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $levelHdr = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $semesterSearchHdr['LEVEL_OF_STUDY'] ?? '']);
         }
         ?>
-        <div class="card-header text-white fw-bold" style="background-image: linear-gradient(#455492, #304186, #455492);">
+        <div class="card-header text-white fw-bold d-flex align-items-center justify-content-between" style="background-image: linear-gradient(#455492, #304186, #455492);">
             <?php if (!empty($academicYearHdr) || !empty($degreeCodeHdr) || !empty($degreeNameHdr)) : ?>
                 <?= Html::encode($academicYearHdr) ?>
                 <?= Html::encode($degreeCodeHdr) ?>
@@ -187,6 +187,10 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php else: ?>
                 Academic Filters
             <?php endif; ?>
+            <div class="d-flex align-items-center ms-2">
+                <span id="filter-loading-indicator" class="me-2 d-none" aria-hidden="true"></span>
+                <span id="filter-loading-text" class="d-none">Loading...</span>
+            </div>
         </div>
         <div class=" card-body row g-3">
             <?php echo $this->render('_search', [
@@ -577,6 +581,27 @@ $this->registerCss("\n.kv-panel .panel-heading,\n.kv-panel .panel-heading * {\n 
 
 // Ensure the card header above the _search and the grouped row header share the same font size and weight
 $this->registerCss("\n.semester-index .card-header {\n  font-size: 1rem;\n  font-weight: 700;\n}\n.kv-grid-table .kv-grouped-row > td {\n  font-size: 1rem;\n  font-weight: 700;\n}\n");
+
+// Loading spinner for the filter header (top of filter partial) — make it more conspicuous
+$this->registerCss("\n#filter-loading-indicator {\n  display: inline-block;\n  width: 22px;\n  height: 22px;\n  border: 3px solid rgba(255,255,255,0.45);\n  border-top-color: #fff;\n  border-radius: 50%;\n  animation: spin 0.8s linear infinite;\n}\n#filter-loading-text {\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.5px;\n  animation: pulse 1.2s ease-in-out infinite;\n}\n@keyframes spin { to { transform: rotate(360deg); } }\n@keyframes pulse { 0% { opacity: .5;} 50% { opacity: 1;} 100% { opacity: .5;} }\n.d-none { display: none !important; }\n");
+
+// Show spinner when search or panel forms submit
+$this->registerJs(<<<JS
+(function(){
+  function showFilterSpinner(){
+    var sp = document.getElementById('filter-loading-indicator');
+    var tx = document.getElementById('filter-loading-text');
+    if(sp){ sp.classList.remove('d-none'); }
+    if(tx){ tx.classList.remove('d-none'); }
+  }
+  document.addEventListener('submit', function(e){
+    if(e.target && (e.target.id === 'semester-search-form' || e.target.id === 'panel-filter-form')){
+      showFilterSpinner();
+    }
+  }, true);
+  window.addEventListener('beforeunload', function(){ showFilterSpinner(); });
+})();
+JS);
 
 
 
