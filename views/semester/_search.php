@@ -304,10 +304,7 @@ $this->registerCss(
             <?= Html::button('Reset', [
                 'class' => 'btn btn-outline-secondary px-4 mt-4',
                 'onclick' => 'window.location.href = "' . \yii\helpers\Url::to([
-                    'index',
-                    'SemesterSearch' => [
-                        'ACADEMIC_YEAR' => $currentAcademicYear,
-                    ],
+                    'index'
                 ]) . '";'
 
             ]) ?>

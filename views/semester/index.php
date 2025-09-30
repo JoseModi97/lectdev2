@@ -123,7 +123,7 @@ $filtertype = [
 $actionColumn = [
     'class' => 'kartik\grid\ActionColumn',
     'width' => '25%',
-    'template' => '{allocate} {manage} {remove}',
+    'template' => '{allocate}  {manage}  {remove}',
     'contentOptions' => [
         'style' => 'white-space: nowrap; width: 30%;',
         'class' => 'text-center align-middle'
@@ -131,7 +131,7 @@ $actionColumn = [
 
     'buttons' => [
         'allocate' => function ($url, $model, $key) {
-            return Html::a('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate</span>', '#', [
+            return Html::a('<i class="fas fa-user-plus text-success"></i> <span class="text-dark">Allocate / Request</span>', '#', [
                 'title' => 'Allocate / Request',
                 'class' => 'assign-lecturer text-decoration-none',
                 'data-id' => 'NULL',

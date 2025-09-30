@@ -23,9 +23,9 @@ $this->title = $title;
 <!-- contextual header (match Assign modal layout) -->
 <div class="card" style="padding:10px; margin-bottom:10px; border: 1px solid #008cba;border-radius: 5px;">
     <div class="card-body">
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DEGREE: </span> <span class="lecturer-allocation-degree-name"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DEGREE PROGRAMME: </span> <span class="lecturer-allocation-degree-name"></span></p></div></div>
         <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE CODE: </span> <span class="lecturer-allocation-course-code"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE NAME: </span> <span class="lecturer-allocation-course-name"></span></p></div></div>
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DESCRIPTION: </span> <span class="lecturer-allocation-description-full"></span></p></div></div>
+        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER: </span> <span class="lecturer-allocation-description-full"></span></p></div></div>
         <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> GROUP: </span> <span class="lecturer-allocation-group"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER TYPE: </span> <span class="lecturer-allocation-semester-type"></span></p></div></div>
     </div>
 </div>
@@ -144,7 +144,7 @@ $manageLecturersScript = <<< JS
     (function(){
         var marksheetId = $('#manage-lecturer-marksheet-id').val();
         if(marksheetId){
-            $('#modal .shimmer-overlay').removeClass('d-none');
+            $('#manage-lecturer-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h5>');
             $.ajax({
                 type: 'POST',
                 url: '$courseDetailsAction',
@@ -165,7 +165,7 @@ $manageLecturersScript = <<< JS
                     $('.lecturer-allocation-description-full').html(desc);
                 }
             }).always(function(){
-                $('#modal .shimmer-overlay').addClass('d-none');
+                $('#manage-lecturer-loader').html('');
             });
         }
     })();
@@ -189,8 +189,7 @@ $manageLecturersScript = <<< JS
                 'lecturer'         : lecturer,
             };
             if(confirm('Are you sure you want the selected lecturer as the course leader?')){
-                $('#modal .shimmer-overlay').removeClass('d-none');
-                $('#manage-lecturer-loader').html('');
+                $('#manage-lecturer-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h5>');
                 $.ajax({
                     type        :   'POST',
                     url         :   manageLecturerAction,
@@ -204,12 +203,12 @@ $manageLecturersScript = <<< JS
                             $.pjax.reload({container: '#semester-grid-pjax', timeout: 0});
                         }).modal('hide');
                     } else {
-                        $('#modal .shimmer-overlay').addClass('d-none');
+                        $('#manage-lecturer-loader').removeClass('alert-danger').html('');
                         $('#manage-lecturer-loader').addClass('alert-danger').html('<p>' + (resp.message || 'Failed to update') + '</p>');
                     }
                 })
                 .fail(function(){
-                    $('#modal .shimmer-overlay').addClass('d-none');
+                    $('#manage-lecturer-loader').removeClass('alert-danger').html('');
                     $('#manage-lecturer-loader').addClass('alert-danger').html('<p>Request failed.</p>');
                 });
             }else{
