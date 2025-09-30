@@ -52,6 +52,7 @@ Modal::begin([
 // PHP to JS variables
 $allocateLecturerAction = Url::to(['/allocation/allocate-request-lecturer']);
 $courseDetailsAction = Url::to(['/allocation/course-details']);
+$cancelRequestAction = Url::to(['/allocation/cancel-request']);
 
 $deptCoursesScript = <<< JS
     var requestId;
@@ -332,6 +333,31 @@ $deptCoursesScript = <<< JS
     $(document).on('click', '.remove-lecturer', function(e){
         loadModal.call(this, e);
     });
+
+    // Cancel a lecturer request from requested-courses grid
+    $('#requested-courses-grid-pjax').on('click', '.cancel-request', function(e){
+        e.preventDefault();
+        var id = $(this).data('id');
+        if(!id){ return; }
+        if(!confirm('Are you sure you want to cancel this request?')){ return; }
+        var _csrf = $('input[type=hidden][name=_csrf]').val();
+        $.ajax({
+            type: 'POST',
+            url: '$cancelRequestAction',
+            data: {requestId: id, _csrf: _csrf},
+            dataType: 'json'
+        }).done(function(resp){
+            if(resp && resp.status === 200){
+                $.pjax.reload({container: '#requested-courses-grid-pjax', timeout: 0});
+            } else {
+                alert(resp && resp.message ? resp.message : 'Failed to cancel request');
+            }
+        }).fail(function(){
+            alert('Failed to cancel request');
+        });
+    });
+
+    // Delete for NOT APPROVED removed; only pending can be cancelled/deleted
 
     // Reset shimmer on close
     $('#modal').on('hidden.bs.modal', function () {

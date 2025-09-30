@@ -231,7 +231,7 @@ if ($gridId === 'service-courses-grid') {
 } else {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
-        'template' => '{view-request-render}',
+        'template' => '{view-request-render} {cancel-request}',
         'vAlign' => 'middle',
         'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
@@ -241,6 +241,19 @@ if ($gridId === 'service-courses-grid') {
                     'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
                     'class' => 'btn btn-xs btn-spacer view-course-request'
                 ]);
+            },
+            'cancel-request' => function ($url, $model) use ($deptCode) {
+                $status = AllocationStatus::findOne($model->STATUS_ID);
+                $isPending = $status && $status->STATUS_NAME === 'PENDING';
+                $isOwner = (isset($model->REQUESTING_DEPT) && $model->REQUESTING_DEPT === $deptCode);
+                if ($isPending && $isOwner) {
+                    return Html::button('<i class="fas fa-times text-danger"></i> Cancel', [
+                        'title' => 'Cancel this lecturer request',
+                        'class' => 'btn btn-xs btn-spacer cancel-request',
+                        'data-id' => $model->REQUEST_ID,
+                    ]);
+                }
+                return '';
             }
         ]
     ];

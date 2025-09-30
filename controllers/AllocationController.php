@@ -702,6 +702,50 @@ class AllocationController extends BaseController
     }
 
     /**
+     * Cancel a lecturer request by deleting the PENDING record.
+     * Only the requesting department may delete its own pending request.
+     * Returns JSON on AJAX requests.
+     */
+    public function actionCancelRequest()
+    {
+        try {
+            $post = \Yii::$app->request->post();
+            $requestId = $post['requestId'] ?? null;
+            if (!$requestId) {
+                return $this->asJson(['status' => 500, 'message' => 'Missing request id.']);
+            }
+
+            $allocationReq = AllocationRequest::findOne($requestId);
+            if (!$allocationReq) {
+                return $this->asJson(['status' => 500, 'message' => 'Request not found.']);
+            }
+
+            // Only requesting department can cancel
+            if ($allocationReq->REQUESTING_DEPT !== $this->deptCode) {
+                return $this->asJson(['status' => 500, 'message' => 'Not allowed to cancel this request.']);
+            }
+
+            // Only PENDING requests can be deleted
+            $pending = AllocationStatus::find()->where(['STATUS_NAME' => 'PENDING'])->one();
+            if ($pending && (int)$allocationReq->STATUS_ID !== (int)$pending->STATUS_ID) {
+                return $this->asJson(['status' => 500, 'message' => 'Only pending requests can be deleted.']);
+            }
+
+            if ($allocationReq->delete() === false) {
+                return $this->asJson(['status' => 500, 'message' => 'Failed to cancel (delete) request.']);
+            }
+
+            return $this->asJson(['status' => 200]);
+        } catch (\Throwable $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            return $this->asJson(['status' => 500, 'message' => $message]);
+        }
+    }
+
+    /**
      * Update a course leader
      * @return Response
      */
@@ -985,7 +1029,7 @@ class AllocationController extends BaseController
         $emails[] = $email;
         $layout = '@app/mail/layouts/html';
         $view = '@app/mail/views/' . $viewName;
-        SmisHelper::sendEmails($emails, $layout, $view);
+        // SmisHelper::sendEmails($emails, $layout, $view);
     }
 
     public function getUserProgrammes($payrollNo, $dataProvider = null)
