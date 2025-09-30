@@ -192,6 +192,25 @@ $this->registerCss(
     .help-block{
     color: red;
     }
+    /* Loading state for Select2 when dependent data is being fetched */
+    .select2-container.select2-loading{
+        position: relative;
+        opacity: 0.6;
+    }
+    .select2-container.select2-loading:after{
+        content: '';
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        margin-top: -8px;
+        border: 2px solid rgba(0,0,0,0.2);
+        border-top-color: #455492;
+        border-radius: 50%;
+        animation: spin-rotate 0.8s linear infinite;
+    }
+    @keyframes spin-rotate { to { transform: rotate(360deg); } }
     "
 );
 ?>
@@ -226,6 +245,16 @@ $this->registerCss(
                         const queryString = window.location.search;
                         const urlParams = new URLSearchParams(queryString);
                         const academicYear = $('#academicYearSelect').val();
+                        // Put dependent selects into loading state
+                        const semSel = $('#semesterCodeSelect');
+                        const lvlSel = $('#levelSelect');
+                        semSel.prop('disabled', true)
+                             .html('<option>Loading...</option>')
+                             .trigger('change.select2');
+                        lvlSel.html('<option>Loading...</option>')
+                              .trigger('change.select2');
+                        semSel.next('.select2-container').addClass('select2-loading');
+                        lvlSel.next('.select2-container').addClass('select2-loading');
                         $.post("/semester/semcode?DEGREE_CODE=" + $(this).val()+'&ACADEMIC_YEAR='+academicYear, function(data) {
                             // console.log(data);
                             // $("select#semesterCodeSelect").html(data).val(null).trigger("change");
@@ -235,6 +264,8 @@ $this->registerCss(
                                 semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
                             $("#semesterCodeSelect").html(semOptions).val(null).trigger("change.select2");
+                            // Re-enable semester select for user to choose
+                            semSel.prop('disabled', false);
 
 
 
@@ -243,7 +274,14 @@ $this->registerCss(
                                 lvlOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
                             $("#levelSelect").html(lvlOptions).val(null).trigger("change.select2");
+                            // Remove loading states
+                            semSel.next('.select2-container').removeClass('select2-loading');
+                            lvlSel.next('.select2-container').removeClass('select2-loading');
                             
+                        }).fail(function(){
+                            // On error, remove loading state and keep selects disabled until user retries
+                            semSel.next('.select2-container').removeClass('select2-loading');
+                            lvlSel.next('.select2-container').removeClass('select2-loading');
                         });
                     JS,
                 ],
