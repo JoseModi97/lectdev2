@@ -287,6 +287,7 @@ class SemesterController extends BaseController
                 'MUTHONI.SEMESTERS.SEMESTER_CODE',
                 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
                 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
+                'MUTHONI.SEMESTERS.SEMESTER_TYPE',
             ])
             ->distinct()
             ->from('MUTHONI.SEMESTERS')
@@ -329,7 +330,7 @@ class SemesterController extends BaseController
         foreach ($semCode as $sem) {
             $semesterOptions[] = [
                 'id'   => $sem['SEMESTER_CODE'],
-                'text' => $sem['SEMESTER_CODE'] . ' - ' . $sem['SEMESTER_DESC'],
+                'text' => $sem['SEMESTER_CODE'] . ' - ' . $sem['SEMESTER_DESC'] . ' - ' . $sem['SEMESTER_TYPE'],
             ];
         }
 

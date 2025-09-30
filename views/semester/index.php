@@ -163,8 +163,30 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="semester-index">
     <div class="card shadow-sm rounded-0 w-100">
+        <?php
+        $semesterSearchHdr = Yii::$app->request->get('SemesterSearch', []);
+        $academicYearHdr = $semesterSearchHdr['ACADEMIC_YEAR'] ?? '';
+        $degreeCodeHdr   = $semesterSearchHdr['DEGREE_CODE'] ?? '';
+        $degreeNameHdr   = '';
+        if (!empty($degreeCodeHdr)) {
+            $degHdr = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degreeCodeHdr]);
+            $degreeNameHdr = $degHdr->DEGREE_NAME ?? '';
+        }
+        $levelHdr = null;
+        if (!empty($semesterSearchHdr)) {
+            $levelHdr = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $semesterSearchHdr['LEVEL_OF_STUDY'] ?? '']);
+        }
+        ?>
         <div class="card-header text-white fw-bold" style="background-image: linear-gradient(#455492, #304186, #455492);">
-            Academic Filters
+            <?php if (!empty($academicYearHdr) || !empty($degreeCodeHdr) || !empty($degreeNameHdr)) : ?>
+                <?= Html::encode($academicYearHdr) ?>
+                <?= Html::encode($degreeCodeHdr) ?>
+                <?= Html::encode($degreeNameHdr) ?>
+                <div class="small fw-normal"><?= Html::encode($levelHdr->NAME ?? '') ?>
+                    SEMESTER <?= Html::encode($semesterSearchHdr['SEMESTER_CODE'] ?? '') ?></div>
+            <?php else: ?>
+                Academic Filters
+            <?php endif; ?>
         </div>
         <div class=" card-body row g-3">
             <?php echo $this->render('_search', [
@@ -221,6 +243,41 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             }
 
+            // Build dynamic Group options based on selected Academic Year / Degree (and Semester Code if provided)
+            $groupsQuery = (new Query())
+                ->select([
+                    'MUTHONI.GROUPS.GROUP_CODE',
+                    'MUTHONI.GROUPS.GROUP_NAME',
+                ])
+                ->distinct()
+                ->from('MUTHONI.SEMESTERS')
+                ->innerJoin(
+                    'MUTHONI.GROUPS',
+                    'MUTHONI.GROUPS.GROUP_CODE = MUTHONI.SEMESTERS.GROUP_CODE'
+                )
+                ->andFilterWhere([
+                    'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $academicYear ?: null,
+                    'MUTHONI.SEMESTERS.DEGREE_CODE' => $degreeCode ?: null,
+                    'MUTHONI.SEMESTERS.SEMESTER_CODE' => $semesterSearch['SEMESTER_CODE'] ?? null,
+                ])
+                ->orderBy([
+                    'MUTHONI.GROUPS.GROUP_NAME' => SORT_ASC,
+                ])
+                ->all();
+
+            $groupOptions = [];
+            if (!empty($academicYear) && !empty($degreeCode)) {
+                $groupOptions = \yii\helpers\ArrayHelper::map($groupsQuery, 'GROUP_CODE', 'GROUP_NAME');
+            }
+            // Ensure currently selected Group remains selectable/searchable
+            $selectedGroup = $semesterSearch['GROUP_CODE'] ?? '';
+            if (!empty($selectedGroup) && !array_key_exists($selectedGroup, $groupOptions)) {
+                $grp = \app\models\Group::findOne(['GROUP_CODE' => $selectedGroup]);
+                if ($grp) {
+                    $groupOptions[$selectedGroup] = $grp->GROUP_NAME;
+                }
+            }
+
             $semesterTypeOptions = [
                 'SUPPLEMENTARY' => 'SUPPLEMENTARY',
                 'TEACHING' => 'TEACHING',
@@ -245,12 +302,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo '<div class="row g-3 align-items-end">';
             echo '<div class="col-md-6">';
-            echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                'data' => $yearLists,
+                    echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                        'data' => $yearLists,
+                        'options' => [
+                            'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
+                            'id' => 'levelSelect',
+                            'required' => !$panelDisabled,
+                            'disabled' => $panelDisabled,
+                        ],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
+                        'pluginEvents' => [
+                            'select2:select' => 'function (e) { this.form.submit(); }',
+                            'select2:clear'  => 'function (e) { this.form.submit(); }',
+                        ],
+                    ]);
+            echo '</div>';
+            echo '<div class="col-md-6">';
+            echo $form->field($searchModel, 'GROUP_CODE')->widget(Select2::class, [
+                'data' => $groupOptions,
                 'options' => [
-                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
-                    'id' => 'levelSelect',
-                    'required' => !$panelDisabled,
+                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Group...',
+                    'id' => 'groupSelect',
+                    'required' => false,
                     'disabled' => $panelDisabled,
                 ],
                 'pluginOptions' => [
@@ -258,25 +333,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'pluginEvents' => [
                     'select2:select' => 'function (e) { this.form.submit(); }',
+                    'select2:clear'  => 'function (e) { this.form.submit(); }',
                 ],
             ]);
             echo '</div>';
             echo '<div class="col-md-6">';
-            echo $form->field($searchModel, 'SEMESTER_TYPE')->widget(Select2::class, [
-                'data' => $semesterTypeOptions,
-                'options' => [
-                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Semester Type...',
-                    'id' => 'semesterTypeSelect',
-                    'required' => !$panelDisabled,
-                    'disabled' => $panelDisabled,
-                ],
-                'pluginOptions' => [
-                    'allowClear' => true,
-                ],
-                'pluginEvents' => [
-                    'select2:select' => 'function (e) { this.form.submit(); }',
-                ],
-            ]);
+            // echo $form->field($searchModel, 'SEMESTER_TYPE')->widget(Select2::class, [
+            //     'data' => $semesterTypeOptions,
+            //     'options' => [
+            //         'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Semester Type...',
+            //         'id' => 'semesterTypeSelect',
+            //         'required' => !$panelDisabled,
+            //         'disabled' => $panelDisabled,
+            //     ],
+            //     'pluginOptions' => [
+            //         'allowClear' => true,
+            //     ],
+            //     'pluginEvents' => [
+            //         'select2:select' => 'function (e) { this.form.submit(); }',
+            //     ],
+            // ]);
             echo '</div>';
             echo '</div>';
 
@@ -294,27 +370,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 $levelModel = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $semesterSearch['LEVEL_OF_STUDY'] ?? '']);
             }
             ob_start();
-            echo '<div class="d-flex flex-column">';
             echo '<h5>'
-                . Html::encode($academicYear) . ' '
+                . Html::encode($academicYear) . ' | '
                 . Html::encode($degreeCode) . ' '
                 . Html::encode($degreeName)
-                . '</h5>';
-            echo '<p>'
-                . Html::encode($levelModel->NAME ?? '') . ' SEMESTER '
+                . Html::encode($levelModel->NAME ?? '') . ' | SEMESTER '
                 . Html::encode($semesterSearch['SEMESTER_CODE'] ?? '')
-                . '</p>';
-            echo '</div>';
+                . '</h5>';
             $heading = ob_get_clean();
 
             return [
-                'heading' => $heading,
+                'heading' => false,
                 'type' => 'default',
                 'before' => $before,
-                'headingOptions' => [
-                    'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color: white; padding-left: 12px; padding-right: 12px;',
-                    'class' => 'text-white',
-                ],
             ];
         })(),
 
@@ -323,6 +391,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'hover' => true,
         'striped' => false,
         'bordered' => true,
+        // Keep the number-of-items summary visible even without a panel heading
+        'summary' => '<span class="badge bg-light text-dark border">Total {totalCount} item(s)</span>',
+        'summaryOptions' => [
+            'class' => 'd-block text-end mb-2',
+        ],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -342,8 +415,23 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Level of Study',
                 'value' => function ($model) {
-                    $semDesc = $model->semester->semesterDescription ?? '';
-                    return $model->semester->ACADEMIC_YEAR . ' - ' . $model->semester->levelOfStudy->NAME . '  |  Semester ' . $model->semester->SEMESTER_CODE . '  |  ' . $semDesc->SEMESTER_DESC ?? '';
+                    $semDesc = $model->semester->semesterDescription ?? null;
+                    $semType = $model->semester->SEMESTER_TYPE ?? '';
+                    $groupName = $model->semester->group->GROUP_NAME ?? '';
+
+                    $parts = [
+                        $model->semester->ACADEMIC_YEAR,
+                        $model->semester->levelOfStudy->NAME,
+                        'Semester ' . ($model->semester->SEMESTER_CODE ?? ''),
+                        ($semDesc->SEMESTER_DESC ?? ''),
+                        ($semType !== '' ? $semType : ''),
+                        ($groupName !== '' ? $groupName : ''), // group code last
+                    ];
+
+                    $parts = array_filter($parts, fn($v) => $v !== '' && $v !== null);
+
+                    // add pipes between items
+                    return implode(' | ', $parts);
                 },
                 'group' => true,
                 'groupedRow' => true,
@@ -352,25 +440,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'py-3'
                 ],
             ],
-            [
-                'label' => 'Semester Type',
-                'attribute' => 'SEMESTER_TYPE',
-                'value' => 'semester.SEMESTER_TYPE',
-                'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
-                'filter' => [
-                    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
-                    'TEACHING' => 'TEACHING',
-                ],
-                'group' => true,
-                'groupedRow' => true,
-                'subGroupOf' => 1,
-                'filterWidgetOptions' => [
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                        'placeholder' => 'Select Semester Type...',
-                    ],
-                ],
-            ],
+
+            // [
+            //     'label' => 'Semester Type',
+            //     'attribute' => 'SEMESTER_TYPE',
+            //     'value' => 'semester.SEMESTER_TYPE',
+            //     'filterType' => \kartik\grid\GridView::FILTER_SELECT2,
+            //     'filter' => [
+            //         'SUPPLEMENTARY' => 'SUPPLEMENTARY',
+            //         'TEACHING' => 'TEACHING',
+            //     ],
+            //     'filterWidgetOptions' => [
+            //         'pluginOptions' => [
+            //             'allowClear' => true,
+            //             'placeholder' => 'Select Semester Type...',
+            //         ],
+            //     ],
+            // ],
 
             [
                 'attribute' => 'courseCode',
@@ -404,15 +490,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //     'filterInputOptions' => ['placeholder' => 'Any course name'],
             // ],
 
-            [
-                'label' => 'Group Name',
-                'value' => function ($model) {
-                    $semDesc = $model->semester->semesterDescription;
-                    return $model->semester->group->GROUP_NAME;
-                },
-                'group' => true,
-                'subGroupOf' => 1,
-            ],
+            // [
+            //     'label' => 'Group Name',
+            //     'value' => function ($model) {
+            //         return $model->semester->group->GROUP_NAME ?? '';
+            //     },
+            // ],
             [
                 'attribute' => 'PAYROLL_NO',
                 'header' => 'Assigned Lecturer(s)',
@@ -491,6 +574,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
 // Ensure panel heading and its right-aligned summary text are white
 $this->registerCss("\n.kv-panel .panel-heading,\n.kv-panel .panel-heading * {\n  color: #fff !important;\n}\n.kv-panel .panel-heading .summary {\n  color: #fff !important;\n}\n");
+
+// Ensure the card header above the _search and the grouped row header share the same font size and weight
+$this->registerCss("\n.semester-index .card-header {\n  font-size: 1rem;\n  font-weight: 700;\n}\n.kv-grid-table .kv-grouped-row > td {\n  font-size: 1rem;\n  font-weight: 700;\n}\n");
 
 
 

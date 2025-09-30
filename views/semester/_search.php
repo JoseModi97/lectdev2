@@ -23,7 +23,7 @@ $data = (new \yii\db\Query())
     ->select([
         'MUTHONI.SEMESTERS.SEMESTER_CODE',
         'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
-        new \yii\db\Expression("MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC AS SEMESTER_LABEL")
+        new \yii\db\Expression("MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC || ' - ' || MUTHONI.SEMESTERS.SEMESTER_TYPE AS SEMESTER_LABEL")
     ])
     ->distinct()
     ->from('MUTHONI.SEMESTERS')
@@ -204,7 +204,7 @@ $this->registerCss(
     ]); ?>
 
     <div class="card-body row g-3">
-        <div class="col-md-6">
+        <div class="col-md-2">
             <?= $form->field($model, 'ACADEMIC_YEAR')->widget(Select2::class, [
                 'data' => $academicYears,
                 'options' => [
@@ -251,7 +251,7 @@ $this->registerCss(
             ]) ?>
         </div>
         <!-- Level of Study moved to GridView panel -->
-        <div class="col-md-6">
+        <div class="col-md-3">
             <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
                 'data' => $semesterLists,
                 'options' => [
@@ -260,6 +260,18 @@ $this->registerCss(
                     'required' => true,
                 ],
                 'pluginOptions' => ['allowClear' => true],
+            ]) ?>
+        </div>
+        <div class="col-md-1">
+            <?= Html::button('Reset', [
+                'class' => 'btn btn-outline-secondary px-4 mt-4',
+                'onclick' => 'window.location.href = "' . \yii\helpers\Url::to([
+                    'index',
+                    'SemesterSearch' => [
+                        'ACADEMIC_YEAR' => $currentAcademicYear,
+                    ],
+                ]) . '";'
+
             ]) ?>
         </div>
         <!-- Semester Type moved to GridView panel -->
@@ -282,19 +294,9 @@ $this->registerCss(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-    </div>
-    <div class="card-footer d-flex justify-content-start gap-2">
-        <?= Html::button('Reset', [
-            'class' => 'btn btn-outline-secondary px-4',
-            'onclick' => 'window.location.href = "' . \yii\helpers\Url::to([
-                'index',
-                'SemesterSearch' => [
-                    'ACADEMIC_YEAR' => $currentAcademicYear,
-                ],
-            ]) . '";'
 
-        ]) ?>
     </div>
+
 
 
     <?php ActiveForm::end(); ?>
