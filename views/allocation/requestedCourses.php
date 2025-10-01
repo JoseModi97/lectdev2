@@ -249,20 +249,29 @@ $allocatedLecturer = [
             return rtrim($lecturers, ', ');;
         }
 
-        // For pending requests with no allocated lecturers, show the request time relative to now (EAT)
+        // For pending requests with no allocated lecturers, show a compact relative request time (EAT)
         if ($model->status->STATUS_NAME === 'PENDING') { 
             $date = $model->REQUEST_DATE ?? null; 
             if ($date) { 
-                try { 
-                    $formatter = Yii::$app->formatter; 
-                    $prevTz = $formatter->timeZone; 
-                    $formatter->timeZone = 'Africa/Nairobi'; 
-                    $relative = $formatter->asRelativeTime($date); 
-                    $formatter->timeZone = $prevTz; 
-                } catch (\Throwable $e) { 
-                    $relative = (string)$date; 
-                } 
-                return 'Requested: ' . $relative;  
+                try {
+                    $tz = new \DateTimeZone('Africa/Nairobi');
+                    $now = new \DateTime('now', $tz);
+                    $dt  = new \DateTime(is_string($date) ? $date : (string)$date, $tz);
+                    $diff = $now->diff($dt);
+                    // Build compact label using at most two largest non‑zero units (e.g., 3y 1m, 2d 4h, 45m, 30s)
+                    $units = [];
+                    if ($diff->y) { $units[] = $diff->y . 'y'; }
+                    if ($diff->m) { $units[] = $diff->m . 'mo'; }
+                    if ($diff->d) { $units[] = $diff->d . 'd'; }
+                    if ($diff->h) { $units[] = $diff->h . 'h'; }
+                    if ($diff->i) { $units[] = $diff->i . 'm'; }
+                    if ($diff->s || empty($units)) { $units[] = $diff->s . 's'; }
+                    $label = implode(' ', array_slice($units, 0, 2));
+                    $relative = $diff->invert ? ('in ' . $label) : ($label . ' ago');
+                } catch (\Throwable $e) {
+                    $relative = (string)$date;
+                }
+                return 'Requested: ' . $relative;
             } 
         } 
 
