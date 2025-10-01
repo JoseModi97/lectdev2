@@ -135,6 +135,11 @@ class AllocationRequestsSearchNew extends AllocationRequest
             $query->andWhere(['like', 'CS.COURSE_NAME', $courseFilter->courseName]);
         }
 
+        // Filter by semester code if provided
+        if (!empty($courseFilter->semester)) {
+            $query->andWhere(['SM.SEMESTER_CODE' => $courseFilter->semester]);
+        }
+
         // Apply in-grid filters (optional) if provided
         if (!empty($this->courseCode)) {
             $query->andWhere(['like', 'CS.COURSE_CODE', $this->courseCode]);

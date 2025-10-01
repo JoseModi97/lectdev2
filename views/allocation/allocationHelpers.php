@@ -62,6 +62,7 @@ $deptCoursesScript = <<< JS
     var internalLecturer = true;
     var externalLecturer = false;
 
+    
     // Get course details 
     const getCourseDetails = function(){
         $('.content-loader').html('').removeClass('alert-danger');
@@ -230,37 +231,36 @@ $deptCoursesScript = <<< JS
     });
 
     // Revert an attended request back to pending (service-courses grid)
-    $('#service-courses-grid-pjax').on('click', '.revert-request', function(e){
-        e.preventDefault();
-        var id = $(this).data('id');
-        var marksheetId = $(this).data('marksheetid');
-        if(!id || !marksheetId){ return; }
-        if(!confirm('Revert this request to PENDING and remove allocated lecturers and remarks?')){ return; }
-        var _csrf = $('input[type=hidden][name=_csrf]').val();
-        // show generic modal shimmer during op
-        $('#modal').modal('show');
-        $('#modal .shimmer-overlay').removeClass('d-none');
-        $('#modalContent').html('');
-        let revertAction = '$revertRequestAction';
-        $.ajax({
-            type: 'POST',
-            url: revertAction,
-            data: {requestId: id, marksheetId: marksheetId, _csrf: _csrf},
-            dataType: 'json'
-        }).done(function(resp){
-            $('#modal .shimmer-overlay').addClass('d-none');
-            $('#modal').modal('hide');
-            if(resp && resp.status === 200){
-                $.pjax.reload({container: '#service-courses-grid-pjax', timeout: 0});
-            } else {
-                alert(resp && resp.message ? resp.message : 'Failed to revert request');
-            }
-        }).fail(function(){
-            $('#modal .shimmer-overlay').addClass('d-none');
-            $('#modal').modal('hide');
-            alert('Failed to revert request');
-        });
-    });
+    $('#service-courses-grid-pjax').on('click', '.revert-request', function(e){ 
+        e.preventDefault(); 
+        var btnEl = $(this); 
+        var id = btnEl.data('id'); 
+        var marksheetId = btnEl.data('marksheetid'); 
+        if(!id || !marksheetId){ return; } 
+        if(!confirm('Revert this request to PENDING and remove allocated lecturers and remarks?')){ return; } 
+        var _csrf = $('input[type=hidden][name=_csrf]').val(); 
+        // lightweight inline feedback (no modal) 
+        var prevHtml = btnEl.html(); 
+        btnEl.prop('disabled', true).addClass('disabled'); 
+        btnEl.html('<i class="fas fa-spinner fa-pulse"></i> Reverting'); 
+        let revertAction = '$revertRequestAction'; 
+        $.ajax({ 
+            type: 'POST', 
+            url: revertAction, 
+            data: {requestId: id, marksheetId: marksheetId, _csrf: _csrf}, 
+            dataType: 'json' 
+        }).done(function(resp){ 
+            if(resp && resp.status === 200){ 
+                $.pjax.reload({container: '#service-courses-grid-pjax', timeout: 0}); 
+            } else { 
+                alert(resp && resp.message ? resp.message : 'Failed to revert request'); 
+                btnEl.prop('disabled', false).removeClass('disabled').html(prevHtml); 
+            } 
+        }).fail(function(){ 
+            alert('Failed to revert request'); 
+            btnEl.prop('disabled', false).removeClass('disabled').html(prevHtml); 
+        }); 
+    }); 
 
     // Track the lecturer request status
     $('#external-lecturer-status').on('change', function(){

@@ -224,25 +224,7 @@ $allocatedLecturer = [
     }
 ];
 
-// Extra revert-to-pending column (visible for service courses grid)
-$revertColumn = [
-    'label' => 'REVERT',
-    'format' => 'raw',
-    'vAlign' => 'middle',
-    'visible' => ($gridId === 'service-courses-grid'),
-    'value' => function ($model) {
-        $status = AllocationStatus::findOne($model->STATUS_ID);
-        if ($status && $status->STATUS_NAME !== 'PENDING') {
-            return Html::button('<i class="fas fa-undo"></i> Revert', [
-                'title' => 'Revert to pending (remove lecturers and remarks)',
-                'class' => 'btn btn-xs btn-spacer text-warning revert-request',
-                'data-id' => $model->REQUEST_ID,
-                'data-marksheetId' => $model->MARKSHEET_ID,
-            ]);
-        }
-        return '';
-    }
-];
+// (revert action moved into ActionColumn for better placement)
 
 if ($gridId === 'service-courses-grid') {
     $actionColumn = [
@@ -268,11 +250,18 @@ if ($gridId === 'service-courses-grid') {
                         'data-type' => 'service'
                     ]);
                 } else {
-                    return Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
+                    $detailsBtn = Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
                         'title' => 'View lecturer request details',
                         'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
                         'class' => 'btn btn-xs btn-spacer view-course-request'
                     ]);
+                    $revertBtn = Html::button('<i class="fas fa-undo"></i> Revert', [
+                        'title' => 'Revert to pending (remove lecturers and remarks)',
+                        'class' => 'btn btn-xs btn-spacer text-warning revert-request',
+                        'data-id' => $model->REQUEST_ID,
+                        'data-marksheetId' => $model->MARKSHEET_ID,
+                    ]);
+                    return $detailsBtn . ' ' . $revertBtn;
                 }
             },
         ]
@@ -309,9 +298,9 @@ if ($gridId === 'service-courses-grid') {
 }
 ?>
 
-<?php
-echo $this->render('moreFilters', ['filter' => $filter]);
-?>
+<?php 
+echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]); 
+?> 
 
 <div class="requested-courses">
     <?php
@@ -347,9 +336,8 @@ echo $this->render('moreFilters', ['filter' => $filter]);
 
                 $departmentColumn,
                 $requestStatusColumn,
-                $allocatedLecturer, 
-                $actionColumn, 
-                $revertColumn 
+                $allocatedLecturer,  
+                $actionColumn  
             ] 
         ]);
     } catch (Exception $ex) {
