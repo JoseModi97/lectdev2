@@ -530,7 +530,7 @@ class AllocationController extends BaseController
                 }
             }
 
-            $currentDate = new Expression('CURRENT_DATE');
+            $currentDate = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
 
             // Allocate lecturers to a course.
             if (($courseType === 'departmental' &&  $internalLecturer === 'true') || $statusName === 'APPROVED') {
@@ -844,7 +844,7 @@ class AllocationController extends BaseController
 
             $previousMkModel = clone $mkModel;
             $mkModel->PAYROLL_NO = $lecturer;
-            $mkModel->LAST_UPDATE = new Expression('CURRENT_DATE');
+            $mkModel->LAST_UPDATE = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
             if ($mkModel->save()) {
                 $this->sendAllocationAlert($mkModel, $lecturer, 'updateCourseLeader');
             } else {
@@ -911,7 +911,7 @@ class AllocationController extends BaseController
                         } else {
                             $mkModel->PAYROLL_NO = $otherLecturer->PAYROLL_NO;
                         }
-                        $mkModel->LAST_UPDATE = new Expression('CURRENT_DATE');
+                        $mkModel->LAST_UPDATE = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
                         if ($mkModel->save()) {
                             if (!is_null($otherLecturer)) {
                                 $this->sendAllocationAlert($mkModel, $otherLecturer->PAYROLL_NO, 'newCourseLeader');

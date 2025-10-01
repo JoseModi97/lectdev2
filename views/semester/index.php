@@ -7,6 +7,7 @@ use app\models\Group;
 use app\models\LevelOfStudy;
 use app\models\MarksheetDef;
 use app\models\search\AllocationRequestsSearchNew;
+use app\models\AllocationRequest;
 use app\models\search\MarksheetDefAllocationSearchNew;
 use app\models\Semester;
 
@@ -561,6 +562,87 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterInputOptions' => ['placeholder' => 'Any lecturer'],
             ],
+
+            // Request status for unassigned courses (service course requests made elsewhere)
+            [
+                'label' => 'Request',
+                'format' => 'raw',
+                'width' => '12%',
+                'value' => function ($d) {
+                    if (CourseAssignment::find()->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])->exists()) {
+                        return '';
+                    }
+
+                    $req = AllocationRequest::find()->alias('AR')
+                        ->select([
+                            'AR.REQUEST_ID',
+                            new \yii\db\Expression("TO_CHAR(AR.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE")
+                        ])
+                        ->where(['AR.MARKSHEET_ID' => $d->MRKSHEET_ID])
+                        ->orderBy(['AR.REQUEST_ID' => SORT_DESC])
+                        ->one();
+
+                    if (!$req) {
+                        return '';
+                    }
+
+                    try {
+                        $rawDate = $req->REQUEST_DATE;
+
+                        // Normalize: ensure fractional part .000000
+                        if (strpos($rawDate, '.') === false) {
+                            $rawDate .= '.000000';
+                        } else {
+                            // if only .000 or .123 → pad to microseconds
+                            $rawDate = preg_replace_callback('/\.(\d{1,6})$/', function ($m) {
+                                return '.' . str_pad($m[1], 6, '0');
+                            }, $rawDate);
+                        }
+
+                        // Parse with microsecond format
+                        $dt = \DateTime::createFromFormat('Y-m-d H:i:s.u', $rawDate);
+                        $now = new \DateTime('now');
+
+                        if (!$dt) {
+                            return '<span class="badge bg-info text-dark">Requested</span>';
+                        }
+
+                        $diff = $now->diff($dt);
+
+                        $units = [];
+                        if ($diff->y) $units[] = $diff->y . 'y';
+                        if ($diff->m) $units[] = $diff->m . 'mo';
+                        if ($diff->d) $units[] = $diff->d . 'd';
+                        if ($diff->h) $units[] = $diff->h . 'h';
+                        if ($diff->i) $units[] = $diff->i . 'm';
+                        if ($diff->s || empty($units)) $units[] = $diff->s . 's';
+
+                        $label = implode(' ', array_slice($units, 0, 2));
+
+                        // Always past tense
+                        $relative = $label . ' ago';
+
+                        // Tooltip with exact date
+                        $formatter = Yii::$app->formatter;
+                        $prevTz = $formatter->timeZone;
+                        $formatter->timeZone = 'Africa/Nairobi';
+                        $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
+                        $formatter->timeZone = $prevTz;
+
+                        $title = 'Requested: ' . $exact;
+
+                        return '<span class="badge bg-info text-dark" data-bs-toggle="tooltip" title="' . Html::encode($title) . '">
+                                    <i class="far fa-clock"></i> ' . Html::encode($relative) . '
+                                </span>';
+                    } catch (\Throwable $e) {
+                        return '<span class="badge bg-info text-dark">Requested</span>';
+                    }
+                },
+            ],
+
+
+
+
 
             $actionColumn,
         ],

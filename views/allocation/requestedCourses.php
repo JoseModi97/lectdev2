@@ -267,7 +267,8 @@ $allocatedLecturer = [
                     if ($diff->i) { $units[] = $diff->i . 'm'; }
                     if ($diff->s || empty($units)) { $units[] = $diff->s . 's'; }
                     $label = implode(' ', array_slice($units, 0, 2));
-                    $relative = $diff->invert ? ('in ' . $label) : ($label . ' ago');
+                    // invert=1 means past (dt < now) => "ago"; invert=0 means future => "in"
+                    $relative = $diff->invert ? ($label . ' ago') : ('in ' . $label);
                 } catch (\Throwable $e) {
                     $relative = (string)$date;
                 }
