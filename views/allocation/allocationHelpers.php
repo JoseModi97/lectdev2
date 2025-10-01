@@ -53,6 +53,7 @@ Modal::begin([
 $allocateLecturerAction = Url::to(['/allocation/allocate-request-lecturer']);
 $courseDetailsAction = Url::to(['/allocation/course-details']);
 $cancelRequestAction = Url::to(['/allocation/cancel-request']);
+$revertRequestAction = Url::to(['/allocation/revert-request']);
 
 $deptCoursesScript = <<< JS
     var requestId;
@@ -226,6 +227,39 @@ $deptCoursesScript = <<< JS
  
     $('#service-courses-grid-pjax').on('click', '.assign-external-lecturer', function(e){
         assignExternalLecturer.call(this, e);
+    });
+
+    // Revert an attended request back to pending (service-courses grid)
+    $('#service-courses-grid-pjax').on('click', '.revert-request', function(e){
+        e.preventDefault();
+        var id = $(this).data('id');
+        var marksheetId = $(this).data('marksheetid');
+        if(!id || !marksheetId){ return; }
+        if(!confirm('Revert this request to PENDING and remove allocated lecturers and remarks?')){ return; }
+        var _csrf = $('input[type=hidden][name=_csrf]').val();
+        // show generic modal shimmer during op
+        $('#modal').modal('show');
+        $('#modal .shimmer-overlay').removeClass('d-none');
+        $('#modalContent').html('');
+        let revertAction = '$revertRequestAction';
+        $.ajax({
+            type: 'POST',
+            url: revertAction,
+            data: {requestId: id, marksheetId: marksheetId, _csrf: _csrf},
+            dataType: 'json'
+        }).done(function(resp){
+            $('#modal .shimmer-overlay').addClass('d-none');
+            $('#modal').modal('hide');
+            if(resp && resp.status === 200){
+                $.pjax.reload({container: '#service-courses-grid-pjax', timeout: 0});
+            } else {
+                alert(resp && resp.message ? resp.message : 'Failed to revert request');
+            }
+        }).fail(function(){
+            $('#modal .shimmer-overlay').addClass('d-none');
+            $('#modal').modal('hide');
+            alert('Failed to revert request');
+        });
     });
 
     // Track the lecturer request status

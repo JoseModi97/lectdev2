@@ -224,6 +224,26 @@ $allocatedLecturer = [
     }
 ];
 
+// Extra revert-to-pending column (visible for service courses grid)
+$revertColumn = [
+    'label' => 'REVERT',
+    'format' => 'raw',
+    'vAlign' => 'middle',
+    'visible' => ($gridId === 'service-courses-grid'),
+    'value' => function ($model) {
+        $status = AllocationStatus::findOne($model->STATUS_ID);
+        if ($status && $status->STATUS_NAME !== 'PENDING') {
+            return Html::button('<i class="fas fa-undo"></i> Revert', [
+                'title' => 'Revert to pending (remove lecturers and remarks)',
+                'class' => 'btn btn-xs btn-spacer text-warning revert-request',
+                'data-id' => $model->REQUEST_ID,
+                'data-marksheetId' => $model->MARKSHEET_ID,
+            ]);
+        }
+        return '';
+    }
+];
+
 if ($gridId === 'service-courses-grid') {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
@@ -327,9 +347,10 @@ echo $this->render('moreFilters', ['filter' => $filter]);
 
                 $departmentColumn,
                 $requestStatusColumn,
-                $allocatedLecturer,
-                $actionColumn
-            ]
+                $allocatedLecturer, 
+                $actionColumn, 
+                $revertColumn 
+            ] 
         ]);
     } catch (Exception $ex) {
         $message = 'Failed to create grid for department courses.';

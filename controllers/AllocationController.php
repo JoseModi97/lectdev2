@@ -746,6 +746,86 @@ class AllocationController extends BaseController
     }
 
     /**
+     * Revert a serviced course request back to PENDING.
+     * - Clears remarks and attended fields
+     * - Sets status to PENDING
+     * - Removes any allocated lecturers for the marksheet
+     * Returns JSON on AJAX requests.
+     */
+    public function actionRevertRequest()
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $post = \Yii::$app->request->post();
+            $requestId = $post['requestId'] ?? null;
+            $marksheetId = $post['marksheetId'] ?? null;
+            if (!$requestId || !$marksheetId) {
+                return $this->asJson(['status' => 500, 'message' => 'Missing request id or marksheet id.']);
+            }
+
+            $allocationReq = AllocationRequest::findOne($requestId);
+            if (!$allocationReq) {
+                return $this->asJson(['status' => 500, 'message' => 'Request not found.']);
+            }
+
+            // Only servicing department can revert
+            if ($allocationReq->SERVICING_DEPT !== $this->deptCode) {
+                return $this->asJson(['status' => 500, 'message' => 'Not allowed to revert this request.']);
+            }
+
+            // Only APPROVED / NOT APPROVED requests can be reverted
+            $pending = AllocationStatus::find()->where(['STATUS_NAME' => 'PENDING'])->one();
+            if (!$pending) {
+                return $this->asJson(['status' => 500, 'message' => 'Pending status not configured.']);
+            }
+
+            if ((int)$allocationReq->STATUS_ID === (int)$pending->STATUS_ID) {
+                return $this->asJson(['status' => 500, 'message' => 'Request already pending.']);
+            }
+
+            // Remove allocated lecturers for this marksheet
+            $assignments = CourseAssignment::find()->where(['MRKSHEET_ID' => $marksheetId])->all();
+            foreach ($assignments as $assignment) {
+                if ($assignment->delete() === false) {
+                    throw new Exception('Failed to remove allocated lecturers for this request.');
+                }
+            }
+
+            // If course leader is one of deleted or no assignments remain, clear leader
+            $remaining = CourseAssignment::find()->where(['MRKSHEET_ID' => $marksheetId])->count();
+            if ((int)$remaining === 0) {
+                $marksheetDef = MarksheetDef::findOne($marksheetId);
+                if ($marksheetDef) {
+                    $marksheetDef->PAYROLL_NO = null;
+                    $marksheetDef->LAST_UPDATE = new Expression('CURRENT_DATE');
+                    if ($marksheetDef->save() === false) {
+                        throw new Exception('Failed to reset course leader.');
+                    }
+                }
+            }
+
+            // Revert request fields
+            $allocationReq->STATUS_ID = $pending->STATUS_ID;
+            $allocationReq->REMARKS = null;
+            $allocationReq->ATTENDED_BY = null;
+            $allocationReq->ATTENDED_DATE = null;
+            if ($allocationReq->save() === false) {
+                throw new Exception('Failed to revert request to pending.');
+            }
+
+            $transaction->commit();
+            return $this->asJson(['status' => 200]);
+        } catch (\Throwable $ex) {
+            $transaction->rollBack();
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            return $this->asJson(['status' => 500, 'message' => $message]);
+        }
+    }
+
+    /**
      * Update a course leader
      * @return Response
      */
