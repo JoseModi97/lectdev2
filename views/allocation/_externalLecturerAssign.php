@@ -36,22 +36,53 @@ $statusList = ArrayHelper::map($status, 'STATUS_NAME', function($sta){
 Modal::begin([
     'title' => '<b>Allocate course lecturer(s)</b>',
     'id' => 'allocate-external-lecturers-modal',
-    'size' => 'modal-md',
+    'size' => 'modal-xl',
     'options' => ['data-backdrop'=>"static", 'data-keyboard'=>"false"],
+    'dialogOptions' => [
+        'class' => 'modal-dialog-scrollable modal-dialog-centered',
+        'style' => 'max-width: 1100px; max-height: 90vh;'
+    ],
+    'headerOptions' => [
+        'style' => 'background-image: linear-gradient(#455492, #304186, #455492); color:#fff'
+    ],
 ]);
 ?>
 
 <div class="content-loader" style="border-radius: 5px;"></div>
 
 <!-- course details -->
+<style>
+    .allocate-info p { margin-bottom: 6px; }
+    .allocate-info .label { color:#0d6efd; font-weight:600; }
+    @media (min-width: 768px){ .allocate-info .col-md-6 { padding-right:12px; padding-left:12px; } }
+    .form-border { border:1px solid #008cba; border-radius:6px; }
+    .form-border .card-body { padding:12px 14px; }
+    .kv-editable-input, .select2-container{ width:100% !important; }
+    .modal-xl .select2-container{ max-width:100%; }
+    .gap-row{ row-gap:8px; }
+    .truncate-wrap{ word-break:break-word; }
+    .allocate-info .value{ display:inline-block; }
+</style>
 <div class="card form-border">
-    <div class="card-body">
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> DEGREE PROGRAMME: </span> <span class="lecturer-allocation-degree-name"></span></p></div></div>
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE CODE: </span> <span class="lecturer-allocation-course-code"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> COURSE NAME: </span> <span class="lecturer-allocation-course-name"></span></p></div></div>
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER: </span> <span class="lecturer-allocation-description-full"></span></p></div></div>
-        <div class="row"><div class="col-md-6"><p class="card-text"><span class="text-primary"> GROUP: </span> <span class="lecturer-allocation-group"></span></p></div><div class="col-md-6"><p class="card-text"><span class="text-primary"> SEMESTER TYPE: </span> <span class="lecturer-allocation-semester-type"></span></p></div></div>
+    <div class="card-body allocate-info">
+        <div class="row gap-row">
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">ACADEMIC YEAR: </span> <span class="lecturer-allocation-academic-year value"></span></p></div>
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">DEGREE PROGRAMME: </span> <span class="lecturer-allocation-degree-name value"></span></p></div>
+        </div>
+        <div class="row gap-row">
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">COURSE CODE: </span> <span class="lecturer-allocation-course-code value"></span></p></div>
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">COURSE NAME: </span> <span class="lecturer-allocation-course-name value"></span></p></div>
+        </div>
+        <div class="row gap-row">
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">LEVEL OF STUDY: </span> <span class="lecturer-allocation-level-of-study value"></span></p></div>
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">SEMESTER: </span> <span class="lecturer-allocation-description-full value"></span></p></div>
+        </div>
+        <div class="row gap-row">
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">GROUP: </span> <span class="lecturer-allocation-group value"></span></p></div>
+            <div class="col-md-6 truncate-wrap"><p class="card-text"><span class="label">SEMESTER TYPE: </span> <span class="lecturer-allocation-semester-type value"></span></p></div>
+        </div>
     </div>
-</div>
+ </div>
 <!-- end course details -->
 
 <!-- assign lecturers form -->

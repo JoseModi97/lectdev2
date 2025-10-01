@@ -124,29 +124,29 @@ if ($filter->purpose === 'serviceCourses') {
         'groupEvenCssClass' => 'group-academic-year',
     ];
 } else {
-    $departmentColumn = [ 
-        'attribute' => 'servicingDept.DEPT_NAME', 
-        'label' => 'SERVICING DEPARTMENT', 
-        'vAlign' => 'middle', 
-        'group' => true, 
-        'groupedRow' => true, 
-        'groupOddCssClass' => 'group-academic-year', 
-        'groupEvenCssClass' => 'group-academic-year', 
-        'value' => function ($model) { 
-            $deptName = $model->servicingDept->DEPT_NAME ?? ''; 
-            $degCode = $model->marksheet->semester->DEGREE_CODE ?? ''; 
-            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]); 
-            $degName = $deg['DEGREE_NAME'] ?? ''; 
-            $suffix = ''; 
-            if ($degCode) { 
-                $suffix .= ' | ' . $degCode; 
-            } 
-            if ($degName) { 
-                $suffix .= ' - ' . $degName; 
-            } 
-            return trim($deptName . $suffix); 
-        } 
-    ]; 
+    $departmentColumn = [
+        'attribute' => 'servicingDept.DEPT_NAME',
+        'label' => 'SERVICING DEPARTMENT',
+        'vAlign' => 'middle',
+        'group' => true,
+        'groupedRow' => true,
+        'groupOddCssClass' => 'group-academic-year',
+        'groupEvenCssClass' => 'group-academic-year',
+        'value' => function ($model) {
+            $deptName = $model->servicingDept->DEPT_NAME ?? '';
+            $degCode = $model->marksheet->semester->DEGREE_CODE ?? '';
+            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]);
+            $degName = $deg['DEGREE_NAME'] ?? '';
+            $suffix = '';
+            if ($degCode) {
+                $suffix .= ' | ' . $degCode;
+            }
+            if ($degName) {
+                $suffix .= ' - ' . $degName;
+            }
+            return trim($deptName . $suffix);
+        }
+    ];
 }
 
 $dataModels = $coursesProvider->getModels();
@@ -168,12 +168,12 @@ $courseCodeColumn = [
     'attribute' => 'courseCode',
     'label' => 'COURSE',
     'vAlign' => 'middle',
-    'width' => '25%',
-    'value' => function ($model) { 
-        $code = $model->marksheet->course->COURSE_CODE ?? ''; 
-        $name = $model->marksheet->course->COURSE_NAME ?? ''; 
-        return trim($code . ($name ? ' - ' . $name : '')); 
-    }, 
+    'width' => ($gridId === 'requested-courses-grid') ? '45%' : '25%',
+    'value' => function ($model) {
+        $code = $model->marksheet->course->COURSE_CODE ?? '';
+        $name = $model->marksheet->course->COURSE_NAME ?? '';
+        return trim($code . ($name ? ' - ' . $name : ''));
+    },
     'filterType' => GridView::FILTER_SELECT2,
     'filter' => $courseCodeOptions,
     'filterWidgetOptions' => [
@@ -187,6 +187,7 @@ $requestStatusColumn = [
     'attribute' => 'statusName',
     'format' => 'raw',
     'vAlign' => 'middle',
+    'width' => ($gridId === 'requested-courses-grid') ? '12%' : null,
     'filterType' => GridView::FILTER_SELECT2,
     'filter' => (function () use ($dataModels) {
         if (empty($dataModels)) return [];
@@ -218,6 +219,7 @@ $requestStatusColumn = [
 $allocatedLecturer = [
     'label' => 'ALLOCATED LECTURER(S)',
     'vAlign' => 'middle',
+    'width' => ($gridId === 'requested-courses-grid') ? '28%' : null,
     'value' => function ($model) use ($deptCode) {
         if ($model->status->STATUS_NAME === 'APPROVED') {
             $assignments = CourseAssignment::find()->alias('CS')->select(['CS.PAYROLL_NO'])
@@ -258,6 +260,7 @@ if ($gridId === 'service-courses-grid') {
         'class' => 'kartik\grid\ActionColumn',
         'template' => '{assign-course-render}',
         'vAlign' => 'middle',
+        'width' => '15%',
         'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
             'assign-course-render' => function ($url, $model) {
@@ -358,23 +361,9 @@ echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]
                 'after' => false,
             ],
             'columns' => [
-                ['class' => 'kartik\grid\SerialColumn', 'vAlign' => 'middle'],
+                ['class' => 'kartik\grid\SerialColumn', 'vAlign' => 'middle', 'width' => '4%'],
                 $courseCodeColumn,
-
                 $departmentColumn,
-                [
-                    'attribute' => 'DEGREE_CODE',
-                    'label' => 'Degree',
-                    'value' => function ($model) {
-                        $deg = DegreeProgramme::findOne(['DEGREE_CODE' => $model->marksheet->semester->DEGREE_CODE]);
-                        return $model->marksheet->semester->DEGREE_CODE . ' - ' . $deg['DEGREE_NAME'];
-                    }
-                ],
-                // [
-                //     'value' => function ($model) {
-                //         return $model->marksheet->semester->LEVEL_OF_STUDY;
-                //     }
-                // ],
                 $requestStatusColumn,
                 $allocatedLecturer,
                 $actionColumn
