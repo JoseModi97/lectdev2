@@ -517,10 +517,58 @@ $this->params['breadcrumbs'][] = $this->title;
                         ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])
                         ->all();
 
+                    // Case 1: No assignments
                     if (empty($assignments)) {
-                        return '<span class="badge bg-secondary fs-6 py-1">Not assigned</span>';
+                        // Look up request date
+                        $req = AllocationRequest::find()->alias('AR')
+                            ->select([
+                                'AR.REQUEST_ID',
+                                new \yii\db\Expression("TO_CHAR(AR.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE")
+                            ])
+                            ->where(['AR.MARKSHEET_ID' => $d->MRKSHEET_ID])
+                            ->orderBy(['AR.REQUEST_ID' => SORT_DESC])
+                            ->one();
+
+                        $relative = '';
+                        if ($req && $req->REQUEST_DATE) {
+                            try {
+                                $rawDate = Yii::$app->formatter->asDate($req->REQUEST_DATE, 'php:Y-m-d H:i:s') . '.000';
+                                $dt  = \DateTime::createFromFormat('Y-m-d H:i:s.u', $rawDate);
+                                $now = new \DateTime('now');
+
+                                if ($dt) {
+                                    $diff = $now->diff($dt);
+                                    $units = [];
+                                    if ($diff->y) $units[] = $diff->y . 'y';
+                                    if ($diff->m) $units[] = $diff->m . 'mo';
+                                    if ($diff->d) $units[] = $diff->d . 'd';
+                                    if ($diff->h) $units[] = $diff->h . 'h';
+                                    if ($diff->i) $units[] = $diff->i . 'm';
+                                    if ($diff->s || empty($units)) $units[] = $diff->s . 's';
+
+                                    $label = implode(' ', array_slice($units, 0, 2));
+                                    $relative = 'Requested ' . $label . ' ago';
+
+                                    // Tooltip exact time
+                                    $formatter = Yii::$app->formatter;
+                                    $prevTz = $formatter->timeZone;
+                                    $formatter->timeZone = 'Africa/Nairobi';
+                                    $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
+                                    $formatter->timeZone = $prevTz;
+
+                                    $relative = '<span class="text-muted ms-2" data-bs-toggle="tooltip" title="Requested: ' .
+                                        Html::encode($exact) . '"><i class="far fa-clock"></i> ' .
+                                        Html::encode($relative) . '</span>';
+                                }
+                            } catch (\Throwable $e) {
+                                $relative = '';
+                            }
+                        }
+
+                        return '<div class="mb-1 text-dark"><b>Not assigned</b>' . $relative . '</div>';
                     }
 
+                    // Case 2: Show assigned lecturers
                     $output = '';
                     $courseLeaderFound = false;
 
@@ -537,7 +585,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         $lecturerName = trim(($lecturer->EMP_TITLE ? $lecturer->EMP_TITLE . ' ' : '') .
                             $lecturer->SURNAME . ' ' . $lecturer->OTHER_NAMES);
 
-                        // Check if this lecturer is the course leader
                         $isLeader = MarksheetDef::find()
                             ->where([
                                 'MRKSHEET_ID' => $d->MRKSHEET_ID,
@@ -547,9 +594,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         if ($isLeader && !$courseLeaderFound) {
                             $courseLeaderFound = true;
-                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user-tie"></i> ' . Html::encode($lecturerName) . ' <span class="text-success" style="font-weight: bold">(Leader)</span></div>';
+                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user-tie"></i> '
+                                . Html::encode($lecturerName)
+                                . ' <span class="text-success" style="font-weight: bold">(Leader)</span></div>';
                         } else {
-                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user"></i> ' . Html::encode($lecturerName) . '</div>';
+                            $output .= '<div class="mb-1 text-dark"><i class="fas fa-user"></i> '
+                                . Html::encode($lecturerName)
+                                . '</div>';
                         }
                     }
 
@@ -563,82 +614,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filterInputOptions' => ['placeholder' => 'Any lecturer'],
             ],
 
-            // Request status for unassigned courses (service course requests made elsewhere)
-            [
-                'label' => 'Request',
-                'format' => 'raw',
-                'width' => '12%',
-                'value' => function ($d) {
-                    if (CourseAssignment::find()->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])->exists()) {
-                        return '';
-                    }
-
-                    $req = AllocationRequest::find()->alias('AR')
-                        ->select([
-                            'AR.REQUEST_ID',
-                            new \yii\db\Expression("TO_CHAR(AR.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE")
-                        ])
-                        ->where(['AR.MARKSHEET_ID' => $d->MRKSHEET_ID])
-                        ->orderBy(['AR.REQUEST_ID' => SORT_DESC])
-                        ->one();
-
-                    if (!$req) {
-                        return '';
-                    }
-
-                    try {
-                        $rawDate = $req->REQUEST_DATE;
-
-                        // Normalize: ensure fractional part .000000
-                        if (strpos($rawDate, '.') === false) {
-                            $rawDate .= '.000000';
-                        } else {
-                            // if only .000 or .123 → pad to microseconds
-                            $rawDate = preg_replace_callback('/\.(\d{1,6})$/', function ($m) {
-                                return '.' . str_pad($m[1], 6, '0');
-                            }, $rawDate);
-                        }
-
-                        // Parse with microsecond format
-                        $dt = \DateTime::createFromFormat('Y-m-d H:i:s.u', $rawDate);
-                        $now = new \DateTime('now');
-
-                        if (!$dt) {
-                            return '<span class="badge bg-info text-dark">Requested</span>';
-                        }
-
-                        $diff = $now->diff($dt);
-
-                        $units = [];
-                        if ($diff->y) $units[] = $diff->y . 'y';
-                        if ($diff->m) $units[] = $diff->m . 'mo';
-                        if ($diff->d) $units[] = $diff->d . 'd';
-                        if ($diff->h) $units[] = $diff->h . 'h';
-                        if ($diff->i) $units[] = $diff->i . 'm';
-                        if ($diff->s || empty($units)) $units[] = $diff->s . 's';
-
-                        $label = implode(' ', array_slice($units, 0, 2));
-
-                        // Always past tense
-                        $relative = $label . ' ago';
-
-                        // Tooltip with exact date
-                        $formatter = Yii::$app->formatter;
-                        $prevTz = $formatter->timeZone;
-                        $formatter->timeZone = 'Africa/Nairobi';
-                        $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
-                        $formatter->timeZone = $prevTz;
-
-                        $title = 'Requested: ' . $exact;
-
-                        return '<span class="badge bg-info text-dark" data-bs-toggle="tooltip" title="' . Html::encode($title) . '">
-                                    <i class="far fa-clock"></i> ' . Html::encode($relative) . '
-                                </span>';
-                    } catch (\Throwable $e) {
-                        return '<span class="badge bg-info text-dark">Requested</span>';
-                    }
-                },
-            ],
 
 
 

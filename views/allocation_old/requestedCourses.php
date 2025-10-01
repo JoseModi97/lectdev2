@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -33,17 +34,17 @@ $activeFiltersContent = function ($filter) {
 
     if ($filter->purpose === 'nonSuppCourses' || $filter->purpose === 'suppCourses') {
         $degree = DegreeProgramme::find()->select(['DEGREE_NAME'])->where(['DEGREE_CODE' => $filter->degreeCode])->asArray()->one();
-        if($degree) {
+        if ($degree) {
             $content .= '<span class="filter-item"><strong>Degree:</strong> ' . $degree['DEGREE_NAME'] . ' (' . $filter->degreeCode . ')</span>';
         }
 
         $level = LevelOfStudy::find()->select(['NAME'])->where(['LEVEL_OF_STUDY' => $filter->levelOfStudy])->asArray()->one();
-        if($level) {
+        if ($level) {
             $content .= '<span class="filter-item"><strong>Level of study:</strong> ' . strtoupper($level['NAME']) . '</span>';
         }
 
         $group = Group::find()->select(['GROUP_NAME'])->where(['GROUP_CODE' => $filter->group])->asArray()->one();
-        if($group) {
+        if ($group) {
             $content .= '<span class="filter-item"><strong>Group:</strong> ' . strtoupper($group['GROUP_NAME']) . '</span>';
         }
 
@@ -51,7 +52,7 @@ $activeFiltersContent = function ($filter) {
         $semester = Semester::find()->alias('SM')->select(['SM.SEMESTER_ID', 'SM.SEMESTER_CODE', 'SM.DESCRIPTION_CODE'])->joinWith(['semesterDescription SD' => function ($q) {
             $q->select(['SD.DESCRIPTION_CODE', 'SD.SEMESTER_DESC']);
         }], true, 'INNER JOIN')->where(['SM.SEMESTER_ID' => $semesterId])->asArray()->one();
-        if($semester) {
+        if ($semester) {
             $content .= '<span class="filter-item"><strong>Semester:</strong> ' . $semester['SEMESTER_CODE'] . ' (' . strtoupper($semester['semesterDescription']['SEMESTER_DESC']) . ')</span>';
         }
     }
@@ -87,7 +88,7 @@ $this->params['breadcrumbs'][] = [
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridId = 'requested-courses-grid';
-if($filter->purpose === 'serviceCourses'){
+if ($filter->purpose === 'serviceCourses') {
     $gridId = 'service-courses-grid';
 
     $departmentColumn = [
@@ -95,7 +96,7 @@ if($filter->purpose === 'serviceCourses'){
         'label' => 'REQUESTING DEPARTMENT',
         'vAlign' => 'middle',
     ];
-}else{
+} else {
     $departmentColumn = [
         'attribute' => 'servicingDept.DEPT_NAME',
         'label' => 'SERVICING DEPARTMENT',
@@ -120,7 +121,7 @@ $requestStatusColumn = [
     'attribute' => 'status.STATUS_NAME',
     'format' => 'raw',
     'vAlign' => 'middle',
-    'value' => function($model){
+    'value' => function ($model) {
         $status = $model->status->STATUS_NAME;
         $icon = '';
         $badgeClass = '';
@@ -150,11 +151,11 @@ $requestStatusColumn = [
 $allocatedLecturer = [
     'label' => 'ALLOCATED LECTURER(S)',
     'vAlign' => 'middle',
-    'value' => function($model) use ($deptCode) {
-        if($model->status->STATUS_NAME === 'APPROVED'){
+    'value' => function ($model) use ($deptCode) {
+        if ($model->status->STATUS_NAME === 'APPROVED') {
             $assignments = CourseAssignment::find()->alias('CS')->select(['CS.PAYROLL_NO'])
                 ->where(['CS.MRKSHEET_ID' => $model->MARKSHEET_ID])
-                ->joinWith(['staff ST' => function(ActiveQuery $q){
+                ->joinWith(['staff ST' => function (ActiveQuery $q) {
                     $q->select([
                         'ST.PAYROLL_NO',
                         'ST.DEPT_CODE',
@@ -168,8 +169,8 @@ $allocatedLecturer = [
                 ->asArray()->all();
 
             $lecturers = '';
-            if(!empty($assignments)){
-                foreach ($assignments as $assignment){
+            if (!empty($assignments)) {
+                foreach ($assignments as $assignment) {
                     $lecturers .= $assignment['staff']['EMP_TITLE'] . ' ' . $assignment['staff']['SURNAME'] . ' ' .
                         $assignment['staff']['OTHER_NAMES'] . ' (' . $assignment['staff']['EMAIL'] . ' ' .
                         $assignment['staff']['MOBILE'] . '), ';
@@ -183,26 +184,30 @@ $allocatedLecturer = [
     }
 ];
 
-if($gridId === 'service-courses-grid'){
+if ($gridId === 'service-courses-grid') {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
         'template' => '{assign-course-render}',
         'vAlign' => 'middle',
-        'contentOptions' => ['style'=>'white-space:nowrap;','class'=>'kartik-sheet-style kv-align-middle'],
+        'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
-            'assign-course-render' => function($url, $model){
+            'assign-course-render' => function ($url, $model) {
                 $status = AllocationStatus::findOne($model->STATUS_ID);
-                if($status->STATUS_NAME === 'PENDING'){
+                if ($status->STATUS_NAME === 'PENDING') {
                     return Html::button('<i class="fa fa-user-plus"></i> Allocate', [
                         'title' => 'Allocate lecturer',
-                        'href' => Url::to(['/allocation/assign-course-render', 'id' => $model->REQUEST_ID,
-                            'marksheetId' => $model->MARKSHEET_ID, 'type'=>'service']),
+                        'href' => Url::to([
+                            '/allocation/assign-course-render',
+                            'id' => $model->REQUEST_ID,
+                            'marksheetId' => $model->MARKSHEET_ID,
+                            'type' => 'service'
+                        ]),
                         'class' => 'btn  btn-xs btn-spacer assign-external-lecturer',
                         'data-id' => $model->REQUEST_ID,
                         'data-marksheetId' => $model->MARKSHEET_ID,
-                        'data-type'=>'service'
+                        'data-type' => 'service'
                     ]);
-                }else{
+                } else {
                     return Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
                         'title' => 'View lecturer request details',
                         'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
@@ -212,14 +217,14 @@ if($gridId === 'service-courses-grid'){
             },
         ]
     ];
-}else{
+} else {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
         'template' => '{view-request-render}',
         'vAlign' => 'middle',
-        'contentOptions' => ['style'=>'white-space:nowrap;','class'=>'kartik-sheet-style kv-align-middle'],
+        'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
-            'view-request-render' => function($url, $model){
+            'view-request-render' => function ($url, $model) {
                 return Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
                     'title' => 'View lecturer request details',
                     'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
@@ -275,7 +280,7 @@ echo $this->render('moreFilters', ['filter' => $filter]);
         ]);
     } catch (Exception $ex) {
         $message = 'Failed to create grid for department courses.';
-        if(YII_ENV_DEV){
+        if (YII_ENV_DEV) {
             $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
         }
         throw new ServerErrorHttpException($message, 500);

@@ -54,7 +54,7 @@ class AllocationRequestsSearchNew extends AllocationRequest
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.REMARKS',
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.REQUESTING_DEPT',
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.SERVICING_DEPT',
-                'MUTHONI.LEC_ALLOCATION_REQUESTS.REQUEST_DATE',
+                new \yii\db\Expression("TO_CHAR(LEC_ALLOCATION_REQUESTS.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE"),
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.REQUEST_BY',
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.ATTENDED_BY',
                 'MUTHONI.LEC_ALLOCATION_REQUESTS.ATTENDED_DATE'
@@ -196,7 +196,7 @@ class AllocationRequestsSearchNew extends AllocationRequest
 
 
 
-            
+
 
         return new ActiveDataProvider([
             'query' => $query,

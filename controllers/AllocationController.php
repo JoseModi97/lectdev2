@@ -530,7 +530,10 @@ class AllocationController extends BaseController
                 }
             }
 
-            $currentDate = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
+            $currentDate = new Expression("
+    CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)
+    - ( (44/1440) + (27/86400) )
+");
 
             // Allocate lecturers to a course.
             if (($courseType === 'departmental' &&  $internalLecturer === 'true') || $statusName === 'APPROVED') {
