@@ -66,24 +66,26 @@ use yii\db\ActiveQuery;
                         $query->andWhere(['AR.SERVICING_DEPT' => $deptCode]);
                     }
 
-                    $rows = $query->distinct()->orderBy(['SM.SEMESTER_CODE' => SORT_ASC])->asArray()->all(); 
-                    $semDescMap = []; 
-                    foreach ($rows as $row) { 
-                        $code = $row['SEMESTER_CODE'] ?? ''; 
-                        $desc = $row['SEMESTER_DESC'] ?? ''; 
-                        $descCode = $row['DESCRIPTION_CODE'] ?? ''; 
-                        if ($code) { 
-                            $semesterOptions[$code] = trim($code . ($desc ? ' - ' . strtoupper($desc) : '')); 
-                            if ($descCode) { $semDescMap[$code] = $descCode; } 
-                        } 
-                    } 
-                } 
-                echo $form->field($filter, 'semester')->widget(Select2::class, [ 
-                    'data' => $semesterOptions, 
-                    'options' => ['placeholder' => 'Select Semester...', 'id' => 'filter-semester'], 
-                    'pluginOptions' => ['allowClear' => true], 
-                ])->label('Semester'); 
-                echo $form->field($filter, 'semesterDesc')->hiddenInput()->label(false); 
+                    $rows = $query->distinct()->orderBy(['SM.SEMESTER_CODE' => SORT_ASC])->asArray()->all();
+                    $semDescMap = [];
+                    foreach ($rows as $row) {
+                        $code = $row['SEMESTER_CODE'] ?? '';
+                        $desc = $row['SEMESTER_DESC'] ?? '';
+                        $descCode = $row['DESCRIPTION_CODE'] ?? '';
+                        if ($code) {
+                            $semesterOptions[$code] = trim($code . ($desc ? ' - ' . strtoupper($desc) : ''));
+                            if ($descCode) {
+                                $semDescMap[$code] = $descCode;
+                            }
+                        }
+                    }
+                }
+                echo $form->field($filter, 'semester')->widget(Select2::class, [
+                    'data' => $semesterOptions,
+                    'options' => ['placeholder' => 'Select Semester...', 'id' => 'filter-semester'],
+                    'pluginOptions' => ['allowClear' => true],
+                ])->label('Semester');
+                echo $form->field($filter, 'semesterDesc')->hiddenInput()->label(false);
                 $mapJson = isset($semDescMap) ? json_encode($semDescMap) : json_encode([]);
                 $js = <<<JS
 (function(){
@@ -99,7 +101,7 @@ use yii\db\ActiveQuery;
 })();
 JS;
                 $this->registerJs($js);
-                ?> 
+                ?>
             </div>
             <div class="col-md-4">
                 <?php
@@ -108,11 +110,11 @@ JS;
                 if (!empty($filter->academicYear) && !empty($deptCode)) {
                     $lvlQuery = \app\models\AllocationRequest::find()->alias('AR')
                         ->select(['SM.LEVEL_OF_STUDY AS LEVEL_OF_STUDY', 'LVL.NAME AS NAME'])
-                        ->joinWith(['marksheet.semester SM' => function(\yii\db\ActiveQuery $q){
-                            $q->select(['SM.SEMESTER_ID','SM.ACADEMIC_YEAR','SM.LEVEL_OF_STUDY']);
+                        ->joinWith(['marksheet.semester SM' => function (\yii\db\ActiveQuery $q) {
+                            $q->select(['SM.SEMESTER_ID', 'SM.ACADEMIC_YEAR', 'SM.LEVEL_OF_STUDY']);
                         }], true, 'INNER JOIN')
-                        ->joinWith(['marksheet.semester.levelOfStudy LVL' => function(\yii\db\ActiveQuery $q){
-                            $q->select(['LVL.LEVEL_OF_STUDY','LVL.NAME']);
+                        ->joinWith(['marksheet.semester.levelOfStudy LVL' => function (\yii\db\ActiveQuery $q) {
+                            $q->select(['LVL.LEVEL_OF_STUDY', 'LVL.NAME']);
                         }], true, 'INNER JOIN')
                         ->where(['SM.ACADEMIC_YEAR' => $filter->academicYear]);
 

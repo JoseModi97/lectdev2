@@ -249,6 +249,23 @@ $allocatedLecturer = [
             return rtrim($lecturers, ', ');;
         }
 
+        // For pending requests with no allocated lecturers, show the request time relative to now (EAT)
+        if ($model->status->STATUS_NAME === 'PENDING') { 
+            $date = $model->REQUEST_DATE ?? null; 
+            if ($date) { 
+                try { 
+                    $formatter = Yii::$app->formatter; 
+                    $prevTz = $formatter->timeZone; 
+                    $formatter->timeZone = 'Africa/Nairobi'; 
+                    $relative = $formatter->asRelativeTime($date); 
+                    $formatter->timeZone = $prevTz; 
+                } catch (\Throwable $e) { 
+                    $relative = (string)$date; 
+                } 
+                return 'Requested: ' . $relative;  
+            } 
+        } 
+
         return '';
     }
 ];
