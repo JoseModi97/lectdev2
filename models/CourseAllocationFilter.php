@@ -14,6 +14,7 @@ use yii\base\Model;
  * @property string $group
  * @property string $levelOfStudy
  * @property string $semester
+ * @property string $semesterDesc
  * @property string $courseCode
  * @property string $courseName
  * @property string $purpose
@@ -28,6 +29,7 @@ class CourseAllocationFilter extends Model
     public $group;
     public $levelOfStudy;
     public $semester;
+    public $semesterDesc;
     public $courseCode;
     public $courseName;
     public $purpose;
@@ -41,12 +43,12 @@ class CourseAllocationFilter extends Model
     public function rules(): array
     {
         return [
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName', 'purpose',
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'semesterDesc', 'courseCode', 'courseName', 'purpose',
                 'status', 'requestingDepartment', 'servicingDepartment'], 'string'],
             [['academicYear'], 'required'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName', 'purpose',
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'semesterDesc', 'courseCode', 'courseName', 'purpose',
                 'status', 'requestingDepartment', 'servicingDepartment'], 'trim'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'courseCode', 'courseName', 'purpose',
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'semester', 'semesterDesc', 'courseCode', 'courseName', 'purpose',
                 'status', 'requestingDepartment', 'servicingDepartment'], 'default']
         ];
     }
@@ -62,6 +64,7 @@ class CourseAllocationFilter extends Model
             'group' => 'Group',
             'levelOfStudy' => 'Level of study',
             'semester' => 'Semester',
+            'semesterDesc' => 'Semester description code',
             'courseCode' => 'Course code',
             'courseName' => 'Course name',
             'purpose' => 'Filters for',

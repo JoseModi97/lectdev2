@@ -5,6 +5,7 @@ use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\Url;
 use app\models\Semester;
+use app\models\LevelOfStudy;
 use app\models\AllocationRequest;
 use yii\db\ActiveQuery;
 
@@ -25,7 +26,7 @@ use yii\db\ActiveQuery;
 
     <?= $form->field($filter, 'degreeCode')->textInput()->label(false) ?>
     <?= $form->field($filter, 'group')->hiddenInput()->label(false) ?>
-    <?= $form->field($filter, 'levelOfStudy')->hiddenInput()->label(false) ?>
+    <?php /* levelOfStudy now rendered visibly below; remove hidden duplicate */ ?>
     <?php /* semester now rendered visibly below; remove hidden duplicate */ ?>
     <?= $form->field($filter, 'purpose')->hiddenInput()->label(false) ?>
 
@@ -34,14 +35,14 @@ use yii\db\ActiveQuery;
             <h5 class="m-0 float-start text-white">More Filters</h5>
         </div>
         <div class="card-body row g-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <?= $form->field($filter, 'academicYear')->widget(Select2::class, [
                     'data' => Yii::$app->params['academicYears'] ?? [],
                     'options' => ['placeholder' => 'Select Academic Year...'],
                     'pluginOptions' => ['allowClear' => true],
                 ]) ?>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <?php
                 $semesterOptions = [];
                 if (!empty($filter->academicYear) && !empty($deptCode)) {
@@ -65,20 +66,76 @@ use yii\db\ActiveQuery;
                         $query->andWhere(['AR.SERVICING_DEPT' => $deptCode]);
                     }
 
-                    $rows = $query->distinct()->orderBy(['SM.SEMESTER_CODE' => SORT_ASC])->asArray()->all();
-                    foreach ($rows as $row) {
-                        $code = $row['SEMESTER_CODE'] ?? '';
-                        $desc = $row['SEMESTER_DESC'] ?? '';
-                        if ($code) {
-                            $semesterOptions[$code] = trim($code . ($desc ? ' - ' . strtoupper($desc) : ''));
+                    $rows = $query->distinct()->orderBy(['SM.SEMESTER_CODE' => SORT_ASC])->asArray()->all(); 
+                    $semDescMap = []; 
+                    foreach ($rows as $row) { 
+                        $code = $row['SEMESTER_CODE'] ?? ''; 
+                        $desc = $row['SEMESTER_DESC'] ?? ''; 
+                        $descCode = $row['DESCRIPTION_CODE'] ?? ''; 
+                        if ($code) { 
+                            $semesterOptions[$code] = trim($code . ($desc ? ' - ' . strtoupper($desc) : '')); 
+                            if ($descCode) { $semDescMap[$code] = $descCode; } 
+                        } 
+                    } 
+                } 
+                echo $form->field($filter, 'semester')->widget(Select2::class, [ 
+                    'data' => $semesterOptions, 
+                    'options' => ['placeholder' => 'Select Semester...', 'id' => 'filter-semester'], 
+                    'pluginOptions' => ['allowClear' => true], 
+                ])->label('Semester'); 
+                echo $form->field($filter, 'semesterDesc')->hiddenInput()->label(false); 
+                $mapJson = isset($semDescMap) ? json_encode($semDescMap) : json_encode([]);
+                $js = <<<JS
+(function(){
+    var map = $mapJson;
+    var sel = $('#filter-semester');
+    var hid = $('input[name="CourseAllocationFilter[semesterDesc]"]');
+    var sync = function(){
+        var v = sel.val();
+        hid.val(map[v] || '');
+    };
+    sel.on('change', sync);
+    sync();
+})();
+JS;
+                $this->registerJs($js);
+                ?> 
+            </div>
+            <div class="col-md-4">
+                <?php
+                // Academic Level (Level of Study) options based on current dataset
+                $levelOptions = [];
+                if (!empty($filter->academicYear) && !empty($deptCode)) {
+                    $lvlQuery = \app\models\AllocationRequest::find()->alias('AR')
+                        ->select(['SM.LEVEL_OF_STUDY AS LEVEL_OF_STUDY', 'LVL.NAME AS NAME'])
+                        ->joinWith(['marksheet.semester SM' => function(\yii\db\ActiveQuery $q){
+                            $q->select(['SM.SEMESTER_ID','SM.ACADEMIC_YEAR','SM.LEVEL_OF_STUDY']);
+                        }], true, 'INNER JOIN')
+                        ->joinWith(['marksheet.semester.levelOfStudy LVL' => function(\yii\db\ActiveQuery $q){
+                            $q->select(['LVL.LEVEL_OF_STUDY','LVL.NAME']);
+                        }], true, 'INNER JOIN')
+                        ->where(['SM.ACADEMIC_YEAR' => $filter->academicYear]);
+
+                    if ($filter->purpose === 'requestedCourses') {
+                        $lvlQuery->andWhere(['AR.REQUESTING_DEPT' => $deptCode]);
+                    } elseif ($filter->purpose === 'serviceCourses') {
+                        $lvlQuery->andWhere(['AR.SERVICING_DEPT' => $deptCode]);
+                    }
+
+                    $lvlRows = $lvlQuery->distinct()->orderBy(['SM.LEVEL_OF_STUDY' => SORT_ASC])->asArray()->all();
+                    foreach ($lvlRows as $row) {
+                        $code = $row['LEVEL_OF_STUDY'] ?? '';
+                        $name = $row['NAME'] ?? '';
+                        if ($code !== '') {
+                            $levelOptions[$code] = strtoupper($name ?: $code);
                         }
                     }
                 }
-                echo $form->field($filter, 'semester')->widget(Select2::class, [
-                    'data' => $semesterOptions,
-                    'options' => ['placeholder' => 'Select Semester...'],
+                echo $form->field($filter, 'levelOfStudy')->widget(Select2::class, [
+                    'data' => $levelOptions,
+                    'options' => ['placeholder' => 'Select Level...'],
                     'pluginOptions' => ['allowClear' => true],
-                ])->label('Semester');
+                ])->label('Academic level');
                 ?>
             </div>
         </div>
@@ -91,7 +148,7 @@ use yii\db\ActiveQuery;
                 'academicYear' => $filter->academicYear,
                 'degreeCode' => $filter->degreeCode,
                 'group' => $filter->group,
-                'levelOfStudy' => $filter->levelOfStudy,
+                'levelOfStudy' => '',
                 'semester' => '',
                 'purpose' => $filter->purpose,
             ]], ['class' => 'btn btn-outline-secondary px-4']) ?>

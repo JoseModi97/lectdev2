@@ -14,6 +14,8 @@
  * @var string $deptName
  * @var string $panelHeading
  */
+// dd($coursesProvider->getModels());
+
 
 use app\components\BreadcrumbHelper;
 use app\models\AllocationStatus;
@@ -30,6 +32,8 @@ use app\models\Group;
 use app\models\LevelOfStudy;
 use app\models\Semester;
 
+
+// dd($filter);
 echo BreadcrumbHelper::generate([
     [
         'label' => 'HOD',
@@ -41,8 +45,15 @@ echo BreadcrumbHelper::generate([
     'Courses'
 ]);
 $activeFiltersContent = function ($filter) {
+    $lvl = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $filter->levelOfStudy]);
+
+
+
     $content = '<div class="active-filters">';
     $content .= '<span class="filter-item"><strong>Academic year:</strong> ' . $filter->academicYear . '</span>';
+    if (!empty($filter->levelOfStudy)) {
+        $content .= '<span class="filter-item"><strong>Level of Study:</strong> ' . $filter->levelOfStudy . ' - ' . $lvl['NAME'] . '</span>';
+    }
 
     if ($filter->purpose === 'nonSuppCourses' || $filter->purpose === 'suppCourses') {
         $degree = DegreeProgramme::find()->select(['DEGREE_NAME'])->where(['DEGREE_CODE' => $filter->degreeCode])->asArray()->one();
@@ -113,15 +124,29 @@ if ($filter->purpose === 'serviceCourses') {
         'groupEvenCssClass' => 'group-academic-year',
     ];
 } else {
-    $departmentColumn = [
-        'attribute' => 'servicingDept.DEPT_NAME',
-        'label' => 'SERVICING DEPARTMENT',
-        'vAlign' => 'middle',
-        'group' => true,
-        'groupedRow' => true,
-        'groupOddCssClass' => 'group-academic-year',
-        'groupEvenCssClass' => 'group-academic-year',
-    ];
+    $departmentColumn = [ 
+        'attribute' => 'servicingDept.DEPT_NAME', 
+        'label' => 'SERVICING DEPARTMENT', 
+        'vAlign' => 'middle', 
+        'group' => true, 
+        'groupedRow' => true, 
+        'groupOddCssClass' => 'group-academic-year', 
+        'groupEvenCssClass' => 'group-academic-year', 
+        'value' => function ($model) { 
+            $deptName = $model->servicingDept->DEPT_NAME ?? ''; 
+            $degCode = $model->marksheet->semester->DEGREE_CODE ?? ''; 
+            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]); 
+            $degName = $deg['DEGREE_NAME'] ?? ''; 
+            $suffix = ''; 
+            if ($degCode) { 
+                $suffix .= ' | ' . $degCode; 
+            } 
+            if ($degName) { 
+                $suffix .= ' - ' . $degName; 
+            } 
+            return trim($deptName . $suffix); 
+        } 
+    ]; 
 }
 
 $dataModels = $coursesProvider->getModels();
@@ -134,7 +159,9 @@ if (!empty($dataModels)) {
             $courseCodeOptions[$code] = trim($code . ($name ? ' - ' . $name : ''));
         }
     }
-    if (!empty($courseCodeOptions)) { ksort($courseCodeOptions, SORT_NATURAL | SORT_FLAG_CASE); }
+    if (!empty($courseCodeOptions)) {
+        ksort($courseCodeOptions, SORT_NATURAL | SORT_FLAG_CASE);
+    }
 }
 
 $courseCodeColumn = [
@@ -142,11 +169,11 @@ $courseCodeColumn = [
     'label' => 'COURSE',
     'vAlign' => 'middle',
     'width' => '25%',
-    'value' => function ($model) {
-        $code = $model->marksheet->course->COURSE_CODE ?? '';
-        $name = $model->marksheet->course->COURSE_NAME ?? '';
-        return trim($code . ($name ? ' - ' . $name : ''));
-    },
+    'value' => function ($model) { 
+        $code = $model->marksheet->course->COURSE_CODE ?? ''; 
+        $name = $model->marksheet->course->COURSE_NAME ?? ''; 
+        return trim($code . ($name ? ' - ' . $name : '')); 
+    }, 
     'filterType' => GridView::FILTER_SELECT2,
     'filter' => $courseCodeOptions,
     'filterWidgetOptions' => [
@@ -298,9 +325,9 @@ if ($gridId === 'service-courses-grid') {
 }
 ?>
 
-<?php 
-echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]); 
-?> 
+<?php
+echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]);
+?>
 
 <div class="requested-courses">
     <?php
@@ -335,10 +362,23 @@ echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]
                 $courseCodeColumn,
 
                 $departmentColumn,
+                [
+                    'attribute' => 'DEGREE_CODE',
+                    'label' => 'Degree',
+                    'value' => function ($model) {
+                        $deg = DegreeProgramme::findOne(['DEGREE_CODE' => $model->marksheet->semester->DEGREE_CODE]);
+                        return $model->marksheet->semester->DEGREE_CODE . ' - ' . $deg['DEGREE_NAME'];
+                    }
+                ],
+                // [
+                //     'value' => function ($model) {
+                //         return $model->marksheet->semester->LEVEL_OF_STUDY;
+                //     }
+                // ],
                 $requestStatusColumn,
-                $allocatedLecturer,  
-                $actionColumn  
-            ] 
+                $allocatedLecturer,
+                $actionColumn
+            ]
         ]);
     } catch (Exception $ex) {
         $message = 'Failed to create grid for department courses.';
