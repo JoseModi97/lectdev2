@@ -555,9 +555,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
                             $formatter->timeZone = $prevTz;
 
-                            return '<span class="text-muted ms-2" data-bs-toggle="tooltip" title="Requested: '
-                                . Html::encode($exact) . '"><i class="far fa-clock"></i> '
-                                . Html::encode($relative) . '</span>';
+                            return '<div class="text-muted small" data-bs-toggle="tooltip" 
+                                        title="Requested: ' . Html::encode($exact) . '">
+                                        <i class="far fa-clock"></i> ' . Html::encode($relative) . '
+                                    </div>';
                         } catch (\Throwable $e) {
                             return '';
                         }
@@ -570,14 +571,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     // Case 1: No assignments
                     if (empty($assignments)) {
-                        return '<div class="mb-1 text-dark"><b>Not assigned</b>'
-                            . $getRelativeTime($d->MRKSHEET_ID) . '</div>';
+                        return '<div class="mb-1 text-dark"><b>Not assigned</b></div>'
+                            . $getRelativeTime($d->MRKSHEET_ID);
                     }
 
-                    // Case 2: Show assigned lecturers with relative time
+                    // Case 2: Show assigned lecturers
                     $output = '';
                     $courseLeaderFound = false;
-                    $relative = $getRelativeTime($d->MRKSHEET_ID);
 
                     foreach ($assignments as $assignment) {
                         $lecturer = EmpVerifyView::find()
@@ -603,14 +603,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             $courseLeaderFound = true;
                             $output .= '<div class="mb-1 text-dark"><i class="fas fa-user-tie"></i> '
                                 . Html::encode($lecturerName)
-                                . ' <span class="text-success" style="font-weight: bold">(Leader)</span>'
-                                . $relative . '</div>';
+                                . ' <span class="text-success" style="font-weight: bold">(Leader)</span></div>';
                         } else {
                             $output .= '<div class="mb-1 text-dark"><i class="fas fa-user"></i> '
                                 . Html::encode($lecturerName)
-                                . $relative . '</div>';
+                                . '</div>';
                         }
                     }
+
+                    // Append relative time once at the bottom
+                    $output .= $getRelativeTime($d->MRKSHEET_ID);
 
                     return $output;
                 },
@@ -621,12 +623,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterInputOptions' => ['placeholder' => 'Any lecturer'],
             ],
-
-
-
-
-
-
 
             $actionColumn,
         ],
