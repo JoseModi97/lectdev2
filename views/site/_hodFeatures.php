@@ -104,7 +104,15 @@ $this->title = '';
                                 ]),
                                 'fa fa-chalkboard-teacher'
                             ),
-                            Menu::link('Service courses', '/gr', 'fa fa-book-open'),
+                            'Service courses <span class="badge bg-primary">New</span>',
+                            Url::to([
+                                'allocation/give',
+                                'CourseAllocationFilter' => [
+                                    'purpose' => 'serviceCourses',
+                                    'academicYear' => '2024/2025',
+                                ],
+                                '_csrf' => Yii::$app->request->csrfToken,
+                            ]),
                         ]),
                     ]),
                     Menu::parent('Reports', [
