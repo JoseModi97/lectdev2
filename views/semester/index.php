@@ -512,6 +512,57 @@ $this->params['breadcrumbs'][] = $this->title;
                 'vAlign' => 'middle',
                 'width' => '25%',
                 'value' => function ($d) {
+                    // Helper: fetch latest request relative time
+                    $getRelativeTime = function ($marksheetId) {
+                        $req = AllocationRequest::find()->alias('AR')
+                            ->select([
+                                'AR.REQUEST_ID',
+                                new \yii\db\Expression("TO_CHAR(AR.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE")
+                            ])
+                            ->where(['AR.MARKSHEET_ID' => $marksheetId])
+                            ->orderBy(['AR.REQUEST_ID' => SORT_DESC])
+                            ->one();
+
+                        if (!$req || !$req->REQUEST_DATE) {
+                            return '';
+                        }
+
+                        try {
+                            $rawDate = Yii::$app->formatter->asDate($req->REQUEST_DATE, 'php:Y-m-d H:i:s') . '.000';
+                            $dt  = \DateTime::createFromFormat('Y-m-d H:i:s.u', $rawDate);
+                            $now = new \DateTime('now');
+
+                            if (!$dt) {
+                                return '';
+                            }
+
+                            $diff = $now->diff($dt);
+                            $units = [];
+                            if ($diff->y) $units[] = $diff->y . 'y';
+                            if ($diff->m) $units[] = $diff->m . 'mo';
+                            if ($diff->d) $units[] = $diff->d . 'd';
+                            if ($diff->h) $units[] = $diff->h . 'h';
+                            if ($diff->i) $units[] = $diff->i . 'm';
+                            if ($diff->s || empty($units)) $units[] = $diff->s . 's';
+
+                            $label = implode(' ', array_slice($units, 0, 2));
+                            $relative = 'Requested ' . $label . ' ago';
+
+                            // Tooltip exact time
+                            $formatter = Yii::$app->formatter;
+                            $prevTz = $formatter->timeZone;
+                            $formatter->timeZone = 'Africa/Nairobi';
+                            $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
+                            $formatter->timeZone = $prevTz;
+
+                            return '<span class="text-muted ms-2" data-bs-toggle="tooltip" title="Requested: '
+                                . Html::encode($exact) . '"><i class="far fa-clock"></i> '
+                                . Html::encode($relative) . '</span>';
+                        } catch (\Throwable $e) {
+                            return '';
+                        }
+                    };
+
                     $assignments = CourseAssignment::find()
                         ->select(['PAYROLL_NO'])
                         ->where(['MRKSHEET_ID' => $d->MRKSHEET_ID])
@@ -519,58 +570,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     // Case 1: No assignments
                     if (empty($assignments)) {
-                        // Look up request date
-                        $req = AllocationRequest::find()->alias('AR')
-                            ->select([
-                                'AR.REQUEST_ID',
-                                new \yii\db\Expression("TO_CHAR(AR.REQUEST_DATE, 'YYYY-MM-DD HH24:MI:SS') AS REQUEST_DATE")
-                            ])
-                            ->where(['AR.MARKSHEET_ID' => $d->MRKSHEET_ID])
-                            ->orderBy(['AR.REQUEST_ID' => SORT_DESC])
-                            ->one();
-
-                        $relative = '';
-                        if ($req && $req->REQUEST_DATE) {
-                            try {
-                                $rawDate = Yii::$app->formatter->asDate($req->REQUEST_DATE, 'php:Y-m-d H:i:s') . '.000';
-                                $dt  = \DateTime::createFromFormat('Y-m-d H:i:s.u', $rawDate);
-                                $now = new \DateTime('now');
-
-                                if ($dt) {
-                                    $diff = $now->diff($dt);
-                                    $units = [];
-                                    if ($diff->y) $units[] = $diff->y . 'y';
-                                    if ($diff->m) $units[] = $diff->m . 'mo';
-                                    if ($diff->d) $units[] = $diff->d . 'd';
-                                    if ($diff->h) $units[] = $diff->h . 'h';
-                                    if ($diff->i) $units[] = $diff->i . 'm';
-                                    if ($diff->s || empty($units)) $units[] = $diff->s . 's';
-
-                                    $label = implode(' ', array_slice($units, 0, 2));
-                                    $relative = 'Requested ' . $label . ' ago';
-
-                                    // Tooltip exact time
-                                    $formatter = Yii::$app->formatter;
-                                    $prevTz = $formatter->timeZone;
-                                    $formatter->timeZone = 'Africa/Nairobi';
-                                    $exact = $formatter->asDatetime($dt, 'php:j M Y, H:i:s') . ' EAT';
-                                    $formatter->timeZone = $prevTz;
-
-                                    $relative = '<span class="text-muted ms-2" data-bs-toggle="tooltip" title="Requested: ' .
-                                        Html::encode($exact) . '"><i class="far fa-clock"></i> ' .
-                                        Html::encode($relative) . '</span>';
-                                }
-                            } catch (\Throwable $e) {
-                                $relative = '';
-                            }
-                        }
-
-                        return '<div class="mb-1 text-dark"><b>Not assigned</b>' . $relative . '</div>';
+                        return '<div class="mb-1 text-dark"><b>Not assigned</b>'
+                            . $getRelativeTime($d->MRKSHEET_ID) . '</div>';
                     }
 
-                    // Case 2: Show assigned lecturers
+                    // Case 2: Show assigned lecturers with relative time
                     $output = '';
                     $courseLeaderFound = false;
+                    $relative = $getRelativeTime($d->MRKSHEET_ID);
 
                     foreach ($assignments as $assignment) {
                         $lecturer = EmpVerifyView::find()
@@ -596,11 +603,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             $courseLeaderFound = true;
                             $output .= '<div class="mb-1 text-dark"><i class="fas fa-user-tie"></i> '
                                 . Html::encode($lecturerName)
-                                . ' <span class="text-success" style="font-weight: bold">(Leader)</span></div>';
+                                . ' <span class="text-success" style="font-weight: bold">(Leader)</span>'
+                                . $relative . '</div>';
                         } else {
                             $output .= '<div class="mb-1 text-dark"><i class="fas fa-user"></i> '
                                 . Html::encode($lecturerName)
-                                . '</div>';
+                                . $relative . '</div>';
                         }
                     }
 
@@ -613,6 +621,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filterInputOptions' => ['placeholder' => 'Any lecturer'],
             ],
+
 
 
 
