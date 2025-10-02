@@ -161,8 +161,14 @@ $manageLecturersScript = <<< JS
                     },
                     success     :   function(res){
                         if(res && res.status === 200){
-                            alert('Course leader set successfully.');
-                            location.reload();
+                            // Close modal, then refresh the entire page
+                            if($('#modal').length){
+                                $('#modal').one('hidden.bs.modal', function(){
+                                    location.reload();
+                                }).modal('hide');
+                            } else {
+                                location.reload();
+                            }
                         }else{
                             let msg = (res && res.message) ? res.message : 'Request failed. Please try again.';
                             alert(msg);

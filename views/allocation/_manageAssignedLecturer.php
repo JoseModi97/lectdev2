@@ -199,8 +199,8 @@ $manageLecturersScript = <<< JS
                 })
                 .done(function(resp){
                     if(resp && resp.status === 200){
-                        $('#modal').on('hidden.bs.modal', function(){
-                            $.pjax.reload({container: '#semester-grid-pjax', timeout: 0});
+                        $('#modal').one('hidden.bs.modal', function(){
+                            location.reload();
                         }).modal('hide');
                     } else {
                         $('#manage-lecturer-loader').removeClass('alert-danger').html('');
