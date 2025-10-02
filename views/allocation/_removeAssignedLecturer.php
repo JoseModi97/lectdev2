@@ -214,13 +214,32 @@ $removeLecturersScript = <<< JS
                 url: removeLecturerAction,
                 data: formData,
                 dataType: 'json',
-                encode: true
+                encode: true,
+                beforeSend: function(){
+                    $('#remove-lecturer-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h5>');
+                },
+                complete: function(){
+                    $('#remove-lecturer-loader').html('');
+                }
             })
-            .done(function(data) {
-                // handle success
+            .done(function(res) {
+                if(res && res.status === 200){
+                    if($('#modal').length){
+                        $('#modal').one('hidden.bs.modal', function(){
+                            location.reload();
+                        }).modal('hide');
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    var msg = (res && res.message) ? res.message : 'Request failed. Please try again.';
+                    alert(msg);
+                }
             })
-            .fail(function(data) {
-                // handle error
+            .fail(function(xhr) {
+                var msg = 'Request failed.';
+                try{ if(xhr.responseJSON && xhr.responseJSON.message){ msg = xhr.responseJSON.message; } }catch(e){}
+                alert(msg);
             });
         } else {
             alert('Operation was cancelled.');

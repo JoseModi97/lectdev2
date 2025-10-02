@@ -250,9 +250,9 @@ $allocatedLecturer = [
         }
 
         // For pending requests with no allocated lecturers, show a compact relative request time (EAT)
-        if ($model->status->STATUS_NAME === 'PENDING') { 
-            $date = $model->REQUEST_DATE ?? null; 
-            if ($date) { 
+        if ($model->status->STATUS_NAME === 'PENDING') {
+            $date = $model->REQUEST_DATE ?? null;
+            if ($date) {
                 try {
                     $tz = new \DateTimeZone('Africa/Nairobi');
                     $now = new \DateTime('now', $tz);
@@ -260,12 +260,24 @@ $allocatedLecturer = [
                     $diff = $now->diff($dt);
                     // Build compact label using at most two largest non‑zero units (e.g., 3y 1m, 2d 4h, 45m, 30s)
                     $units = [];
-                    if ($diff->y) { $units[] = $diff->y . 'y'; }
-                    if ($diff->m) { $units[] = $diff->m . 'mo'; }
-                    if ($diff->d) { $units[] = $diff->d . 'd'; }
-                    if ($diff->h) { $units[] = $diff->h . 'h'; }
-                    if ($diff->i) { $units[] = $diff->i . 'm'; }
-                    if ($diff->s || empty($units)) { $units[] = $diff->s . 's'; }
+                    if ($diff->y) {
+                        $units[] = $diff->y . 'y';
+                    }
+                    if ($diff->m) {
+                        $units[] = $diff->m . 'mo';
+                    }
+                    if ($diff->d) {
+                        $units[] = $diff->d . 'd';
+                    }
+                    if ($diff->h) {
+                        $units[] = $diff->h . 'h';
+                    }
+                    if ($diff->i) {
+                        $units[] = $diff->i . 'm';
+                    }
+                    if ($diff->s || empty($units)) {
+                        $units[] = $diff->s . 's';
+                    }
                     $label = implode(' ', array_slice($units, 0, 2));
                     // invert=1 means past (dt < now) => "ago"; invert=0 means future => "in"
                     $relative = $diff->invert ? ($label . ' ago') : ('in ' . $label);
@@ -273,8 +285,8 @@ $allocatedLecturer = [
                     $relative = (string)$date;
                 }
                 return 'Requested: ' . $relative;
-            } 
-        } 
+            }
+        }
 
         return '';
     }

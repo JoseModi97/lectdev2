@@ -902,6 +902,7 @@ class AllocationController extends BaseController
      */
     public function actionRemoveAllocatedLecturer(): Response
     {
+        $isAjax = Yii::$app->request->isAjax;
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $post = Yii::$app->request->post();
@@ -950,6 +951,11 @@ class AllocationController extends BaseController
                 }
             }
             $transaction->commit();
+
+            if ($isAjax) {
+                return $this->asJson(['status' => 200, 'message' => 'The selected lecturer(s) have been removed.']);
+            }
+
             Yii::$app->session->setFlash(
                 'success',
                 'Remove allocated lecturers',
@@ -961,6 +967,9 @@ class AllocationController extends BaseController
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            if ($isAjax) {
+                return $this->asJson(['status' => 500, 'message' => $message]);
             }
             Yii::$app->session->setFlash('danger', 'Failed to remove lecturer', $message);
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
