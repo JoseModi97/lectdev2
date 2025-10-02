@@ -116,11 +116,19 @@ $getLevelsOfStudyUrl = Url::to(['/shared-reports/get-levels-of-study']);
 $getGroupsUrl = Url::to(['/shared-reports/get-groups']);
 $consolidatedMarksUrl = Url::to(['/shared-reports/consolidated-marks-per-student']);
 
-$studentConsolidatedMarksScript = <<< JS
-var academicYearsUrl = '$getAcademicYearsUrl';
-var programmesUrl = '$getProgrammesUrl';
-var levelsUrl = '$getLevelsOfStudyUrl';
-var groupsUrl = '$getGroupsUrl';
+$this->registerJsVar('studentConsolidatedMarksUrls', [
+    'academicYears' => $getAcademicYearsUrl,
+    'programmes' => $getProgrammesUrl,
+    'levels' => $getLevelsOfStudyUrl,
+    'groups' => $getGroupsUrl,
+    'consolidatedMarks' => $consolidatedMarksUrl,
+]);
+
+$studentConsolidatedMarksScript = <<<'JS'
+var academicYearsUrl = studentConsolidatedMarksUrls.academicYears;
+var programmesUrl = studentConsolidatedMarksUrls.programmes;
+var levelsUrl = studentConsolidatedMarksUrls.levels;
+var groupsUrl = studentConsolidatedMarksUrls.groups;
 var academicYear = '';
 var programmeCode = '';
 var levelOfStudy = '';
@@ -179,7 +187,7 @@ $("#course-analysis-filters-form").validate({
         }
     },
     submitHandler: function(form) {
-        var url = '$consolidatedMarksUrl';
+        var url = studentConsolidatedMarksUrls.consolidatedMarks;
         var data = $(form).serialize();
 
         $.ajax({
