@@ -40,13 +40,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Select2::widget([
                         'name' => 'StudentConsolidatedMarksFilter[academicYear]',
                         'id' => 'academic-year',
-                        'bsVersion' => '5.x',
-                        'theme' => Select2::THEME_BOOTSTRAP,
                         'options' => ['placeholder' => 'Select'],
                         'pluginOptions' => [
                             'allowClear' => true,
-                            'dropdownParent' => '#student-consolidated-marks-card',
-                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -56,13 +52,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Select2::widget([
                         'name' => 'StudentConsolidatedMarksFilter[degreeCode]',
                         'id' => 'programme',
-                        'bsVersion' => '5.x',
-                        'theme' => Select2::THEME_BOOTSTRAP,
                         'options' => ['placeholder' => 'Select'],
                         'pluginOptions' => [
                             'allowClear' => true,
-                            'dropdownParent' => '#student-consolidated-marks-card',
-                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -72,13 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Select2::widget([
                         'name' => 'StudentConsolidatedMarksFilter[levelOfStudy]',
                         'id' => 'level-of-study',
-                        'bsVersion' => '5.x',
-                        'theme' => Select2::THEME_BOOTSTRAP,
                         'options' => ['placeholder' => 'Select', 'disabled' => true],
                         'pluginOptions' => [
                             'allowClear' => true,
-                            'dropdownParent' => '#student-consolidated-marks-card',
-                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -88,13 +76,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Select2::widget([
                         'name' => 'StudentConsolidatedMarksFilter[group]',
                         'id' => 'group',
-                        'bsVersion' => '5.x',
-                        'theme' => Select2::THEME_BOOTSTRAP,
                         'options' => ['placeholder' => 'Select', 'disabled' => true],
                         'pluginOptions' => [
                             'allowClear' => true,
-                            'dropdownParent' => '#student-consolidated-marks-card',
-                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -279,17 +263,9 @@ $('#group').on('change', function (e){
 // Get levels of study 
 getLevelsOfStudy = function (){
     var $levelSelect = $('#level-of-study');
-    if ($levelSelect.data('select2')) {
-        $levelSelect.select2('destroy');
-    }
-
     $levelSelect.find('option').not(':first').remove();
-    $levelSelect.prop('disabled', true).select2({
-        placeholder: 'Loading...',
-        dropdownParent: dropdownParent,
-        allowClear: true,
-        width: '100%'
-    });
+    $levelSelect.prop('disabled', true);
+
     axios.get(levelsUrl, {
         params: {
             year: academicYear,
@@ -305,44 +281,20 @@ getLevelsOfStudy = function (){
                 text: level.levelOfStudy.NAME.toUpperCase()
             }));
         });
-        if ($levelSelect.data('select2')) {
-            $levelSelect.select2('destroy');
-        }
-        $levelSelect.prop('disabled', false).select2({
-            placeholder: 'Select',
-            dropdownParent: dropdownParent,
-            allowClear: true,
-            width: '100%'
-        });
+        $levelSelect.prop('disabled', false);
     })
     .catch(error => {
         console.error(error);
-        if ($levelSelect.data('select2')) {
-            $levelSelect.select2('destroy');
-        }
-        $levelSelect.prop('disabled', false).select2({
-            placeholder: 'Error loading data',
-            dropdownParent: dropdownParent,
-            allowClear: true,
-            width: '100%'
-        });
+        $levelSelect.prop('disabled', false);
     });
 }
 
 // Get students groups
 getGroups = function (){
     var $groupSelect = $('#group');
-    if ($groupSelect.data('select2')) {
-        $groupSelect.select2('destroy');
-    }
-
     $groupSelect.find('option').not(':first').remove();
-    $groupSelect.prop('disabled', true).select2({
-        placeholder: 'Loading...',
-        dropdownParent: dropdownParent,
-        allowClear: true,
-        width: '100%'
-    });
+    $groupSelect.prop('disabled', true);
+
     axios.get(groupsUrl, {
         params: {
             year: academicYear,
@@ -359,27 +311,11 @@ getGroups = function (){
                 text: group.group.GROUP_NAME
             }));
         });
-        if ($groupSelect.data('select2')) {
-            $groupSelect.select2('destroy');
-        }
-        $groupSelect.prop('disabled', false).select2({
-            placeholder: 'Select',
-            dropdownParent: dropdownParent,
-            allowClear: true,
-            width: '100%'
-        });
+        $groupSelect.prop('disabled', false);
     })
     .catch(error => {
         console.error(error);
-        if ($groupSelect.data('select2')) {
-            $groupSelect.select2('destroy');
-        }
-        $groupSelect.prop('disabled', false).select2({
-            placeholder: 'Error loading data',
-            dropdownParent: dropdownParent,
-            allowClear: true,
-            width: '100%'
-        });
+        $groupSelect.prop('disabled', false);
     });
 }
 JS;
