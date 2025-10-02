@@ -769,56 +769,54 @@ CSS;
         try {
             $filter = new StudentConsolidatedMarksFilter();
 
-            $session = Yii::$app->session;
+            if ($filter->load(Yii::$app->request->get()) && $filter->validate()) {
+                $bindParams = [
+                    ':academicYear' => $filter->academicYear,
+                    ':studyProgram' => $filter->degreeCode,
+                    ':studyLevel' => $filter->levelOfStudy,
+                    ':studyGroup' => $filter->group
+                ];
 
-            // Save the filters in the session for retrieval on page redirects
-            if (!empty(Yii::$app->request->get()['StudentConsolidatedMarksFilter'])) {
-                $session['StudentConsolidatedMarksFilter'] = Yii::$app->request->get();
+                $connection = Yii::$app->getDb();
+
+                // Get all students registered for courses in the given timetable
+                $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
+                        FROM MUTHONI.MARKSHEETS MS
+                        INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
+                        INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
+                        INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
+                        WHERE
+                            SEM.ACADEMIC_YEAR = :academicYear AND
+                            SEM.DEGREE_CODE = :studyProgram AND
+                            SEM.LEVEL_OF_STUDY = :studyLevel AND
+                            SEM.GROUP_CODE = :studyGroup
+                        ORDER BY MS.REGISTRATION_NUMBER ASC";
+
+                $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
+
+                /**
+                 * Get the maximum number of courses registered for by students in the given timetable.
+                 * We use this number to decide how many table cells we'll have to display the courses in the report.
+                 */
+                $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
+
+                $panelHeading = 'Consolidated marks per student';
+
+                return $this->renderAjax('consolidatedMarksPerStudent', [
+                    'title' => 'Consolidated marks per student',
+                    'students' => $students,
+                    'maxStudentCourses' => $maxStudentCourses,
+                    'panelHeading' => $panelHeading,
+                    'filter' => $filter
+                ]);
             }
 
-            if (!$filter->load($session->get('StudentConsolidatedMarksFilter')) || !$filter->validate()) {
-                throw new Exception('Failed to load filters for course analysis report.');
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['error' => $filter->getErrors()];
             }
+            throw new Exception('Failed to load filters for course analysis report.');
 
-            $bindParams = [
-                ':academicYear' => $filter->academicYear,
-                ':studyProgram' => $filter->degreeCode,
-                ':studyLevel' => $filter->levelOfStudy,
-                ':studyGroup' => $filter->group
-            ];
-
-            $connection = Yii::$app->getDb();
-
-            // Get all students registered for courses in the given timetable
-            $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
-                    FROM MUTHONI.MARKSHEETS MS
-                    INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
-                    INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
-                    INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
-                    WHERE
-                        SEM.ACADEMIC_YEAR = :academicYear AND
-                        SEM.DEGREE_CODE = :studyProgram AND
-                        SEM.LEVEL_OF_STUDY = :studyLevel AND
-                        SEM.GROUP_CODE = :studyGroup
-                    ORDER BY MS.REGISTRATION_NUMBER ASC";
-
-            $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
-
-            /**
-             * Get the maximum number of courses registered for by students in the given timetable.
-             * We use this number to decide how many table cells we'll have to display the courses in the report.
-             */
-            $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
-
-            $panelHeading = 'Consolidated marks per student';
-
-            return $this->render('consolidatedMarksPerStudent', [
-                'title' => 'Consolidated marks per student',
-                'students' => $students,
-                'maxStudentCourses' => $maxStudentCourses,
-                'panelHeading' => $panelHeading,
-                'filter' => $filter
-            ]);
         } catch (Exception $ex) {
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
