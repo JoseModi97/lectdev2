@@ -230,6 +230,11 @@ $this->registerCss(
                     'placeholder' => 'Select Academic Year...',
                     'id' => 'academicYearSelect',
                     'required' => true,
+                    'onchange' => <<< JS
+                        if($('#degreeCodeSelect').val() || $('#semesterCodeSelect').val()){
+                                $('#degreeCodeSelect').val(null).trigger('change');
+                        }
+                    JS,
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>

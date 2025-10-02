@@ -122,6 +122,20 @@ if ($filter->purpose === 'serviceCourses') {
         'groupedRow' => true,
         'groupOddCssClass' => 'group-academic-year',
         'groupEvenCssClass' => 'group-academic-year',
+        'value' => function ($model) {
+            $deptName = $model->requestingDept->DEPT_NAME ?? '';
+            $degCode = $model->marksheet->semester->DEGREE_CODE ?? '';
+            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]);
+            $degName = $deg['DEGREE_NAME'] ?? '';
+            $suffix = '';
+            if ($degCode) {
+                $suffix .= ' | ' . $degCode;
+            }
+            if ($degName) {
+                $suffix .= ' - ' . $degName;
+            }
+            return trim($deptName . $suffix);
+        }
     ];
 } else {
     $departmentColumn = [
