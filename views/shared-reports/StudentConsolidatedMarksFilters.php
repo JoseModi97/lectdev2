@@ -270,6 +270,9 @@ $('#level-of-study').on('change', function (e){
 // Read selected group
 $('#group').on('change', function (e){
     group = $(this).val();
+    if (academicYear && programmeCode && levelOfStudy && group) {
+        $('#course-analysis-filters-form').submit();
+    }
 });
 
 // Get levels of study 
