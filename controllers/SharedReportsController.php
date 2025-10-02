@@ -764,7 +764,7 @@ CSS;
      * @return string page to render the report
      * @throws ServerErrorHttpException
      */
-    public function actionConsolidatedMarksPerStudent(): string
+    public function actionConsolidatedMarksPerStudent()
     {
         try {
             $filter = new StudentConsolidatedMarksFilter();
@@ -928,5 +928,159 @@ CSS;
         //            ]
         //        ]);
         return $pdf->render();
+    }
+
+    public function actionGetStudentDetails($regNumber, $academicYear, $degreeCode, $levelOfStudy, $group)
+    {
+        try {
+            $filter = new StudentConsolidatedMarksFilter();
+            $filter->academicYear = $academicYear;
+            $filter->degreeCode = $degreeCode;
+            $filter->levelOfStudy = $levelOfStudy;
+            $filter->group = $group;
+
+            // Fetch student details (recommendation, GPA, courses, marks, grades)
+            $recommendation = '';
+            $GPA = '';
+            $studentCoursesTotal = 0;
+            $studentName = ''; // Initialize student name
+            $groupName = ''; // Initialize group name
+            $levelName = ''; // Initialize level name
+            $degreeName = ''; // Initialize degree name
+
+            $connection = Yii::$app->getDb();
+
+            // Get degree name
+            $degreeModel = \app\models\DegreeProgramme::find()->select(['DEGREE_NAME'])->where(['DEGREE_CODE' => $degreeCode])->asArray()->one();
+            if ($degreeModel) {
+                $degreeName = $degreeModel['DEGREE_NAME'];
+            }
+
+            // Get student name
+            $studentQuery = "SELECT OTHER_NAMES, SURNAME FROM MUTHONI.UON_STUDENTS WHERE REGISTRATION_NUMBER = :regNumber";
+            $studentResult = $connection->createCommand($studentQuery)->bindValue(':regNumber', $regNumber)->queryOne();
+            if ($studentResult) {
+                $studentName = $studentResult['SURNAME'] . ' ' . $studentResult['OTHER_NAMES'];
+            }
+
+            // Get group name
+            $groupModel = \app\models\Group::find()->select(['GROUP_NAME'])->where(['GROUP_CODE' => $group])->asArray()->one();
+            if ($groupModel) {
+                $groupName = $groupModel['GROUP_NAME'];
+            }
+
+            // Get level name
+            $levelModel = \app\models\LevelOfStudy::find()->select(['NAME'])->where(['LEVEL_OF_STUDY' => $levelOfStudy])->asArray()->one();
+            if ($levelModel) {
+                $levelName = $levelModel['NAME'];
+            }
+
+            // Get recommendation and GPA
+            $recommendationQuery = "SELECT ER.GPA, ER.EXT_RESULT, ER.RESULT FROM MUTHONI.EXAM_RESULT ER
+                                    WHERE ER.REGISTRATION_NUMBER = :regNumber AND ER.LEVEL_OF_STUDY = :studyLevel";
+            $bindParams = [
+                ':regNumber' => $regNumber,
+                ':studyLevel' => $filter->levelOfStudy,
+            ];
+            $recommendationResult = $connection->createCommand($recommendationQuery)->bindValues($bindParams)->queryOne();
+
+            if (!empty($recommendationResult)) {
+                if (!is_null($recommendationResult['RESULT'])) {
+                    $recommendation = $recommendationResult['RESULT'];
+                }
+                if (!is_null($recommendationResult['EXT_RESULT'])) {
+                    $recommendation .= '. ' . $recommendationResult['EXT_RESULT'];
+                }
+                if (!is_null($recommendationResult['GPA'])) {
+                    $GPA = $recommendationResult['GPA'];
+                }
+            }
+
+            // Get total courses for the student
+            $studentCoursesTotal = SmisHelper::getMaximumCoursesRegisteredFor($filter, $regNumber);
+
+            // Get all courses registered for by a student
+            $timetableStartsWith = $filter->academicYear . '_' . $filter->degreeCode . '_' . $filter->levelOfStudy;
+
+            $studentMarksheets = MarksheetDef::find()->alias('MD')
+                ->select([
+                    'MD.MRKSHEET_ID',
+                    'MD.COURSE_ID'
+                ])
+                ->joinWith(['course CS' => function (ActiveQuery $q) {
+                    $q->select([
+                        'CS.COURSE_ID',
+                        'CS.COURSE_CODE',
+                        'CS.COURSE_NAME' // Added course name
+                    ]);
+                }], true, 'INNER JOIN')
+                ->joinWith(['marksheet MS' => function (ActiveQuery $q) {
+                    $q->select([
+                        'MS.MRKSHEET_ID',
+                        'MS.REGISTRATION_NUMBER'
+                    ]);
+                }], true, 'INNER JOIN')
+                ->where(['like', 'MD.MRKSHEET_ID', $timetableStartsWith . '%', false])
+                ->andWhere([
+                    'MD.GROUP_CODE' => $filter->group,
+                    'MS.REGISTRATION_NUMBER' => $regNumber,
+                ])
+                ->orderBy(['CS.COURSE_CODE' => SORT_ASC])
+                ->asArray()
+                ->all();
+
+            $courses = [];
+            foreach ($studentMarksheets as $studentMarksheet) {
+                $studentMarks = TempMarksheet::find()->select(['GRADE', 'FINAL_MARKS'])
+                    ->where([
+                        'MRKSHEET_ID' => $studentMarksheet['MRKSHEET_ID'],
+                        'REGISTRATION_NUMBER' => $regNumber
+                    ])
+                    ->one();
+
+                $grade = '';
+                $finalMarks = '';
+
+                if ($studentMarks) {
+                    if ($studentMarks->GRADE) {
+                        $grade = $studentMarks->GRADE;
+                    }
+                    if ($studentMarks->FINAL_MARKS) {
+                        $finalMarks = $studentMarks->FINAL_MARKS;
+                    }
+                }
+
+                $courses[] = [
+                    'code' => $studentMarksheet['course']['COURSE_CODE'],
+                    'name' => $studentMarksheet['course']['COURSE_NAME'],
+                    'grade' => $grade,
+                    'finalMarks' => $finalMarks
+                ];
+            }
+
+            return $this->renderAjax('_studentDetailsModal', [
+                'regNumber' => $regNumber,
+                'studentName' => $studentName, // Pass student name
+                'academicYear' => $academicYear,
+                'degreeCode' => $degreeCode,
+                'degreeName' => $degreeName, // Pass degree name
+                'levelOfStudy' => $levelOfStudy,
+                'levelName' => $levelName, // Pass level name
+                'group' => $group,
+                'groupName' => $groupName, // Pass group name
+                'recommendation' => $recommendation,
+                'GPA' => $GPA,
+                'studentCoursesTotal' => $studentCoursesTotal,
+                'courses' => $courses,
+            ]);
+
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ['error' => $message];
+        }
     }
 }

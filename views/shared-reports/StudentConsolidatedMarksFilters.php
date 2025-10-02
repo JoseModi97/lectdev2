@@ -51,9 +51,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-12 col-xl-11">
         <div id="student-consolidated-marks-card" class="card shadow-sm border-0">
             <div class="mt-2 py-2 text-white" style="background-color: #304186;">
-                <div class=" d-flex align-items-center">
+                <div class="d-flex align-items-center px-2">
                     <i class="ml-2 fa fa-filter me-2" aria-hidden="true"></i>
                     <h2 class="h5 mb-0">Filter courses</h2>
+                    <i class="fa fa-question-circle ms-2" id="note-popover" style="cursor: pointer;"></i>
                 </div>
             </div>
             <div class="card-body">
@@ -112,11 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]); ?>
                 </div>
 
-                <div class="col-12 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="fa fa-search me-2" aria-hidden="true"></i>Submit
-                    </button>
-                </div>
+
 
                 <?php ActiveForm::end(); ?>
             </div>
@@ -376,5 +373,13 @@ getGroups = function (){
         $groupSelect.prop('disabled', false);
     });
 }
+
+$('#note-popover').popover({
+    title: 'Please note the following',
+    content: 'This consolidated marksheet is provisional and can be tabled in the examiners committees for approval. The final consolidated marksheet with approved results should be generated from SMIS.',
+    trigger: 'hover',
+    placement: 'top',
+    html: true
+});
 JS;
 $this->registerJs($studentConsolidatedMarksScript, View::POS_READY);
