@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => [
                             'allowClear' => true,
                             'dropdownParent' => '#student-consolidated-marks-card',
+                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -61,6 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => [
                             'allowClear' => true,
                             'dropdownParent' => '#student-consolidated-marks-card',
+                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -76,6 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => [
                             'allowClear' => true,
                             'dropdownParent' => '#student-consolidated-marks-card',
+                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -91,6 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'pluginOptions' => [
                             'allowClear' => true,
                             'dropdownParent' => '#student-consolidated-marks-card',
+                            'width' => '100%',
                         ],
                     ]); ?>
                 </div>
@@ -283,7 +287,8 @@ getLevelsOfStudy = function (){
     $levelSelect.prop('disabled', true).select2({
         placeholder: 'Loading...',
         dropdownParent: dropdownParent,
-        allowClear: true
+        allowClear: true,
+        width: '100%'
     });
     axios.get(levelsUrl, {
         params: {
@@ -306,7 +311,8 @@ getLevelsOfStudy = function (){
         $levelSelect.prop('disabled', false).select2({
             placeholder: 'Select',
             dropdownParent: dropdownParent,
-            allowClear: true
+            allowClear: true,
+            width: '100%'
         });
     })
     .catch(error => {
@@ -317,7 +323,8 @@ getLevelsOfStudy = function (){
         $levelSelect.prop('disabled', false).select2({
             placeholder: 'Error loading data',
             dropdownParent: dropdownParent,
-            allowClear: true
+            allowClear: true,
+            width: '100%'
         });
     });
 }
@@ -333,7 +340,8 @@ getGroups = function (){
     $groupSelect.prop('disabled', true).select2({
         placeholder: 'Loading...',
         dropdownParent: dropdownParent,
-        allowClear: true
+        allowClear: true,
+        width: '100%'
     });
     axios.get(groupsUrl, {
         params: {
@@ -357,7 +365,8 @@ getGroups = function (){
         $groupSelect.prop('disabled', false).select2({
             placeholder: 'Select',
             dropdownParent: dropdownParent,
-            allowClear: true
+            allowClear: true,
+            width: '100%'
         });
     })
     .catch(error => {
@@ -368,7 +377,8 @@ getGroups = function (){
         $groupSelect.prop('disabled', false).select2({
             placeholder: 'Error loading data',
             dropdownParent: dropdownParent,
-            allowClear: true
+            allowClear: true,
+            width: '100%'
         });
     });
 }
