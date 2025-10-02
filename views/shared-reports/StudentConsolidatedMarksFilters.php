@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @author Rufusy Idachi <idachirufus@gmail.com>
  */
@@ -14,16 +15,23 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 
+$this->registerCss(
+    <<<CSS
+    .card-header{
+        background-color: #304186;
+    }
+    CSS
+);
 $this->title = $title;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="row justify-content-center">
-    <div class="col-12 col-xl-10">
+    <div class="col-12 col-xl-11">
         <div id="student-consolidated-marks-card" class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex align-items-center">
-                    <i class="fa fa-filter me-2" aria-hidden="true"></i>
+            <div class="mt-2 py-2 text-white" style="background-color: #304186;">
+                <div class=" d-flex align-items-center">
+                    <i class="ml-2 fa fa-filter me-2" aria-hidden="true"></i>
                     <h2 class="h5 mb-0">Filter courses</h2>
                 </div>
             </div>
@@ -96,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <div class="row justify-content-center mt-4">
-    <div class="col-12 col-xl-10">
+    <div class="col-12 col-xl-11">
         <div id="consolidated-marks-container"></div>
     </div>
 </div>
