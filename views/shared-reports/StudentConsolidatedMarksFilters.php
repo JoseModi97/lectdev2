@@ -20,6 +20,27 @@ $this->registerCss(
     .card-header{
         background-color: #304186;
     }
+    .form-group.loading {
+        position: relative;
+    }
+    .form-group.loading:after {
+        content: '';
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 40px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
     CSS
 );
 $this->title = $title;
@@ -209,32 +230,54 @@ $("#course-analysis-filters-form").validate({
 });
 
 // Get academic years
+var academicYearDropdown = $('#academic-year');
+var academicYearFormGroup = academicYearDropdown.closest('.form-group');
+academicYearDropdown.prop('disabled', true);
+academicYearFormGroup.addClass('loading');
+
 axios.get(academicYearsUrl)
 .then(function (response) {
     var academicYears = response.data.academicYears;
-    $('#academic-year').append($('<option>'));
+    academicYearDropdown.append($('<option>'));
     Object.keys(academicYears).forEach(function(key) {
-        $('#academic-year').append($('<option>', { 
+        academicYearDropdown.append($('<option>', { 
             value: key,
             text : academicYears[key]
         }));
     });
+    academicYearDropdown.prop('disabled', false);
+    academicYearFormGroup.removeClass('loading');
 })
-.catch(error => console.error(error));
+.catch(error => {
+    console.error(error);
+    academicYearDropdown.prop('disabled', false);
+    academicYearFormGroup.removeClass('loading');
+});
 
 // Get programmes
+var programmeDropdown = $('#programme');
+var programmeFormGroup = programmeDropdown.closest('.form-group');
+programmeDropdown.prop('disabled', true);
+programmeFormGroup.addClass('loading');
+
 axios.get(programmesUrl)
 .then(function (response){
     var programmes = response.data.programmes;
-    $('#programme').append($('<option>'));
+    programmeDropdown.append($('<option>'));
     programmes.forEach(programme => {
-        $('#programme').append($('<option>', {
+        programmeDropdown.append($('<option>', {
             value: programme.DEGREE_CODE,
             text: programme.DEGREE_CODE + ' - ' + programme.DEGREE_NAME
         }));
     });
+    programmeDropdown.prop('disabled', false);
+    programmeFormGroup.removeClass('loading');
 })
-.catch(error => console.error(error));
+.catch(error => {
+    console.error(error);
+    programmeDropdown.prop('disabled', false);
+    programmeFormGroup.removeClass('loading');
+});
 
 // Read seleceted academic year
 var dropdownParent = $('#student-consolidated-marks-card');
