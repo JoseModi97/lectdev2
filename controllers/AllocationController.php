@@ -830,10 +830,13 @@ class AllocationController extends BaseController
 
     /**
      * Update a course leader
+     * - If request is AJAX, return JSON so client-side handlers can respond correctly.
+     * - Otherwise, fall back to flash + redirect for non-AJAX flows.
      * @return Response
      */
     public function actionManageAllocatedLecturer(): Response
     {
+        $isAjax = Yii::$app->request->isAjax;
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $post = Yii::$app->request->post();
@@ -854,14 +857,21 @@ class AllocationController extends BaseController
                 throw new Exception('Failed to create course leader.');
             }
 
-            $lecturer = EmpVerifyView::find()->select(['PAYROLL_NO'])
+            $lect = EmpVerifyView::find()->select(['PAYROLL_NO'])
                 ->where(['PAYROLL_NO' => $previousMkModel->PAYROLL_NO])->one();
 
-            if (!is_null($lecturer)) {
+            if (!is_null($lect)) {
                 $this->sendAllocationAlert($previousMkModel, $previousMkModel->PAYROLL_NO, 'removeCourseLeader');
             }
 
             $transaction->commit();
+
+            if ($isAjax) {
+                return $this->asJson([
+                    'status' => 200,
+                    'message' => 'Course leader set successfully.'
+                ]);
+            }
 
             Yii::$app->session->setFlash(
                 'success',
@@ -875,6 +885,11 @@ class AllocationController extends BaseController
             if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
+
+            if ($isAjax) {
+                return $this->asJson(['status' => 500, 'message' => $message]);
+            }
+
             Yii::$app->session->setFlash('danger', 'Failed to update course leader', $message);
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         }
