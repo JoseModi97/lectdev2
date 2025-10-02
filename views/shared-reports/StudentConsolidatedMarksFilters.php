@@ -18,78 +18,87 @@ $this->title = $title;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
-<div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12">
-        <div class="panel panel-primary">
-            <div class="panel-heading"><i class="fa fa-filter" aria-hidden="true"></i> <b>Filter courses</b></div>
-            <div class="panel-body">
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div id="student-consolidated-marks-card" class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-filter me-2" aria-hidden="true"></i>
+                    <h2 class="h5 mb-0">Filter courses</h2>
+                </div>
+            </div>
+            <div class="card-body">
                 <?php $form = ActiveForm::begin([
                     'id' => 'course-analysis-filters-form',
-                    'options' => ['class' => 'form-horizontal']
+                    'options' => ['class' => 'row g-3'],
                 ]); ?>
 
                 <?= $form->field($filter, 'approvalLevel')->hiddenInput(['value' => $filter->approvalLevel])->label(false) ?>
 
-                <div class="form-group has-feedback">
-                    <label class="control-label col-sm-2 required-control-label" for="academic-year">Academic year</label>
-                    <div class="col-sm-10">
-                        <?= Select2::widget([
-                            'name' => 'StudentConsolidatedMarksFilter[academicYear]',
-                            'id' => 'academic-year',
-                            'options' => ['placeholder' => 'Select'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]); ?>
-                    </div>
+                <div class="col-12 col-md-6 form-group">
+                    <label class="form-label fw-semibold" for="academic-year">Academic year <span class="text-danger">*</span></label>
+                    <?= Select2::widget([
+                        'name' => 'StudentConsolidatedMarksFilter[academicYear]',
+                        'id' => 'academic-year',
+                        'bsVersion' => '5.x',
+                        'theme' => Select2::THEME_BOOTSTRAP,
+                        'options' => ['placeholder' => 'Select'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'dropdownParent' => '#student-consolidated-marks-card',
+                        ],
+                    ]); ?>
                 </div>
 
-                <div class="form-group has-feedback">
-                    <label class="control-label col-sm-2 required-control-label" for="programme">Programme</label>
-                    <div class="col-sm-10">
-                        <?= Select2::widget([
-                            'name' => 'StudentConsolidatedMarksFilter[degreeCode]',
-                            'id' => 'programme',
-                            'options' => ['placeholder' => 'Select'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]); ?>
-                    </div>
+                <div class="col-12 col-md-6 form-group">
+                    <label class="form-label fw-semibold" for="programme">Programme <span class="text-danger">*</span></label>
+                    <?= Select2::widget([
+                        'name' => 'StudentConsolidatedMarksFilter[degreeCode]',
+                        'id' => 'programme',
+                        'bsVersion' => '5.x',
+                        'theme' => Select2::THEME_BOOTSTRAP,
+                        'options' => ['placeholder' => 'Select'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'dropdownParent' => '#student-consolidated-marks-card',
+                        ],
+                    ]); ?>
                 </div>
 
-                <div class="form-group has-feedback">
-                    <label class="control-label col-sm-2 required-control-label" for="level-of-study">Level of study</label>
-                    <div class="col-sm-10">
-                        <?= Select2::widget([
-                            'name' => 'StudentConsolidatedMarksFilter[levelOfStudy]',
-                            'id' => 'level-of-study',
-                            'options' => ['placeholder' => 'Select', 'disabled' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]); ?>
-                    </div>
+                <div class="col-12 col-md-6 form-group">
+                    <label class="form-label fw-semibold" for="level-of-study">Level of study <span class="text-danger">*</span></label>
+                    <?= Select2::widget([
+                        'name' => 'StudentConsolidatedMarksFilter[levelOfStudy]',
+                        'id' => 'level-of-study',
+                        'bsVersion' => '5.x',
+                        'theme' => Select2::THEME_BOOTSTRAP,
+                        'options' => ['placeholder' => 'Select', 'disabled' => true],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'dropdownParent' => '#student-consolidated-marks-card',
+                        ],
+                    ]); ?>
                 </div>
 
-                <div class="form-group has-feedback">
-                    <label class="control-label col-sm-2 required-control-label" for="group">Group</label>
-                    <div class="col-sm-10">
-                        <?= Select2::widget([
-                            'name' => 'StudentConsolidatedMarksFilter[group]',
-                            'id' => 'group',
-                            'options' => ['placeholder' => 'Select', 'disabled' => true],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]); ?>
-                    </div>
+                <div class="col-12 col-md-6 form-group">
+                    <label class="form-label fw-semibold" for="group">Group <span class="text-danger">*</span></label>
+                    <?= Select2::widget([
+                        'name' => 'StudentConsolidatedMarksFilter[group]',
+                        'id' => 'group',
+                        'bsVersion' => '5.x',
+                        'theme' => Select2::THEME_BOOTSTRAP,
+                        'options' => ['placeholder' => 'Select', 'disabled' => true],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'dropdownParent' => '#student-consolidated-marks-card',
+                        ],
+                    ]); ?>
                 </div>
 
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa fa-search me-2" aria-hidden="true"></i>Submit
+                    </button>
                 </div>
 
                 <?php ActiveForm::end(); ?>
@@ -119,32 +128,54 @@ var group = '';
 
 // https://stackoverflow.com/questions/18754020/bootstrap-with-jquery-validation-plugin
 $("#course-analysis-filters-form").validate({
-    errorElement: "span",
-    errorClass: "help-block",
-    highlight: function (element, errorClass, validClass) {
-        // Only validation controls
-        if (!$(element).hasClass('novalidation')) {
-            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+    errorElement: "div",
+    errorClass: "invalid-feedback d-block",
+    highlight: function (element) {
+        var $element = $(element);
+        if ($element.hasClass('novalidation')) {
+            return;
+        }
+
+        var $group = $element.closest('.form-group');
+        $group.addClass('has-error');
+
+        if ($element.hasClass('select2-hidden-accessible')) {
+            $element.next('.select2-container').find('.select2-selection').addClass('is-invalid');
+        } else {
+            $element.addClass('is-invalid');
         }
     },
-    unhighlight: function (element, errorClass, validClass) {
-        // Only validation controls
-        if (!$(element).hasClass('novalidation')) {
-            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
+    unhighlight: function (element) {
+        var $element = $(element);
+        if ($element.hasClass('novalidation')) {
+            return;
+        }
+
+        var $group = $element.closest('.form-group');
+        $group.removeClass('has-error');
+
+        if ($element.hasClass('select2-hidden-accessible')) {
+            $element.next('.select2-container').find('.select2-selection').removeClass('is-invalid');
+        } else {
+            $element.removeClass('is-invalid');
         }
     },
     errorPlacement: function (error, element) {
-        if (element.parent('.input-group').length) {
-            error.insertAfter(element.parent());
+        var $element = $(element);
+        if ($element.parent('.input-group').length) {
+            error.insertAfter($element.parent());
         }
-        else if (element.prop('type') === 'radio' && element.parent('.radio-inline').length) {
-            error.insertAfter(element.parent().parent());
+        else if ($element.prop('type') === 'radio' && $element.parent('.radio-inline').length) {
+            error.insertAfter($element.parent().parent());
         }
-        else if (element.prop('type') === 'checkbox' || element.prop('type') === 'radio') {
-            error.appendTo(element.parent().parent());
+        else if ($element.prop('type') === 'checkbox' || $element.prop('type') === 'radio') {
+            error.appendTo($element.parent().parent());
+        }
+        else if ($element.hasClass('select2-hidden-accessible')) {
+            error.appendTo($element.closest('.form-group'));
         }
         else {
-            error.insertAfter(element);
+            error.insertAfter($element);
         }
     },
     submitHandler: function(form) {
@@ -156,13 +187,13 @@ $("#course-analysis-filters-form").validate({
             type: 'get',
             data: data,
             beforeSend: function() {
-                $('#consolidated-marks-container').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>');
+                $('#consolidated-marks-container').html('<div class="d-flex justify-content-center py-5"><div class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i><p class="mt-3 mb-0 text-muted">Loading consolidated marks…</p></div></div>');
             },
             success: function(response) {
                 $('#consolidated-marks-container').html(response);
             },
             error: function() {
-                $('#consolidated-marks-container').html('<div class="alert alert-danger">An error occurred.</div>');
+                $('#consolidated-marks-container').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
             }
         });
         return false;
@@ -198,6 +229,8 @@ axios.get(programmesUrl)
 .catch(error => console.error(error));
 
 // Read seleceted academic year
+var dropdownParent = $('#student-consolidated-marks-card');
+
 $('#academic-year').on('change', function(e) {
     academicYear = $(this).val();
     $('#level-of-study').val(null).trigger('change').prop('disabled', true);
@@ -229,15 +262,21 @@ $('#level-of-study').on('change', function (e){
 // Read selected group
 $('#group').on('change', function (e){
     group = $(this).val();
-     if(academicYear !== '' && programmeCode !== '' && levelOfStudy !== '' && group !== ''){
-        getSemesters();
-    }
 });
 
 // Get levels of study 
 getLevelsOfStudy = function (){
-    $('#level-of-study').find('option').not(':first').remove();
-    $('#level-of-study').prop('disabled', true).select2({placeholder: 'Loading...'});
+    var $levelSelect = $('#level-of-study');
+    if ($levelSelect.data('select2')) {
+        $levelSelect.select2('destroy');
+    }
+
+    $levelSelect.find('option').not(':first').remove();
+    $levelSelect.prop('disabled', true).select2({
+        placeholder: 'Loading...',
+        dropdownParent: dropdownParent,
+        allowClear: true
+    });
     axios.get(levelsUrl, {
         params: {
             year: academicYear,
@@ -246,25 +285,48 @@ getLevelsOfStudy = function (){
     })
     .then(response => {
         var levels = response.data.levels;
-        $('#level-of-study').append($('<option>'));
+        $levelSelect.append($('<option>'));
         levels.forEach(level => {
-            $('#level-of-study').append($('<option>', {
+            $levelSelect.append($('<option>', {
                 value: level.LEVEL_OF_STUDY,
                 text: level.levelOfStudy.NAME.toUpperCase()
             }));
         });
-        $('#level-of-study').prop('disabled', false).select2({placeholder: 'Select'});
+        if ($levelSelect.data('select2')) {
+            $levelSelect.select2('destroy');
+        }
+        $levelSelect.prop('disabled', false).select2({
+            placeholder: 'Select',
+            dropdownParent: dropdownParent,
+            allowClear: true
+        });
     })
     .catch(error => {
         console.error(error);
-        $('#level-of-study').prop('disabled', false).select2({placeholder: 'Error loading data'});
+        if ($levelSelect.data('select2')) {
+            $levelSelect.select2('destroy');
+        }
+        $levelSelect.prop('disabled', false).select2({
+            placeholder: 'Error loading data',
+            dropdownParent: dropdownParent,
+            allowClear: true
+        });
     });
 }
 
-// Get students groups 
+// Get students groups
 getGroups = function (){
-    $('#group').find('option').not(':first').remove();
-    $('#group').prop('disabled', true).select2({placeholder: 'Loading...'});
+    var $groupSelect = $('#group');
+    if ($groupSelect.data('select2')) {
+        $groupSelect.select2('destroy');
+    }
+
+    $groupSelect.find('option').not(':first').remove();
+    $groupSelect.prop('disabled', true).select2({
+        placeholder: 'Loading...',
+        dropdownParent: dropdownParent,
+        allowClear: true
+    });
     axios.get(groupsUrl, {
         params: {
             year: academicYear,
@@ -274,18 +336,32 @@ getGroups = function (){
     })
     .then(response => {
         var groups = response.data.groups;
-        $('#group').append($('<option>'));
+        $groupSelect.append($('<option>'));
         groups.forEach(group => {
-            $('#group').append($('<option>', {
+            $groupSelect.append($('<option>', {
                 value: group.GROUP_CODE,
                 text: group.group.GROUP_NAME
-            })); 
+            }));
         });
-        $('#group').prop('disabled', false).select2({placeholder: 'Select'});
+        if ($groupSelect.data('select2')) {
+            $groupSelect.select2('destroy');
+        }
+        $groupSelect.prop('disabled', false).select2({
+            placeholder: 'Select',
+            dropdownParent: dropdownParent,
+            allowClear: true
+        });
     })
     .catch(error => {
         console.error(error);
-        $('#group').prop('disabled', false).select2({placeholder: 'Error loading data'});
+        if ($groupSelect.data('select2')) {
+            $groupSelect.select2('destroy');
+        }
+        $groupSelect.prop('disabled', false).select2({
+            placeholder: 'Error loading data',
+            dropdownParent: dropdownParent,
+            allowClear: true
+        });
     });
 }
 JS;
