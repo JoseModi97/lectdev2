@@ -95,7 +95,11 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
 
-<div id="consolidated-marks-container"></div>
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-xl-10">
+        <div id="consolidated-marks-container"></div>
+    </div>
+</div>
 
 <?php
 $getAcademicYearsUrl = Url::to(['/shared-reports/get-academic-years']);
