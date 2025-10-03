@@ -6,6 +6,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Semester;
 use Yii;
+use yii\db\Query;
 
 /**
  * SemesterSearch represents the model behind the search form of `app\models\Semester`.
@@ -31,7 +32,7 @@ class SemesterSearch extends Semester
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
             [['SEMESTER_CODE_DESC'], 'safe'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
-            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE'], 'required'],
+            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'LEVEL_OF_STUDY'], 'required'],
         ];
     }
 
@@ -55,6 +56,37 @@ class SemesterSearch extends Semester
     public function search($params, $formName = null)
     {
         $this->load($params, $formName);
+
+        $hasRequiredFilters = !empty($this->ACADEMIC_YEAR)
+            && !empty($this->DEGREE_CODE)
+            && $this->LEVEL_OF_STUDY !== null
+            && $this->LEVEL_OF_STUDY !== '';
+
+        if ($hasRequiredFilters && ($this->SEMESTER_CODE === null || $this->SEMESTER_CODE === '')) {
+            $firstSemester = (new Query())
+                ->select('MUTHONI.SEMESTERS.SEMESTER_CODE')
+                ->from('MUTHONI.SEMESTERS')
+                ->andWhere([
+                    'MUTHONI.SEMESTERS.ACADEMIC_YEAR'   => $this->ACADEMIC_YEAR,
+                    'MUTHONI.SEMESTERS.DEGREE_CODE'     => $this->DEGREE_CODE,
+                    'MUTHONI.SEMESTERS.LEVEL_OF_STUDY'  => $this->LEVEL_OF_STUDY,
+                ])
+                ->orderBy([
+                    'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
+                ])
+                ->scalar();
+
+            if ($firstSemester !== false && $firstSemester !== null) {
+                $this->SEMESTER_CODE = $firstSemester;
+
+                $queryParams = Yii::$app->request->getQueryParams();
+                if (!isset($queryParams['SemesterSearch'])) {
+                    $queryParams['SemesterSearch'] = [];
+                }
+                $queryParams['SemesterSearch']['SEMESTER_CODE'] = $firstSemester;
+                Yii::$app->request->setQueryParams($queryParams);
+            }
+        }
 
         $query = MarksheetDef::find();
         $query->joinWith(['semester', 'course']);
@@ -87,15 +119,12 @@ class SemesterSearch extends Semester
 
 
 
-        if (empty($params['DEGREE_CODE']) || empty($params['SEMESTER_CODE']) || empty($params['LEVEL_OF_STUDY'])) {
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query->limit(100),
-                'pagination' => false,
-            ]);
-        } elseif (!empty($params)) {
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-            ]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        if (!$hasRequiredFilters) {
+            $query->where('0=1');
         }
 
         if (!$this->validate()) {
