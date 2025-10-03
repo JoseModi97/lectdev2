@@ -148,16 +148,44 @@ $manageLecturersScript = <<< JS
                 'lecturer'         : lecturer,
             };
             if(confirm('Are you sure you want the selected lecturer as the course leader?')){
-                $('#manage-lecturer-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h5>');
                 $.ajax({
                     type        :   'POST',
                     url         :   manageLecturerAction,
                     data        :   formData,
                     dataType    :   'json',
-                    encode      :   true             
-                })
-                .done(function(data){})
-                .fail(function(data){});
+                    beforeSend  :   function(){
+                        $('#manage-lecturer-loader').html('<h5 class="text-center text-primary" style="font-size: 100px;"><i class="fas fa-spinner fa-pulse"></i></h5>');
+                    },
+                    complete    :   function(){
+                        $('#manage-lecturer-loader').html('');
+                    },
+                    success     :   function(res){
+                        if(res && res.status === 200){
+                            // Close modal, then refresh the entire page
+                            if($('#modal').length){
+                                $('#modal').one('hidden.bs.modal', function(){
+                                    location.reload();
+                                }).modal('hide');
+                            } else {
+                                location.reload();
+                            }
+                        }else{
+                            let msg = (res && res.message) ? res.message : 'Request failed. Please try again.';
+                            alert(msg);
+                        }
+                    },
+                    error       :   function(xhr){
+                        var msg = '';
+                        if (xhr && xhr.responseJSON && xhr.responseJSON.message){
+                            msg = xhr.responseJSON.message;
+                        }else if(xhr && xhr.responseText){
+                            msg = xhr.responseText;
+                        }else{
+                            msg = 'Request failed.';
+                        }
+                        alert(msg);
+                    }
+                });
             }else{
                 alert('Operation was cancelled.');
             }

@@ -24,6 +24,7 @@ $reportSummary = [
     'Semester' => $reportDetails['semesterFullName'],
     'Group' => strtoupper($reportDetails['group']),
 ];
+
 ?>
 
 <div class="class-performance-analysis container-fluid py-3">

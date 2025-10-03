@@ -402,7 +402,7 @@ class AllocationController extends BaseController
         try {
             $post = Yii::$app->request->post();
             $mkModel = MarksheetDef::find()->alias('MD')
-                ->select(['MD.MRKSHEET_ID', 'MD.COURSE_ID'])
+                ->select(['MD.MRKSHEET_ID', 'MD.COURSE_ID', 'MD.SEMESTER_ID'])
                 ->where(['MD.MRKSHEET_ID' => $post['marksheetId']])
                 ->joinWith(['course CS' => function (ActiveQuery $q) {
                     $q->select([
@@ -411,6 +411,30 @@ class AllocationController extends BaseController
                         'CS.COURSE_NAME',
                     ]);
                 }], true, 'INNER JOIN')
+                ->joinWith(['semester SM' => function (ActiveQuery $q) {
+                    $q->select([
+                        'SM.SEMESTER_ID',
+                        'SM.ACADEMIC_YEAR',
+                        'SM.LEVEL_OF_STUDY',
+                        'SM.SEMESTER_CODE',
+                        'SM.SEMESTER_TYPE',
+                        'SM.GROUP_CODE',
+                        'SM.DESCRIPTION_CODE',
+                    ]);
+                    // Join related lookup tables for names
+                    $q->joinWith(['levelOfStudy LVL' => function (ActiveQuery $q2) {
+                        $q2->select(['LVL.LEVEL_OF_STUDY', 'LVL.NAME']);
+                    }], false);
+                    $q->joinWith(['semesterDescription DESC' => function (ActiveQuery $q3) {
+                        $q3->select(['DESC.DESCRIPTION_CODE', 'DESC.SEMESTER_DESC']);
+                    }], false);
+                    $q->joinWith(['group GRP' => function (ActiveQuery $q4) {
+                        $q4->select(['GRP.GROUP_CODE', 'GRP.GROUP_NAME']);
+                    }], false);
+                    $q->joinWith(['degreeProgramme DEG' => function (ActiveQuery $q5) {
+                        $q5->select(['DEG.DEGREE_CODE', 'DEG.DEGREE_NAME']);
+                    }], false);
+                }], false, 'LEFT JOIN')
                 ->one();
 
             return $this->asJson([
@@ -418,7 +442,14 @@ class AllocationController extends BaseController
                 'data' => [
                     'marksheetId' => $post['marksheetId'],
                     'courseCode' => $mkModel->course->COURSE_CODE,
-                    'courseName' => $mkModel->course->COURSE_NAME
+                    'courseName' => $mkModel->course->COURSE_NAME,
+                    'academicYear' => $mkModel->semester->ACADEMIC_YEAR ?? '',
+                    'levelOfStudyName' => $mkModel->semester->levelOfStudy->NAME ?? '',
+                    'semesterDescription' => $mkModel->semester->semesterDescription->SEMESTER_DESC ?? '',
+                    'semesterCode' => $mkModel->semester->SEMESTER_CODE ?? '',
+                    'groupName' => $mkModel->semester->group->GROUP_NAME ?? '',
+                    'semesterType' => $mkModel->semester->SEMESTER_TYPE ?? '',
+                    'degreeName' => $mkModel->semester->degreeProgramme->DEGREE_NAME ?? '',
                 ]
             ]);
         } catch (Exception $ex) {
@@ -499,7 +530,10 @@ class AllocationController extends BaseController
                 }
             }
 
-            $currentDate = new Expression('CURRENT_DATE');
+            $currentDate = new Expression("
+    CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)
+    - ( (44/1440) + (27/86400) )
+");
 
             // Allocate lecturers to a course.
             if (($courseType === 'departmental' &&  $internalLecturer === 'true') || $statusName === 'APPROVED') {
@@ -671,11 +705,138 @@ class AllocationController extends BaseController
     }
 
     /**
+     * Cancel a lecturer request by deleting the PENDING record.
+     * Only the requesting department may delete its own pending request.
+     * Returns JSON on AJAX requests.
+     */
+    public function actionCancelRequest()
+    {
+        try {
+            $post = \Yii::$app->request->post();
+            $requestId = $post['requestId'] ?? null;
+            if (!$requestId) {
+                return $this->asJson(['status' => 500, 'message' => 'Missing request id.']);
+            }
+
+            $allocationReq = AllocationRequest::findOne($requestId);
+            if (!$allocationReq) {
+                return $this->asJson(['status' => 500, 'message' => 'Request not found.']);
+            }
+
+            // Only requesting department can cancel
+            if ($allocationReq->REQUESTING_DEPT !== $this->deptCode) {
+                return $this->asJson(['status' => 500, 'message' => 'Not allowed to cancel this request.']);
+            }
+
+            // Only PENDING requests can be deleted
+            $pending = AllocationStatus::find()->where(['STATUS_NAME' => 'PENDING'])->one();
+            if ($pending && (int)$allocationReq->STATUS_ID !== (int)$pending->STATUS_ID) {
+                return $this->asJson(['status' => 500, 'message' => 'Only pending requests can be deleted.']);
+            }
+
+            if ($allocationReq->delete() === false) {
+                return $this->asJson(['status' => 500, 'message' => 'Failed to cancel (delete) request.']);
+            }
+
+            return $this->asJson(['status' => 200]);
+        } catch (\Throwable $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            return $this->asJson(['status' => 500, 'message' => $message]);
+        }
+    }
+
+    /**
+     * Revert a serviced course request back to PENDING.
+     * - Clears remarks and attended fields
+     * - Sets status to PENDING
+     * - Removes any allocated lecturers for the marksheet
+     * Returns JSON on AJAX requests.
+     */
+    public function actionRevertRequest()
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $post = \Yii::$app->request->post();
+            $requestId = $post['requestId'] ?? null;
+            $marksheetId = $post['marksheetId'] ?? null;
+            if (!$requestId || !$marksheetId) {
+                return $this->asJson(['status' => 500, 'message' => 'Missing request id or marksheet id.']);
+            }
+
+            $allocationReq = AllocationRequest::findOne($requestId);
+            if (!$allocationReq) {
+                return $this->asJson(['status' => 500, 'message' => 'Request not found.']);
+            }
+
+            // Only servicing department can revert
+            if ($allocationReq->SERVICING_DEPT !== $this->deptCode) {
+                return $this->asJson(['status' => 500, 'message' => 'Not allowed to revert this request.']);
+            }
+
+            // Only APPROVED / NOT APPROVED requests can be reverted
+            $pending = AllocationStatus::find()->where(['STATUS_NAME' => 'PENDING'])->one();
+            if (!$pending) {
+                return $this->asJson(['status' => 500, 'message' => 'Pending status not configured.']);
+            }
+
+            if ((int)$allocationReq->STATUS_ID === (int)$pending->STATUS_ID) {
+                return $this->asJson(['status' => 500, 'message' => 'Request already pending.']);
+            }
+
+            // Remove allocated lecturers for this marksheet
+            $assignments = CourseAssignment::find()->where(['MRKSHEET_ID' => $marksheetId])->all();
+            foreach ($assignments as $assignment) {
+                if ($assignment->delete() === false) {
+                    throw new Exception('Failed to remove allocated lecturers for this request.');
+                }
+            }
+
+            // If course leader is one of deleted or no assignments remain, clear leader
+            $remaining = CourseAssignment::find()->where(['MRKSHEET_ID' => $marksheetId])->count();
+            if ((int)$remaining === 0) {
+                $marksheetDef = MarksheetDef::findOne($marksheetId);
+                if ($marksheetDef) {
+                    $marksheetDef->PAYROLL_NO = null;
+                    $marksheetDef->LAST_UPDATE = new Expression('CURRENT_DATE');
+                    if ($marksheetDef->save() === false) {
+                        throw new Exception('Failed to reset course leader.');
+                    }
+                }
+            }
+
+            // Revert request fields
+            $allocationReq->STATUS_ID = $pending->STATUS_ID;
+            $allocationReq->REMARKS = null;
+            $allocationReq->ATTENDED_BY = null;
+            $allocationReq->ATTENDED_DATE = null;
+            if ($allocationReq->save() === false) {
+                throw new Exception('Failed to revert request to pending.');
+            }
+
+            $transaction->commit();
+            return $this->asJson(['status' => 200]);
+        } catch (\Throwable $ex) {
+            $transaction->rollBack();
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            return $this->asJson(['status' => 500, 'message' => $message]);
+        }
+    }
+
+    /**
      * Update a course leader
+     * - If request is AJAX, return JSON so client-side handlers can respond correctly.
+     * - Otherwise, fall back to flash + redirect for non-AJAX flows.
      * @return Response
      */
     public function actionManageAllocatedLecturer(): Response
     {
+        $isAjax = Yii::$app->request->isAjax;
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $post = Yii::$app->request->post();
@@ -689,21 +850,28 @@ class AllocationController extends BaseController
 
             $previousMkModel = clone $mkModel;
             $mkModel->PAYROLL_NO = $lecturer;
-            $mkModel->LAST_UPDATE = new Expression('CURRENT_DATE');
+            $mkModel->LAST_UPDATE = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
             if ($mkModel->save()) {
                 $this->sendAllocationAlert($mkModel, $lecturer, 'updateCourseLeader');
             } else {
                 throw new Exception('Failed to create course leader.');
             }
 
-            $lecturer = EmpVerifyView::find()->select(['PAYROLL_NO'])
+            $lect = EmpVerifyView::find()->select(['PAYROLL_NO'])
                 ->where(['PAYROLL_NO' => $previousMkModel->PAYROLL_NO])->one();
 
-            if (!is_null($lecturer)) {
+            if (!is_null($lect)) {
                 $this->sendAllocationAlert($previousMkModel, $previousMkModel->PAYROLL_NO, 'removeCourseLeader');
             }
 
             $transaction->commit();
+
+            if ($isAjax) {
+                return $this->asJson([
+                    'status' => 200,
+                    'message' => 'Course leader set successfully.'
+                ]);
+            }
 
             Yii::$app->session->setFlash(
                 'success',
@@ -717,6 +885,11 @@ class AllocationController extends BaseController
             if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
+
+            if ($isAjax) {
+                return $this->asJson(['status' => 500, 'message' => $message]);
+            }
+
             Yii::$app->session->setFlash('danger', 'Failed to update course leader', $message);
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         }
@@ -729,6 +902,7 @@ class AllocationController extends BaseController
      */
     public function actionRemoveAllocatedLecturer(): Response
     {
+        $isAjax = Yii::$app->request->isAjax;
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $post = Yii::$app->request->post();
@@ -756,7 +930,7 @@ class AllocationController extends BaseController
                         } else {
                             $mkModel->PAYROLL_NO = $otherLecturer->PAYROLL_NO;
                         }
-                        $mkModel->LAST_UPDATE = new Expression('CURRENT_DATE');
+                        $mkModel->LAST_UPDATE = new Expression("CAST(SYSTIMESTAMP AT TIME ZONE 'Africa/Nairobi' AS DATE)");
                         if ($mkModel->save()) {
                             if (!is_null($otherLecturer)) {
                                 $this->sendAllocationAlert($mkModel, $otherLecturer->PAYROLL_NO, 'newCourseLeader');
@@ -777,6 +951,11 @@ class AllocationController extends BaseController
                 }
             }
             $transaction->commit();
+
+            if ($isAjax) {
+                return $this->asJson(['status' => 200, 'message' => 'The selected lecturer(s) have been removed.']);
+            }
+
             Yii::$app->session->setFlash(
                 'success',
                 'Remove allocated lecturers',
@@ -788,6 +967,9 @@ class AllocationController extends BaseController
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
                 $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            if ($isAjax) {
+                return $this->asJson(['status' => 500, 'message' => $message]);
             }
             Yii::$app->session->setFlash('danger', 'Failed to remove lecturer', $message);
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
@@ -954,7 +1136,7 @@ class AllocationController extends BaseController
         $emails[] = $email;
         $layout = '@app/mail/layouts/html';
         $view = '@app/mail/views/' . $viewName;
-        SmisHelper::sendEmails($emails, $layout, $view);
+        // SmisHelper::sendEmails($emails, $layout, $view);
     }
 
     public function getUserProgrammes($payrollNo, $dataProvider = null)

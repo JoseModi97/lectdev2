@@ -244,14 +244,17 @@ class SharedReportsController extends BaseController
             $session = Yii::$app->session;
 
             // Save course filters in the session for retrieval on page redirects
-            if (!empty(Yii::$app->request->get()['CourseAnalysisFilter'])) {
-                $session['CourseAnalysisFilter'] = Yii::$app->request->get();
-            }
-
-            if (!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()) {
-                throw new Exception('Failed to load filters for course analysis report.');
-            }
-
+                    if (!empty(Yii::$app->request->get()['CourseAnalysisFilter'])) {
+                        $session['CourseAnalysisFilter'] = Yii::$app->request->get();
+                        Yii::warning('Session CourseAnalysisFilter set: ' . print_r($session['CourseAnalysisFilter'], true));
+                    }
+            
+                    if (!$courseFilter->load($session->get('CourseAnalysisFilter')) || !$courseFilter->validate()) {
+                        Yii::warning('CourseAnalysisFilter failed to load or validate. Session data: ' . print_r($session->get('CourseAnalysisFilter'), true));
+                        Yii::warning('CourseAnalysisFilter errors: ' . print_r($courseFilter->errors, true));
+                        throw new Exception('Failed to load filters for course analysis report.');
+                    }
+                    Yii::warning('CourseAnalysisFilter loaded: ' . print_r($courseFilter->toArray(), true));
             $searchModel = new CourseAnalysisSearch();
             $dataProvider = $searchModel->search($courseFilter, $this->deptCode, $this->facCode);
 
@@ -260,6 +263,7 @@ class SharedReportsController extends BaseController
                 'panelHeading' => 'Grade analysis report',
                 'dataProvider' => $dataProvider,
                 'filter' => $courseFilter,
+                'facCode' => $this->facCode,
             ]);
         } catch (Exception $ex) {
             $message = $ex->getMessage();
@@ -591,39 +595,48 @@ class SharedReportsController extends BaseController
     private function classPerformanceCss(): string
     {
         return <<<CSS
-.class-performance-pdf { font-size: 9.3pt; color: #1f2933; line-height: 1.35; }
+.class-performance-pdf { font-size: 9.3pt; color: #1f2933; line-height: 1.4; }
 .class-performance-pdf * { box-sizing: border-box; }
-.report-title { margin-bottom: 12px; }
+.report-title { margin-bottom: 14px; }
 .report-title h1 { font-size: 16pt; margin: 0; color: #0b3d91; text-transform: uppercase; letter-spacing: 0.6px; }
 .report-title .report-subtitle { margin: 4px 0 0; font-size: 10pt; color: #4a5568; }
-.report-title .report-meta { margin: 4px 0 0; font-size: 8.3pt; color: #6c757d; }
-.summary-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; margin-bottom: 14px; background-color: #ffffff; page-break-inside: avoid; }
-.summary-card__header { background-color: #0b3d91; color: #ffffff; padding: 7px 12px; font-size: 8.7pt; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-.summary-card__body { padding: 10px 12px; }
+.report-header-card { border: 1px solid #d9dee7; border-radius: 10px; overflow: hidden; margin-bottom: 16px; background-color: #ffffff; page-break-inside: avoid; }
+.report-header-card__banner { background-color: #0b3d91; color: #ffffff; padding: 6px 12px; }
+.report-banner-table { width: 100%; border-collapse: collapse; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.4px; }
+.report-banner-table__cell { padding: 2px 6px; color: #ffffff; white-space: nowrap; }
+.report-banner-table__institution { font-weight: 600; }
+.report-banner-table__course { font-weight: 600; text-align: center; }
+.report-banner-table__user { text-align: center; }
+.report-banner-table__date { text-align: right; }
+.report-banner-table__reference { font-size: 7.8pt; opacity: 0.85; padding-top: 4px; text-transform: none; letter-spacing: 0.2px; white-space: normal; }
+.report-header-card__body { padding: 12px 14px 14px; }
+.report-header-card__title { font-size: 9pt; color: #0b3d91; text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px; margin: 0 0 8px; }
 .summary-grid { width: 100%; border-collapse: collapse; }
-.summary-grid td { width: 33.33%; padding: 4px 8px; vertical-align: top; }
-.summary-grid__label { display: block; font-size: 8.2pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.3px; margin-bottom: 2px; }
+.summary-grid td { width: 33.33%; padding: 6px 8px; vertical-align: top; }
+.summary-grid__label { display: block; font-size: 8pt; text-transform: uppercase; color: #6c757d; letter-spacing: 0.3px; margin-bottom: 2px; }
 .summary-grid__value { display: block; font-weight: 600; color: #1f2933; font-size: 9.5pt; }
-.layout-grid { width: 100%; border-collapse: separate; border-spacing: 12px 10px; margin: 0 0 12px; }
-.layout-grid__col--wide { width: 60%; }
-.layout-grid__col--narrow { width: 40%; }
-.layout-grid__cell { vertical-align: top; padding: 0; }
-.layout-grid__cell--stack { padding: 0; }
-.stack-grid { width: 100%; border-collapse: separate; border-spacing: 10px; }
-.stack-grid__cell { padding: 0; vertical-align: top; }
+.section-grid { width: 100%; border-collapse: separate; border-spacing: 12px 10px; margin: 0 0 12px; }
+.section-grid__cell { vertical-align: top; padding: 0; }
+.section-grid__col--wide { width: 40%; }
+.section-grid__col--chart { width: 32%; }
+.section-grid__col--narrow { width: 28%; }
+.section-grid__col--notes { width: 28%; }
 .panel-card { border: 1px solid #d9dee7; border-radius: 8px; overflow: hidden; background-color: #ffffff; page-break-inside: avoid; }
-.panel-card .panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 7px 11px; font-size: 8.3pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
-.panel-card .panel-body { padding: 10px 12px; }
-.panel-card.panel-card--compact .panel-body { padding: 9px 10px; }
-.panel-card.panel-card--notes .panel-body { padding: 9px 10px; }
+.panel-header { background-color: #f1f4fb; color: #0b3d91; padding: 7px 11px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 0; }
+.panel-body { padding: 14px 12px 10px; }
+.panel-card--compact .panel-body { padding: 12px 10px 9px; }
+.panel-card--notes .panel-body { padding: 14px 12px 10px; }
+.panel-card--center .panel-body { text-align: center; }
+.panel-body--chart { text-align: center; padding: 12px 0 6px; }
+.panel-intro { font-size: 8.1pt; color: #6c757d; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { border: 1px solid #d9dee7; padding: 5px 7px; font-size: 8.3pt; }
 .data-table th { background-color: #f9fafe; text-transform: uppercase; color: #6c757d; font-weight: 600; }
-.data-table .text-end { text-align: right; }
+.text-end { text-align: right; }
+.text-center { text-align: center; }
 .totals-row td { background-color: #f1f4fb; font-weight: 600; }
-.panel-intro { font-size: 8.1pt; color: #6c757d; margin-bottom: 6px; }
 .chart-container { margin: 0 auto; text-align: center; }
-.chart-svg { width: 100%; height: auto; max-width: 340px; }
+.chart-svg { width: 100%; height: auto; max-width: 320px; }
 .chart-axis { stroke: #93a3b8; stroke-width: 1; }
 .chart-grid { stroke: #e7ecf3; stroke-width: 1; }
 .chart-bar { fill: #008751; }
@@ -745,67 +758,193 @@ CSS;
             throw new ServerErrorHttpException($message, '500');
         }
     }
+    /**
+     * @param string $level
+     * @return string page to set filters
+     * @throws ServerErrorHttpException
+     */
+    public function actionStudentConsolidatedMarksFiltersOld(string $level): string
+    {
+        try {
+            if ($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean') {
+                throw new Exception('You may not have permissions to access these reports.');
+            }
+
+            $filter = new StudentConsolidatedMarksFilter();
+
+            $filter->approvalLevel = $level;
+
+            return $this->render('StudentConsolidatedMarksFiltersOld', [
+                'title' => 'Student consolidated marks filters',
+                'filter' => $filter
+            ]);
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, '500');
+        }
+    }
 
     /**
      * Generates a report of consolidated marks for all courses done by a student in an academic year
      * @return string page to render the report
      * @throws ServerErrorHttpException
      */
-    public function actionConsolidatedMarksPerStudent(): string
+    public function actionConsolidatedMarksPerStudent($registrationNumber = null)
     {
         try {
             $filter = new StudentConsolidatedMarksFilter();
 
-            $session = Yii::$app->session;
+            if ($filter->load(Yii::$app->request->get()) && $filter->validate()) {
+                $filter->registrationNumber = $registrationNumber; // Set registrationNumber in filter model
 
-            // Save the filters in the session for retrieval on page redirects
-            if (!empty(Yii::$app->request->get()['StudentConsolidatedMarksFilter'])) {
-                $session['StudentConsolidatedMarksFilter'] = Yii::$app->request->get();
+                $bindParams = [
+                    ':academicYear' => $filter->academicYear,
+                    ':studyProgram' => $filter->degreeCode,
+                    ':studyLevel' => $filter->levelOfStudy,
+                    ':studyGroup' => $filter->group
+                ];
+
+                $connection = Yii::$app->getDb();
+
+                // Get all students registered for courses in the given timetable
+                $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
+                        FROM MUTHONI.MARKSHEETS MS
+                        INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
+                        INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
+                        INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
+                        WHERE
+                            SEM.ACADEMIC_YEAR = :academicYear AND
+                            SEM.DEGREE_CODE = :studyProgram AND
+                            SEM.LEVEL_OF_STUDY = :studyLevel AND
+                            SEM.GROUP_CODE = :studyGroup";
+
+                if ($registrationNumber) {
+                    $studentsQuery .= " AND MS.REGISTRATION_NUMBER = :registrationNumber";
+                    $bindParams[':registrationNumber'] = $registrationNumber;
+                }
+
+                $studentsQuery .= " ORDER BY MS.REGISTRATION_NUMBER ASC";
+
+                $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
+
+                $select2Students = [];
+                foreach ($students as $student) {
+                    $select2Students[] = [
+                        'id' => $student['REGISTRATION_NUMBER'],
+                        'text' => $student['REGISTRATION_NUMBER'] . ' - ' . $student['SURNAME'] . ' ' . $student['OTHER_NAMES']
+                    ];
+                }
+
+                /**
+                 * Get the maximum number of courses registered for by students in the given timetable.
+                 * We use this number to decide how many table cells we'll have to display the courses in the report.
+                 */
+                $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
+
+                $panelHeading = 'Consolidated marks per student';
+
+                return $this->renderAjax('consolidatedMarksPerStudent', [
+                    'title' => 'Consolidated marks per student',
+                    'students' => $students,
+                    'select2Students' => $select2Students, // Pass students for Select2
+                    'maxStudentCourses' => $maxStudentCourses,
+                    'panelHeading' => $panelHeading,
+                    'filter' => $filter
+                ]);
             }
 
-            if (!$filter->load($session->get('StudentConsolidatedMarksFilter')) || !$filter->validate()) {
-                throw new Exception('Failed to load filters for course analysis report.');
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['error' => $filter->getErrors()];
+            }
+            throw new Exception('Failed to load filters for course analysis report.');
+
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+    /**
+     * Generates a report of consolidated marks for all courses done by a student in an academic year
+     * @return string page to render the report
+     * @throws ServerErrorHttpException
+     */
+    public function actionConsolidatedMarksPerStudentOld($registrationNumber = null)
+    {
+        try {
+            $filter = new StudentConsolidatedMarksFilter();
+
+            if ($filter->load(Yii::$app->request->get()) && $filter->validate()) {
+                $filter->registrationNumber = $registrationNumber; // Set registrationNumber in filter model
+
+                $bindParams = [
+                    ':academicYear' => $filter->academicYear,
+                    ':studyProgram' => $filter->degreeCode,
+                    ':studyLevel' => $filter->levelOfStudy,
+                    ':studyGroup' => $filter->group
+                ];
+
+                $connection = Yii::$app->getDb();
+
+                // Get all students registered for courses in the given timetable
+                $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
+                        FROM MUTHONI.MARKSHEETS MS
+                        INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
+                        INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
+                        INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
+                        WHERE
+                            SEM.ACADEMIC_YEAR = :academicYear AND
+                            SEM.DEGREE_CODE = :studyProgram AND
+                            SEM.LEVEL_OF_STUDY = :studyLevel AND
+                            SEM.GROUP_CODE = :studyGroup";
+
+                if ($registrationNumber) {
+                    $studentsQuery .= " AND MS.REGISTRATION_NUMBER = :registrationNumber";
+                    $bindParams[':registrationNumber'] = $registrationNumber;
+                }
+
+                $studentsQuery .= " ORDER BY MS.REGISTRATION_NUMBER ASC";
+
+                $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
+
+                $select2Students = [];
+                foreach ($students as $student) {
+                    $select2Students[] = [
+                        'id' => $student['REGISTRATION_NUMBER'],
+                        'text' => $student['REGISTRATION_NUMBER'] . ' - ' . $student['SURNAME'] . ' ' . $student['OTHER_NAMES']
+                    ];
+                }
+
+                /**
+                 * Get the maximum number of courses registered for by students in the given timetable.
+                 * We use this number to decide how many table cells we'll have to display the courses in the report.
+                 */
+                $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
+
+                $panelHeading = 'Consolidated marks per student';
+
+                return $this->renderAjax('consolidatedMarksPerStudentOld', [
+                    'title' => 'Consolidated marks per student',
+                    'students' => $students,
+                    'select2Students' => $select2Students, // Pass students for Select2
+                    'maxStudentCourses' => $maxStudentCourses,
+                    'panelHeading' => $panelHeading,
+                    'filter' => $filter
+                ]);
             }
 
-            $bindParams = [
-                ':academicYear' => $filter->academicYear,
-                ':studyProgram' => $filter->degreeCode,
-                ':studyLevel' => $filter->levelOfStudy,
-                ':studyGroup' => $filter->group
-            ];
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['error' => $filter->getErrors()];
+            }
+            throw new Exception('Failed to load filters for course analysis report.');
 
-            $connection = Yii::$app->getDb();
-
-            // Get all students registered for courses in the given timetable
-            $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
-                    FROM MUTHONI.MARKSHEETS MS
-                    INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
-                    INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
-                    INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
-                    WHERE
-                        SEM.ACADEMIC_YEAR = :academicYear AND
-                        SEM.DEGREE_CODE = :studyProgram AND
-                        SEM.LEVEL_OF_STUDY = :studyLevel AND
-                        SEM.GROUP_CODE = :studyGroup
-                    ORDER BY MS.REGISTRATION_NUMBER ASC";
-
-            $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
-
-            /**
-             * Get the maximum number of courses registered for by students in the given timetable.
-             * We use this number to decide how many table cells we'll have to display the courses in the report.
-             */
-            $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
-
-            $panelHeading = 'Consolidated marks per student';
-
-            return $this->render('consolidatedMarksPerStudent', [
-                'title' => 'Consolidated marks per student',
-                'students' => $students,
-                'maxStudentCourses' => $maxStudentCourses,
-                'panelHeading' => $panelHeading,
-                'filter' => $filter
-            ]);
         } catch (Exception $ex) {
             $message = $ex->getMessage();
             if (YII_ENV_DEV) {
@@ -917,5 +1056,177 @@ CSS;
         //            ]
         //        ]);
         return $pdf->render();
+    }
+
+    public function actionGetStudentDetails($regNumber, $academicYear, $degreeCode, $levelOfStudy, $group)
+    {
+        try {
+            $filter = new StudentConsolidatedMarksFilter();
+            $filter->academicYear = $academicYear;
+            $filter->degreeCode = $degreeCode;
+            $filter->levelOfStudy = $levelOfStudy;
+            $filter->group = $group;
+
+            // Fetch student details (recommendation, GPA, courses, marks, grades)
+            $recommendation = '';
+            $GPA = '';
+            $studentCoursesTotal = 0;
+            $studentName = ''; // Initialize student name
+            $groupName = ''; // Initialize group name
+            $levelName = ''; // Initialize level name
+            $degreeName = ''; // Initialize degree name
+
+            $connection = Yii::$app->getDb();
+
+            // Get degree name
+            $degreeModel = \app\models\DegreeProgramme::find()->select(['DEGREE_NAME'])->where(['DEGREE_CODE' => $degreeCode])->asArray()->one();
+            if ($degreeModel) {
+                $degreeName = $degreeModel['DEGREE_NAME'];
+            }
+
+            // Get student name
+            $studentQuery = "SELECT OTHER_NAMES, SURNAME FROM MUTHONI.UON_STUDENTS WHERE REGISTRATION_NUMBER = :regNumber";
+            $studentResult = $connection->createCommand($studentQuery)->bindValue(':regNumber', $regNumber)->queryOne();
+            if ($studentResult) {
+                $studentName = $studentResult['SURNAME'] . ' ' . $studentResult['OTHER_NAMES'];
+            }
+
+            // Get group name
+            $groupModel = \app\models\Group::find()->select(['GROUP_NAME'])->where(['GROUP_CODE' => $group])->asArray()->one();
+            if ($groupModel) {
+                $groupName = $groupModel['GROUP_NAME'];
+            }
+
+            // Get level name
+            $levelModel = \app\models\LevelOfStudy::find()->select(['NAME'])->where(['LEVEL_OF_STUDY' => $levelOfStudy])->asArray()->one();
+            if ($levelModel) {
+                $levelName = $levelModel['NAME'];
+            }
+
+            // Get recommendation and GPA
+            $recommendationQuery = "SELECT ER.GPA, ER.EXT_RESULT, ER.RESULT FROM MUTHONI.EXAM_RESULT ER
+                                    WHERE ER.REGISTRATION_NUMBER = :regNumber AND ER.LEVEL_OF_STUDY = :studyLevel";
+            $bindParams = [
+                ':regNumber' => $regNumber,
+                ':studyLevel' => $filter->levelOfStudy,
+            ];
+            $recommendationResult = $connection->createCommand($recommendationQuery)->bindValues($bindParams)->queryOne();
+
+            if (!empty($recommendationResult)) {
+                if (!is_null($recommendationResult['RESULT'])) {
+                    $recommendation = $recommendationResult['RESULT'];
+                }
+                if (!is_null($recommendationResult['EXT_RESULT'])) {
+                    $recommendation .= '. ' . $recommendationResult['EXT_RESULT'];
+                }
+                if (!is_null($recommendationResult['GPA'])) {
+                    $GPA = $recommendationResult['GPA'];
+                }
+            }
+
+            // Get total courses for the student
+            $studentCoursesTotal = SmisHelper::getMaximumCoursesRegisteredFor($filter, $regNumber);
+
+            // Get all courses registered for by a student
+            $timetableStartsWith = $filter->academicYear . '_' . $filter->degreeCode . '_' . $filter->levelOfStudy;
+
+            $studentMarksheets = MarksheetDef::find()->alias('MD')
+                ->select([
+                    'MD.MRKSHEET_ID',
+                    'MD.COURSE_ID'
+                ])
+                ->joinWith(['course CS' => function (ActiveQuery $q) {
+                    $q->select([
+                        'CS.COURSE_ID',
+                        'CS.COURSE_CODE',
+                        'CS.COURSE_NAME' // Added course name
+                    ]);
+                }], true, 'INNER JOIN')
+                ->joinWith(['marksheet MS' => function (ActiveQuery $q) {
+                    $q->select([
+                        'MS.MRKSHEET_ID',
+                        'MS.REGISTRATION_NUMBER'
+                    ]);
+                }], true, 'INNER JOIN')
+                ->where(['like', 'MD.MRKSHEET_ID', $timetableStartsWith . '%', false])
+                ->andWhere([
+                    'MD.GROUP_CODE' => $filter->group,
+                    'MS.REGISTRATION_NUMBER' => $regNumber,
+                ])
+                ->orderBy(['CS.COURSE_CODE' => SORT_ASC])
+                ->asArray()
+                ->all();
+
+            $courses = [];
+            foreach ($studentMarksheets as $studentMarksheet) {
+                $studentMarks = TempMarksheet::find()->select(['GRADE', 'FINAL_MARKS'])
+                    ->where([
+                        'MRKSHEET_ID' => $studentMarksheet['MRKSHEET_ID'],
+                        'REGISTRATION_NUMBER' => $regNumber
+                    ])
+                    ->one();
+
+                $grade = '';
+                $finalMarks = '';
+
+                if ($studentMarks) {
+                    if ($studentMarks->GRADE) {
+                        $grade = $studentMarks->GRADE;
+                    }
+                    if ($studentMarks->FINAL_MARKS) {
+                        $finalMarks = $studentMarks->FINAL_MARKS;
+                    }
+                }
+
+                $courses[] = [
+                    'code' => $studentMarksheet['course']['COURSE_CODE'],
+                    'name' => $studentMarksheet['course']['COURSE_NAME'],
+                    'grade' => $grade,
+                    'finalMarks' => $finalMarks
+                ];
+            }
+
+            return $this->renderAjax('_studentDetailsModal', [
+                'regNumber' => $regNumber,
+                'studentName' => $studentName, // Pass student name
+                'academicYear' => $academicYear,
+                'degreeCode' => $degreeCode,
+                'degreeName' => $degreeName, // Pass degree name
+                'levelOfStudy' => $levelOfStudy,
+                'levelName' => $levelName, // Pass level name
+                'group' => $group,
+                'groupName' => $groupName, // Pass group name
+                'recommendation' => $recommendation,
+                'GPA' => $GPA,
+                'studentCoursesTotal' => $studentCoursesTotal,
+                'courses' => $courses,
+            ]);
+
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ['error' => $message];
+        }
+    }
+
+    public function actionGetStudentsByRegistrationNumber($q = null)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $out = ['results' => []];
+        if (!is_null($q)) {
+            $students = \app\models\UON_STUDENTS::find()
+                ->select(['REGISTRATION_NUMBER as id', 'CONCAT(REGISTRATION_NUMBER, " - ", SURNAME, " ", OTHER_NAMES) as text'])
+                ->where(['like', 'REGISTRATION_NUMBER', $q])
+                ->orWhere(['like', 'SURNAME', $q])
+                ->orWhere(['like', 'OTHER_NAMES', $q])
+                ->limit(20)
+                ->asArray()
+                ->all();
+            $out['results'] = array_values($students);
+        }
+        return $out;
     }
 }

@@ -22,7 +22,8 @@ $courseCodeColumn = [
         'pluginOptions' => ['allowClear' => true],
     ],
     'filterInputOptions' => ['placeholder' => '--All--'],
-    'contentOptions' => ['style' => 'white-space: nowrap; width: 150px;'],
+    'contentOptions' => ['style' => 'white-space: nowrap; width: 260px;'],
+    'headerOptions' => ['style' => 'white-space: nowrap; width: 260px;'],
     'group' => true,
     'subGroupOf' => 1,
     'vAlign' => 'middle',
@@ -33,7 +34,8 @@ $courseCodeColumn = [
 $courseNameColumn = [
     'attribute' => 'marksheetDef.course.COURSE_NAME',
     'label' => 'COURSE NAME',
-    'contentOptions' => ['style' => 'white-space: nowrap;'],
+    'contentOptions' => ['style' => 'white-space: nowrap; min-width: 280px;'],
+    'headerOptions' => ['style' => 'white-space: nowrap; min-width: 280px;'],
     'filterType' => GridView::FILTER_SELECT2,
     'filter' => ArrayHelper::map($data, 'marksheetDef.course.COURSE_NAME', 'marksheetDef.course.COURSE_NAME'),
     'filterWidgetOptions' => [
@@ -51,7 +53,9 @@ $levelOfStudyColumn = [
     'label' => 'LEVEL',
     'value' => function ($model) {
         return $model->marksheetDef->semester->LEVEL_OF_STUDY;
-    }
+    },
+    'contentOptions' => ['style' => 'white-space: nowrap; width: 140px;'],
+    'headerOptions' => ['style' => 'white-space: nowrap; width: 140px;']
 ];
 
 $sessionTypeColumn = [
@@ -74,13 +78,15 @@ $semesterCodeColumn = [
         $code = $model->marksheetDef->semester->SEMESTER_CODE;
         return $code . ' (' . $description . ')';
     },
-    'contentOptions' => ['style' => 'white-space: nowrap;']
+    'contentOptions' => ['style' => 'white-space: nowrap;'],
+    'headerOptions' => ['style' => 'white-space: nowrap;']
 ];
 
 $groupNameColumn = [
     'attribute' => 'marksheetDef.group.GROUP_NAME',
     'label' => 'GROUP',
-    'contentOptions' => ['style' => 'white-space: nowrap;'],
+    'contentOptions' => ['style' => 'white-space: nowrap; width: 150px;'],
+    'headerOptions' => ['style' => 'white-space: nowrap; width: 150px;'],
     'filterType' => GridView::FILTER_SELECT2,
     'filter' => ArrayHelper::map($data, 'marksheetDef.group.GROUP_NAME', 'marksheetDef.group.GROUP_NAME'),
     'filterWidgetOptions' => [
@@ -170,7 +176,8 @@ $programmeGroupColumn = [
 
         return  $degreeCode . ' - ' . $degreeName . " - SEMESTER " . $semester . ' (' . $semesterDesc . ')';
     },
-    'width' => '300px',
+    'width' => '380px',
+    'headerOptions' => ['style' => 'white-space: nowrap; min-width: 380px;'],
     'group' => true,
     'groupedRow' => true,
     'groupOddCssClass' => 'group-academic-year',

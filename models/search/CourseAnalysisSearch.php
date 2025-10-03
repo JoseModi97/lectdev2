@@ -47,12 +47,19 @@ class CourseAnalysisSearch extends MarksheetDef
      */
     public function search(CourseAnalysisFilter $courseFilter, string $deptCode, string $facCode): ActiveDataProvider
     {
-        $semesterId = $courseFilter->academicYear . '_' . $courseFilter->degreeCode . '_' . $courseFilter->levelOfStudy
-            . '_' . $courseFilter->semester . '_' . $courseFilter->group;
+        $semesterId = null;
+        if (!empty($courseFilter->academicYear) && !empty($courseFilter->degreeCode) && !empty($courseFilter->levelOfStudy)
+            && !empty($courseFilter->semester) && !empty($courseFilter->group)) {
+            $semesterId = $courseFilter->academicYear . '_' . $courseFilter->degreeCode . '_' . $courseFilter->levelOfStudy
+                . '_' . $courseFilter->semester . '_' . $courseFilter->group;
+        }
 
-        // get marksheets in the timetables
-        $marksheets = MarksheetDef::find()->select(['MRKSHEET_ID', 'COURSE_ID'])->where(['SEMESTER_ID' => $semesterId])
-            ->asArray()->all();
+        $marksheets = [];
+        if ($semesterId) {
+            // get marksheets in the timetables
+            $marksheets = MarksheetDef::find()->select(['MRKSHEET_ID', 'COURSE_ID'])->where(['SEMESTER_ID' => $semesterId])
+                ->asArray()->all();
+        }
 
         $studentCourseWork = [];
         if ($courseFilter->approvalLevel === 'lecturer') {
@@ -163,6 +170,12 @@ class CourseAnalysisSearch extends MarksheetDef
         } else {
             $query->where(['IN', 'MD.MRKSHEET_ID', array_unique($marksheetsWithMarks, SORT_REGULAR)]);
         }
+
+        $query->joinWith(['semester SM' => function (ActiveQuery $q) use ($courseFilter) {
+            if (!empty($courseFilter->semesterType)) {
+                $q->andWhere(['SM.SEMESTER_TYPE' => $courseFilter->semesterType]);
+            }
+        }], true, 'INNER JOIN');
 
         $query->joinWith(['course CS' => function (ActiveQuery $q) {
             $q->select([

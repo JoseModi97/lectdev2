@@ -22,6 +22,7 @@ class StudentConsolidatedMarksFilter extends Model
     public $group;
     public $levelOfStudy;
     public $approvalLevel;
+    public $registrationNumber;
 
     /**
      * @return array the validation rules.
@@ -29,9 +30,9 @@ class StudentConsolidatedMarksFilter extends Model
     public function rules(): array
     {
         return [
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel'], 'string'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel'], 'trim'],
-            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel'], 'default'],
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel', 'registrationNumber'], 'string'],
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel', 'registrationNumber'], 'trim'],
+            [['academicYear', 'degreeCode', 'group', 'levelOfStudy', 'approvalLevel', 'registrationNumber'], 'default'],
             [['academicYear', 'degreeCode', 'group', 'approvalLevel'], 'required'],
         ];
     }

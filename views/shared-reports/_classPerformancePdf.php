@@ -68,14 +68,28 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
     <div class="report-title">
         <h1>Class Performance Report</h1>
         <p class="report-subtitle"><?= Html::encode($courseLabel); ?></p>
-        <p class="report-meta">
-            Printed by <?= Html::encode($user); ?> · <?= Html::encode($date); ?><?php if (!empty($reportReference)): ?> · Ref: <?= Html::encode($reportReference); ?><?php endif; ?>
-        </p>
     </div>
 
-    <div class="summary-card">
-        <div class="summary-card__header">Class details</div>
-        <div class="summary-card__body">
+    <div class="report-header-card">
+        <div class="report-header-card__banner">
+            <table class="report-banner-table">
+                <tr>
+                    <td class="report-banner-table__cell report-banner-table__institution">University of Nairobi</td>
+                    <td class="report-banner-table__cell report-banner-table__course"><?= Html::encode($reportDetails['courseCode'] ?? ''); ?></td>
+                    <td class="report-banner-table__cell report-banner-table__user">Printed by <?= Html::encode($user); ?></td>
+                    <td class="report-banner-table__cell report-banner-table__date text-end"><?= Html::encode($date); ?></td>
+                </tr>
+                <?php if (!empty($reportReference)): ?>
+                    <tr>
+                        <td colspan="4" class="report-banner-table__cell report-banner-table__reference">
+                            Reference: <?= Html::encode($reportReference); ?>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+        <div class="report-header-card__body">
+            <div class="report-header-card__title">Class details</div>
             <table class="summary-grid">
                 <?php foreach ($summaryChunks as $chunk): ?>
                     <tr>
@@ -98,17 +112,19 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
         </div>
     </div>
 
-    <table class="layout-grid">
+    <table class="section-grid section-grid--three">
         <colgroup>
-            <col class="layout-grid__col layout-grid__col--wide" />
-            <col class="layout-grid__col layout-grid__col--narrow" />
+            <col class="section-grid__col section-grid__col--wide" />
+            <col class="section-grid__col section-grid__col--chart" />
+            <col class="section-grid__col section-grid__col--narrow" />
         </colgroup>
         <tbody>
             <tr>
-                <td class="layout-grid__cell">
+                <td class="section-grid__cell">
                     <div class="panel-card">
+                        <div class="panel-header">Grade distribution</div>
                         <div class="panel-body">
-                            <p class="panel-intro">Distribution of grades attained by the class.</p>
+                            <!-- <p class="panel-intro">Distribution of grades attained by the class.</p> -->
                             <table class="data-table">
                                 <thead>
                                     <tr>
@@ -134,79 +150,80 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                         </div>
                     </div>
                 </td>
-                <td class="layout-grid__cell layout-grid__cell--stack">
-                    <table class="stack-grid">
-                        <tbody>
-                            <tr>
-                                <td class="stack-grid__cell">
-                                    <div class="panel-card">
-                                        <div class="panel-body">
-                                            <p class="panel-intro">Visual overview of grade performance.</p>
-                                            <div class="chart-container">
-                                                <svg class="chart-svg" width="<?= $gradeSvgWidth; ?>" height="<?= $gradeSvgHeight; ?>" viewBox="0 0 <?= $gradeSvgWidth; ?> <?= $gradeSvgHeight; ?>">
-                                                    <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
-                                                    <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisLeft; ?>" y2="<?= $gradeAxisBottom - $gradeChartHeight; ?>" class="chart-axis" />
+                <td class="section-grid__cell">
+                    <div class="panel-card panel-card--center">
+                        <div class="panel-header">Grade distribution chart</div>
+                        <div class="panel-body panel-body--chart">
+                            <div class="chart-container">
+                                <svg class="chart-svg" width="<?= $gradeSvgWidth; ?>" height="<?= $gradeSvgHeight; ?>" viewBox="0 0 <?= $gradeSvgWidth; ?> <?= $gradeSvgHeight; ?>">
+                                    <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $gradeAxisBottom; ?>" class="chart-axis" />
+                                    <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $gradeAxisBottom; ?>" x2="<?= $gradeAxisLeft; ?>" y2="<?= $gradeAxisBottom - $gradeChartHeight; ?>" class="chart-axis" />
 
-                                                    <?php for ($tick = 1; $tick <= $gradeTickSteps; $tick++): ?>
-                                                        <?php
-                                                        $ratio = $tick / $gradeTickSteps;
-                                                        $tickValue = $gradeMaxCount * $ratio;
-                                                        $tickY = $gradeAxisBottom - ($gradeChartHeight * $ratio);
-                                                        ?>
-                                                        <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
-                                                        <text x="<?= $gradeAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
-                                                    <?php endfor; ?>
+                                    <?php for ($tick = 1; $tick <= $gradeTickSteps; $tick++): ?>
+                                        <?php
+                                        $ratio = $tick / $gradeTickSteps;
+                                        $tickValue = $gradeMaxCount * $ratio;
+                                        $tickY = $gradeAxisBottom - ($gradeChartHeight * $ratio);
+                                        ?>
+                                        <line x1="<?= $gradeAxisLeft; ?>" y1="<?= $tickY; ?>" x2="<?= $gradeSvgWidth - 12; ?>" y2="<?= $tickY; ?>" class="chart-grid" />
+                                        <text x="<?= $gradeAxisLeft - 8; ?>" y="<?= $tickY + 4; ?>" text-anchor="end" class="chart-tick"><?= Html::encode(number_format($tickValue)); ?></text>
+                                    <?php endfor; ?>
 
-                                                    <?php foreach ($gradeCounts as $index => $count): ?>
-                                                        <?php
-                                                        $label = $gradeLabels[$index] ?? '';
-                                                        $barHeight = $gradeMaxCount > 0 ? ($count / $gradeMaxCount) * $gradeChartHeight : 0;
-                                                        $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing)) + ($gradeBarSpacing / 2);
-                                                        $barY = $gradeAxisBottom - $barHeight;
-                                                        $valueY = $barHeight > 0 ? $barY - 6 : $gradeAxisBottom - 6;
-                                                        ?>
-                                                        <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar" />
-                                                        <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($count)); ?></text>
-                                                        <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
-                                                    <?php endforeach; ?>
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="stack-grid__cell">
-                                    <div class="panel-card panel-card--compact">
-                                        <div class="panel-body">
-                                            <p class="panel-intro">Quick reference metrics for review.</p>
-                                            <table class="info-table">
-                                                <tr>
-                                                    <th>Highest grade</th>
-                                                    <td><?= Html::encode($highestGrade); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Lowest grade</th>
-                                                    <td><?= Html::encode($lowestGrade); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Report date</th>
-                                                    <td><?= Html::encode($date); ?></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    <?php foreach ($gradeCounts as $index => $count): ?>
+                                        <?php
+                                        $label = $gradeLabels[$index] ?? '';
+                                        $barHeight = $gradeMaxCount > 0 ? ($count / $gradeMaxCount) * $gradeChartHeight : 0;
+                                        $barX = $gradeAxisLeft + ($index * ($gradeBarWidth + $gradeBarSpacing)) + ($gradeBarSpacing / 2);
+                                        $barY = $gradeAxisBottom - $barHeight;
+                                        $valueY = $barHeight > 0 ? $barY - 6 : $gradeAxisBottom - 6;
+                                        ?>
+                                        <rect x="<?= $barX; ?>" y="<?= $barY; ?>" width="<?= $gradeBarWidth; ?>" height="<?= $barHeight; ?>" class="chart-bar" />
+                                        <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $valueY; ?>" text-anchor="middle" class="chart-value"><?= Html::encode(number_format($count)); ?></text>
+                                        <text x="<?= $barX + ($gradeBarWidth / 2); ?>" y="<?= $gradeAxisBottom + 18; ?>" text-anchor="middle" class="chart-label"><?= Html::encode($label); ?></text>
+                                    <?php endforeach; ?>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="section-grid__cell">
+                    <div class="panel-card panel-card--compact">
+                        <div class="panel-header">Key figures</div>
+                        <div class="panel-body">
+                            <!-- <p class="panel-intro">Quick reference for print and review.</p> -->
+                            <table class="info-table">
+                                <tr>
+                                    <th>Highest grade</th>
+                                    <td><?= Html::encode($highestGrade); ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Lowest grade</th>
+                                    <td><?= Html::encode($lowestGrade); ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Report date</th>
+                                    <td><?= Html::encode($date); ?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
                 </td>
             </tr>
+        </tbody>
+    </table>
+
+    <table class="section-grid section-grid--three">
+        <colgroup>
+            <col class="section-grid__col section-grid__col--chart" />
+            <col class="section-grid__col section-grid__col--wide" />
+            <col class="section-grid__col section-grid__col--notes" />
+        </colgroup>
+        <tbody>
             <tr>
-                <td class="layout-grid__cell">
-                    <div class="panel-card">
-                        <div class="panel-body">
-                            <p class="panel-intro">Average marks per assessment component.</p>
+                <td class="section-grid__cell">
+                    <div class="panel-card panel-card--center">
+                        <div class="panel-header">Average scores chart</div>
+                        <div class="panel-body panel-body--chart">
                             <div class="chart-container">
                                 <svg class="chart-svg" width="<?= $averageSvgWidth; ?>" height="<?= $averageSvgHeight; ?>" viewBox="0 0 <?= $averageSvgWidth; ?> <?= $averageSvgHeight; ?>">
                                     <line x1="<?= $averageAxisLeft; ?>" y1="<?= $averageAxisBottom; ?>" x2="<?= $averageSvgWidth - 18; ?>" y2="<?= $averageAxisBottom; ?>" class="chart-axis" />
@@ -239,46 +256,37 @@ $summaryChunks = array_chunk($reportSummary, 3, true);
                         </div>
                     </div>
                 </td>
-                <td class="layout-grid__cell layout-grid__cell--stack">
-                    <table class="stack-grid">
-                        <tbody>
-                            <tr>
-                                <td class="stack-grid__cell">
-                                    <div class="panel-card panel-card--compact">
-                                        <div class="panel-body">
-                                            <table class="info-table">
-                                                <tr>
-                                                    <th>Coursework</th>
-                                                    <td><?= Html::encode(number_format((float)$averages['coursework'], 2)); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Exam</th>
-                                                    <td><?= Html::encode(number_format((float)$averages['exam'], 2)); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Final score</th>
-                                                    <td><?= Html::encode(number_format((float)$averages['final'], 2)); ?></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="stack-grid__cell">
-                                    <div class="panel-card panel-card--notes">
-                                        <div class="panel-header">Notes</div>
-                                        <div class="panel-body">
-                                            <p class="notes-text">
-                                                Use this report to highlight key trends and prepare quick talking points before meetings or when
-                                                exporting the PDF for departmental reviews.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <td class="section-grid__cell">
+                    <div class="panel-card panel-card--compact">
+                        <div class="panel-header">Average scores summary</div>
+                        <div class="panel-body">
+                            <table class="info-table">
+                                <tr>
+                                    <th>Coursework</th>
+                                    <td><?= Html::encode(number_format((float)$averages['coursework'], 2)); ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Exam</th>
+                                    <td><?= Html::encode(number_format((float)$averages['exam'], 2)); ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Final score</th>
+                                    <td><?= Html::encode(number_format((float)$averages['final'], 2)); ?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+                <td class="section-grid__cell">
+                    <div class="panel-card panel-card--notes">
+                        <div class="panel-header">Notes</div>
+                        <div class="panel-body">
+                            <p class="">
+                                Use this report to highlight key trends and prepare quick talking points before meetings or when
+                                exporting the PDF for departmental reviews.
+                            </p>
+                        </div>
+                    </div>
                 </td>
             </tr>
         </tbody>

@@ -23,6 +23,8 @@ $reportSummary = [
     'Semester' => $reportDetails['semesterFullName'],
     'Group' => strtoupper($reportDetails['group']),
 ];
+
+
 ?>
 
 <div class="class-performance-analysis container-fluid py-3">
@@ -42,7 +44,7 @@ $reportSummary = [
 
     <div id="class-performance-report" class="bg-white rounded-3 shadow-sm p-3 p-md-4">
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-primary text-white py-3">
+            <div class="card-header text-white py-3" style="background-image: linear-gradient(#455492, #304186, #455492);">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 small text-uppercase">
                     <span class="fw-semibold">University of Nairobi</span>
                     <span><?= Html::encode($reportDetails['courseCode']); ?></span>
@@ -65,7 +67,7 @@ $reportSummary = [
         <div class="row g-3 mb-4">
             <div class="col-lg-5 col-xl-4">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Grade distribution</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Grade distribution</div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table id="grading-system-table" class="table table-sm table-hover mb-0">
@@ -125,7 +127,7 @@ $reportSummary = [
             </div>
             <div class="col-lg-4 col-xl-4">
                 <div class="card h-100 shadow-sm text-center">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Grade distribution chart</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Grade distribution chart</div>
                     <div class="card-body d-flex align-items-center justify-content-center">
                         <div class="w-100" style="max-width: 320px;">
                             <div id="grade-distribution-loader" class="py-4"></div>
@@ -136,7 +138,7 @@ $reportSummary = [
             </div>
             <div class="col-lg-3 col-xl-4">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Key figures</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Key figures</div>
                     <div class="card-body">
                         <p class="mb-2 text-muted small">Quick reference for print and review.</p>
                         <ul class="list-unstyled mb-0 small">
@@ -161,7 +163,7 @@ $reportSummary = [
         <div class="row g-3 mb-4">
             <div class="col-lg-6 col-xl-5">
                 <div class="card h-100 shadow-sm text-center">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Average scores chart</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Average scores chart</div>
                     <div class="card-body d-flex align-items-center justify-content-center">
                         <div class="w-100" style="max-width: 320px;">
                             <div id="average-scores-loader" class="py-4"></div>
@@ -172,7 +174,7 @@ $reportSummary = [
             </div>
             <div class="col-lg-6 col-xl-4 page-break">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Average scores summary</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Average scores summary</div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
                             <li class="d-flex justify-content-between align-items-center mb-3">
@@ -193,7 +195,7 @@ $reportSummary = [
             </div>
             <div class="col-lg-12 col-xl-3">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-light fw-semibold text-uppercase small">Notes</div>
+                    <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Notes</div>
                     <div class="card-body">
                         <p class="mb-0 small text-muted">
                             Use this report to highlight key trends and share quick talking points before meetings or when exporting the PDF.
@@ -204,7 +206,7 @@ $reportSummary = [
         </div>
 
         <div class="card shadow-sm">
-            <div class="card-header bg-light fw-semibold text-uppercase small">Signatories</div>
+            <div class="card-header text-white fw-semibold text-uppercase small" style="background-image: linear-gradient(#455492, #304186, #455492);">Signatories</div>
             <div class="card-body">
                 <div class="row g-4">
                     <div class="col-md-4">

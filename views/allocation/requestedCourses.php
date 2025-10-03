@@ -14,6 +14,8 @@
  * @var string $deptName
  * @var string $panelHeading
  */
+// dd($coursesProvider->getModels());
+
 
 use app\components\BreadcrumbHelper;
 use app\models\AllocationStatus;
@@ -23,12 +25,15 @@ use yii\db\ActiveQuery;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\ServerErrorHttpException;
+use yii\helpers\ArrayHelper;
 
 use app\models\DegreeProgramme;
 use app\models\Group;
 use app\models\LevelOfStudy;
 use app\models\Semester;
 
+
+// dd($filter);
 echo BreadcrumbHelper::generate([
     [
         'label' => 'HOD',
@@ -40,8 +45,15 @@ echo BreadcrumbHelper::generate([
     'Courses'
 ]);
 $activeFiltersContent = function ($filter) {
+    $lvl = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $filter->levelOfStudy]);
+
+
+
     $content = '<div class="active-filters">';
     $content .= '<span class="filter-item"><strong>Academic year:</strong> ' . $filter->academicYear . '</span>';
+    if (!empty($filter->levelOfStudy)) {
+        $content .= '<span class="filter-item"><strong>Level of Study:</strong> ' . $filter->levelOfStudy . ' - ' . $lvl['NAME'] . '</span>';
+    }
 
     if ($filter->purpose === 'nonSuppCourses' || $filter->purpose === 'suppCourses') {
         $degree = DegreeProgramme::find()->select(['DEGREE_NAME'])->where(['DEGREE_CODE' => $filter->degreeCode])->asArray()->one();
@@ -106,62 +118,122 @@ if ($filter->purpose === 'serviceCourses') {
         'attribute' => 'requestingDept.DEPT_NAME',
         'label' => 'REQUESTING DEPARTMENT',
         'vAlign' => 'middle',
+        'group' => true,
+        'groupedRow' => true,
+        'groupOddCssClass' => 'group-academic-year',
+        'groupEvenCssClass' => 'group-academic-year',
+        'value' => function ($model) {
+            $deptName = $model->requestingDept->DEPT_NAME ?? '';
+            $degCode = $model->marksheet->semester->DEGREE_CODE ?? '';
+            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]);
+            $degName = $deg['DEGREE_NAME'] ?? '';
+            $suffix = '';
+            if ($degCode) {
+                $suffix .= ' | ' . $degCode;
+            }
+            if ($degName) {
+                $suffix .= ' - ' . $degName;
+            }
+            return trim($deptName . $suffix);
+        }
     ];
 } else {
     $departmentColumn = [
         'attribute' => 'servicingDept.DEPT_NAME',
         'label' => 'SERVICING DEPARTMENT',
         'vAlign' => 'middle',
+        'group' => true,
+        'groupedRow' => true,
+        'groupOddCssClass' => 'group-academic-year',
+        'groupEvenCssClass' => 'group-academic-year',
+        'value' => function ($model) {
+            $deptName = $model->servicingDept->DEPT_NAME ?? '';
+            $degCode = $model->marksheet->semester->DEGREE_CODE ?? '';
+            $deg = \app\models\DegreeProgramme::findOne(['DEGREE_CODE' => $degCode]);
+            $degName = $deg['DEGREE_NAME'] ?? '';
+            $suffix = '';
+            if ($degCode) {
+                $suffix .= ' | ' . $degCode;
+            }
+            if ($degName) {
+                $suffix .= ' - ' . $degName;
+            }
+            return trim($deptName . $suffix);
+        }
     ];
 }
 
-$courseCodeColumn = [
-    'attribute' => 'marksheet.course.COURSE_CODE',
-    'label' => 'COURSE CODE',
-    'vAlign' => 'middle',
-];
+$dataModels = $coursesProvider->getModels();
+$courseCodeOptions = [];
+if (!empty($dataModels)) {
+    foreach ($dataModels as $m) {
+        $code = $m->marksheet->course->COURSE_CODE ?? null;
+        $name = $m->marksheet->course->COURSE_NAME ?? '';
+        if ($code) {
+            $courseCodeOptions[$code] = trim($code . ($name ? ' - ' . $name : ''));
+        }
+    }
+    if (!empty($courseCodeOptions)) {
+        ksort($courseCodeOptions, SORT_NATURAL | SORT_FLAG_CASE);
+    }
+}
 
-$courseNameColumn = [
-    'attribute' => 'marksheet.course.COURSE_NAME',
-    'label' => 'COURSE NAME',
+$courseCodeColumn = [
+    'attribute' => 'courseCode',
+    'label' => 'COURSE',
     'vAlign' => 'middle',
+    'width' => ($gridId === 'requested-courses-grid') ? '45%' : '25%',
+    'value' => function ($model) {
+        $code = $model->marksheet->course->COURSE_CODE ?? '';
+        $name = $model->marksheet->course->COURSE_NAME ?? '';
+        return trim($code . ($name ? ' - ' . $name : ''));
+    },
+    'filterType' => GridView::FILTER_SELECT2,
+    'filter' => $courseCodeOptions,
+    'filterWidgetOptions' => [
+        'pluginOptions' => ['allowClear' => true],
+    ],
+    'filterInputOptions' => ['placeholder' => 'Any code'],
 ];
 
 $requestStatusColumn = [
     'label' => 'STATUS',
-    'attribute' => 'status.STATUS_NAME',
+    'attribute' => 'statusName',
     'format' => 'raw',
     'vAlign' => 'middle',
+    'width' => ($gridId === 'requested-courses-grid') ? '12%' : null,
+    'filterType' => GridView::FILTER_SELECT2,
+    'filter' => (function () use ($dataModels) {
+        if (empty($dataModels)) return [];
+        $names = ArrayHelper::getColumn($dataModels, function ($m) {
+            return $m->status->STATUS_NAME ?? null;
+        });
+        $names = array_filter(array_unique($names));
+        return array_combine($names, $names);
+    })(),
+    'filterWidgetOptions' => [
+        'pluginOptions' => ['allowClear' => true],
+    ],
+    'filterInputOptions' => ['placeholder' => 'Any status'],
     'value' => function ($model) {
         $status = $model->status->STATUS_NAME;
-        $icon = '';
-        $badgeClass = '';
-
         switch ($status) {
             case 'APPROVED':
-                $icon = '<i class="fas fa-check-circle"></i>';
-                $badgeClass = 'badge bg-success';
-                break;
+                return '<strong><i class="fas fa-check-circle"></i> ' . Html::encode($status) . '</strong>';
             case 'PENDING':
-                $icon = '<i class="fas fa-clock"></i>';
-                $badgeClass = 'badge bg-warning text-dark';
-                break;
+                return '<i class="fas fa-clock"></i> ' . Html::encode($status);
             case 'NOT APPROVED':
-                $icon = '<i class="fas fa-times-circle"></i>';
-                $badgeClass = 'badge bg-danger';
-                break;
+                return '<i class="fas fa-times-circle"></i> ' . Html::encode($status);
             default:
-                $badgeClass = 'badge bg-secondary';
-                break;
+                return Html::encode($status);
         }
-
-        return '<span class="' . $badgeClass . '">' . $icon . ' ' . $status . '</span>';
     }
 ];
 
 $allocatedLecturer = [
     'label' => 'ALLOCATED LECTURER(S)',
     'vAlign' => 'middle',
+    'width' => ($gridId === 'requested-courses-grid') ? '28%' : null,
     'value' => function ($model) use ($deptCode) {
         if ($model->status->STATUS_NAME === 'APPROVED') {
             $assignments = CourseAssignment::find()->alias('CS')->select(['CS.PAYROLL_NO'])
@@ -191,15 +263,57 @@ $allocatedLecturer = [
             return rtrim($lecturers, ', ');;
         }
 
+        // For pending requests with no allocated lecturers, show a compact relative request time (EAT)
+        if ($model->status->STATUS_NAME === 'PENDING') {
+            $date = $model->REQUEST_DATE ?? null;
+            if ($date) {
+                try {
+                    $tz = new \DateTimeZone('Africa/Nairobi');
+                    $now = new \DateTime('now', $tz);
+                    $dt  = new \DateTime(is_string($date) ? $date : (string)$date, $tz);
+                    $diff = $now->diff($dt);
+                    // Build compact label using at most two largest non‑zero units (e.g., 3y 1m, 2d 4h, 45m, 30s)
+                    $units = [];
+                    if ($diff->y) {
+                        $units[] = $diff->y . 'y';
+                    }
+                    if ($diff->m) {
+                        $units[] = $diff->m . 'mo';
+                    }
+                    if ($diff->d) {
+                        $units[] = $diff->d . 'd';
+                    }
+                    if ($diff->h) {
+                        $units[] = $diff->h . 'h';
+                    }
+                    if ($diff->i) {
+                        $units[] = $diff->i . 'm';
+                    }
+                    if ($diff->s || empty($units)) {
+                        $units[] = $diff->s . 's';
+                    }
+                    $label = implode(' ', array_slice($units, 0, 2));
+                    // invert=1 means past (dt < now) => "ago"; invert=0 means future => "in"
+                    $relative = $diff->invert ? ($label . ' ago') : ('in ' . $label);
+                } catch (\Throwable $e) {
+                    $relative = (string)$date;
+                }
+                return 'Requested: ' . $relative;
+            }
+        }
+
         return '';
     }
 ];
+
+// (revert action moved into ActionColumn for better placement)
 
 if ($gridId === 'service-courses-grid') {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
         'template' => '{assign-course-render}',
         'vAlign' => 'middle',
+        'width' => '15%',
         'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
             'assign-course-render' => function ($url, $model) {
@@ -219,11 +333,18 @@ if ($gridId === 'service-courses-grid') {
                         'data-type' => 'service'
                     ]);
                 } else {
-                    return Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
+                    $detailsBtn = Html::button('<i class="fas fa-eye" style="color: #17a2b8;"></i> Details', [
                         'title' => 'View lecturer request details',
                         'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
                         'class' => 'btn btn-xs btn-spacer view-course-request'
                     ]);
+                    $revertBtn = Html::button('<i class="fas fa-undo"></i> Revert', [
+                        'title' => 'Revert to pending (remove lecturers and remarks)',
+                        'class' => 'btn btn-xs btn-spacer text-warning revert-request',
+                        'data-id' => $model->REQUEST_ID,
+                        'data-marksheetId' => $model->MARKSHEET_ID,
+                    ]);
+                    return $detailsBtn . ' ' . $revertBtn;
                 }
             },
         ]
@@ -231,7 +352,7 @@ if ($gridId === 'service-courses-grid') {
 } else {
     $actionColumn = [
         'class' => 'kartik\grid\ActionColumn',
-        'template' => '{view-request-render}',
+        'template' => '{view-request-render} {cancel-request}',
         'vAlign' => 'middle',
         'contentOptions' => ['style' => 'white-space:nowrap;', 'class' => 'kartik-sheet-style kv-align-middle'],
         'buttons' => [
@@ -241,6 +362,19 @@ if ($gridId === 'service-courses-grid') {
                     'href' => Url::to(['/allocation/view-request-render', 'requestId' => $model->REQUEST_ID]),
                     'class' => 'btn btn-xs btn-spacer view-course-request'
                 ]);
+            },
+            'cancel-request' => function ($url, $model) use ($deptCode) {
+                $status = AllocationStatus::findOne($model->STATUS_ID);
+                $isPending = $status && $status->STATUS_NAME === 'PENDING';
+                $isOwner = (isset($model->REQUESTING_DEPT) && $model->REQUESTING_DEPT === $deptCode);
+                if ($isPending && $isOwner) {
+                    return Html::button('<i class="fas fa-times text-danger"></i> Cancel', [
+                        'title' => 'Cancel this lecturer request',
+                        'class' => 'btn btn-xs btn-spacer cancel-request',
+                        'data-id' => $model->REQUEST_ID,
+                    ]);
+                }
+                return '';
             }
         ]
     ];
@@ -248,7 +382,7 @@ if ($gridId === 'service-courses-grid') {
 ?>
 
 <?php
-echo $this->render('moreFilters', ['filter' => $filter]);
+echo $this->render('moreFilters', ['filter' => $filter, 'deptCode' => $deptCode]);
 ?>
 
 <div class="requested-courses">
@@ -280,9 +414,8 @@ echo $this->render('moreFilters', ['filter' => $filter]);
                 'after' => false,
             ],
             'columns' => [
-                ['class' => 'kartik\grid\SerialColumn', 'vAlign' => 'middle'],
+                ['class' => 'kartik\grid\SerialColumn', 'vAlign' => 'middle', 'width' => '4%'],
                 $courseCodeColumn,
-                $courseNameColumn,
                 $departmentColumn,
                 $requestStatusColumn,
                 $allocatedLecturer,

@@ -137,7 +137,7 @@ $getAcademicYearsUrl = Url::to(['/shared-reports/get-academic-years']);
 $getProgrammesUrl = Url::to(['/shared-reports/get-programmes']);
 $getLevelsOfStudyUrl = Url::to(['/shared-reports/get-levels-of-study']);
 $getGroupsUrl = Url::to(['/shared-reports/get-groups']);
-$consolidatedMarksUrl = Url::to(['/shared-reports/consolidated-marks-per-student']);
+$consolidatedMarksUrl = Url::to(['/shared-reports/consolidated-marks-per-student-old']);
 
 $this->registerJsVar('studentConsolidatedMarksUrls', [
     'academicYears' => $getAcademicYearsUrl,
