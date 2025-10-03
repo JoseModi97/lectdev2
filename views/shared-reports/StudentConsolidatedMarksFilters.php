@@ -41,6 +41,10 @@ $this->registerCss(
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    .small-text p {
+        font-size: 0.85em; /* Adjust as needed */
+        margin-bottom: 0.2em;
+    }
     CSS
 );
 $this->title = $title;
@@ -116,6 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                 <?php ActiveForm::end(); ?>
+                <div id="active-filters-display" class="mt-4 small-text"></div>
             </div>
         </div>
     </div>
@@ -217,6 +222,18 @@ $("#course-analysis-filters-form").validate({
             },
             success: function(response) {
                 $('#consolidated-marks-container').html(response);
+
+                var academicYearText = $('#academic-year option:selected').text();
+                var programmeText = $('#programme option:selected').text();
+                var levelOfStudyText = $('#level-of-study option:selected').text();
+                var groupText = $('#group option:selected').text();
+
+                var activeFiltersHtml = '<p><b>Academic Year:</b> ' + academicYearText + '</p>' +
+                                        '<p><b>Programme:</b> ' + programmeText + '</p>' +
+                                        '<p><b>Level of Study:</b> ' + levelOfStudyText + '</p>' +
+                                        '<p><b>Group:</b> ' + groupText + '</p>';
+
+                $('#active-filters-display').html(activeFiltersHtml);
             },
             error: function() {
                 $('#consolidated-marks-container').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');

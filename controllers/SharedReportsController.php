@@ -764,12 +764,14 @@ CSS;
      * @return string page to render the report
      * @throws ServerErrorHttpException
      */
-    public function actionConsolidatedMarksPerStudent()
+    public function actionConsolidatedMarksPerStudent($registrationNumber = null)
     {
         try {
             $filter = new StudentConsolidatedMarksFilter();
 
             if ($filter->load(Yii::$app->request->get()) && $filter->validate()) {
+                $filter->registrationNumber = $registrationNumber; // Set registrationNumber in filter model
+
                 $bindParams = [
                     ':academicYear' => $filter->academicYear,
                     ':studyProgram' => $filter->degreeCode,
@@ -789,10 +791,24 @@ CSS;
                             SEM.ACADEMIC_YEAR = :academicYear AND
                             SEM.DEGREE_CODE = :studyProgram AND
                             SEM.LEVEL_OF_STUDY = :studyLevel AND
-                            SEM.GROUP_CODE = :studyGroup
-                        ORDER BY MS.REGISTRATION_NUMBER ASC";
+                            SEM.GROUP_CODE = :studyGroup";
+
+                if ($registrationNumber) {
+                    $studentsQuery .= " AND MS.REGISTRATION_NUMBER = :registrationNumber";
+                    $bindParams[':registrationNumber'] = $registrationNumber;
+                }
+
+                $studentsQuery .= " ORDER BY MS.REGISTRATION_NUMBER ASC";
 
                 $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
+
+                $select2Students = [];
+                foreach ($students as $student) {
+                    $select2Students[] = [
+                        'id' => $student['REGISTRATION_NUMBER'],
+                        'text' => $student['REGISTRATION_NUMBER'] . ' - ' . $student['SURNAME'] . ' ' . $student['OTHER_NAMES']
+                    ];
+                }
 
                 /**
                  * Get the maximum number of courses registered for by students in the given timetable.
@@ -805,6 +821,7 @@ CSS;
                 return $this->renderAjax('consolidatedMarksPerStudent', [
                     'title' => 'Consolidated marks per student',
                     'students' => $students,
+                    'select2Students' => $select2Students, // Pass students for Select2
                     'maxStudentCourses' => $maxStudentCourses,
                     'panelHeading' => $panelHeading,
                     'filter' => $filter
@@ -1082,5 +1099,23 @@ CSS;
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ['error' => $message];
         }
+    }
+
+    public function actionGetStudentsByRegistrationNumber($q = null)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $out = ['results' => []];
+        if (!is_null($q)) {
+            $students = \app\models\UON_STUDENTS::find()
+                ->select(['REGISTRATION_NUMBER as id', 'CONCAT(REGISTRATION_NUMBER, " - ", SURNAME, " ", OTHER_NAMES) as text'])
+                ->where(['like', 'REGISTRATION_NUMBER', $q])
+                ->orWhere(['like', 'SURNAME', $q])
+                ->orWhere(['like', 'OTHER_NAMES', $q])
+                ->limit(20)
+                ->asArray()
+                ->all();
+            $out['results'] = array_values($students);
+        }
+        return $out;
     }
 }

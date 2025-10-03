@@ -37,6 +37,9 @@ $this->registerCss(
         background-color: #4a5a96; /* A lighter shade of the panel background */
         border-color: #4a5a96;
     }
+    .panel-title-small {
+        font-size: 1.1em; /* Adjust as needed */
+    }
     CSS
 );
 
@@ -46,6 +49,7 @@ use app\models\Group;
 use app\models\LevelOfStudy;
 use app\models\MarksheetDef;
 use app\models\TempMarksheet;
+use kartik\select2\Select2;
 use yii\db\ActiveQuery;
 use yii\web\ServerErrorHttpException;
 
@@ -65,34 +69,40 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="panel panel-primary">
         <div class="panel-heading">
             <div class="d-flex justify-content-between align-items-center">
-                <h3 class="panel-title">
+                <h3 class="panel-title panel-title-small">
                     <?= $panelHeading; ?>
                 </h3>
                 <button type="button" class="btn btn-primary btn-sm refresh-grid-button btn-shadow btn-circle">
                     <i class="fa fa-refresh" style="color: #333; font-weight: bold;"></i>
                 </button>
             </div>
-            <?php
-            $degree = app\models\DegreeProgramme::find()->select(['DEGREE_NAME'])
-                ->where(['DEGREE_CODE' => $filter->degreeCode])->asArray()->one();
-            $level = app\models\LevelOfStudy::find()->select(['NAME'])
-                ->where(['LEVEL_OF_STUDY' => $filter->levelOfStudy])->asArray()->one();
-            $group = app\models\Group::find()->select(['GROUP_NAME'])->where(['GROUP_CODE' => $filter->group])
-                ->asArray()->one();
-            ?>
-            <div class="clearfix"></div>
-            <div style="margin-top: 10px;">
-                <p><b>Academic Year:</b> <?= $filter->academicYear; ?></p>
-                <p><b>Programme:</b> <?= $degree['DEGREE_NAME'] . ' (' . $filter->degreeCode . ')'; ?></p>
-                <p><b>Level of Study:</b> <?= strtoupper($level['NAME']); ?></p>
-                <p><b>Group:</b> <?= strtoupper($group['GROUP_NAME']); ?></p>
-            </div>
+
         </div>
 
         <div id="consolidated-marks-per-student-grid-container" class="table-responsive kv-grid-container">
             <table class="table table-bordered table-hover table-condensed table-striped">
 
                 <thead>
+                    <tr>
+                        <th colspan="2"></th> <!-- For # and Registration Number -->
+                        <th colspan="2">
+                            <div class="form-group">
+                                <?= Select2::widget([
+                                    'name' => 'student_reg_filter',
+                                    'id' => 'student-reg-filter',
+                                    'data' => \yii\helpers\ArrayHelper::map($select2Students, 'id', 'text'), // Populate with pre-fetched data
+                                    'options' => [
+                                        'placeholder' => 'Filter by Reg No. or Name',
+                                        'value' => $filter->registrationNumber, // Set initial selected value from filter model
+                                    ],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                    ],
+                                ]); ?>
+                            </div>
+                        </th>
+                        <th colspan="1"></th> <!-- For Actions -->
+                    </tr>
                     <tr class="grid-header-row">
                         <th>#</th>
                         <th>Registration Number</th>
@@ -181,6 +191,47 @@ $(document).on('click', '.custom-modal-close', function() {
 
 $(document).on('click', '.refresh-grid-button', function() {
     window.parent.$('#course-analysis-filters-form').submit();
+});
+
+$('#student-reg-filter').on('change', function() {
+    var selectedRegNumber = $(this).val();
+    var filterForm = window.parent.$('#course-analysis-filters-form');
+    var currentData = filterForm.serializeArray();
+    var found = false;
+
+    // Update or add registrationNumber to form data
+    for (var i = 0; i < currentData.length; i++) {
+        if (currentData[i].name === 'registrationNumber') {
+            currentData[i].value = selectedRegNumber;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        currentData.push({name: 'registrationNumber', value: selectedRegNumber});
+    }
+
+    // Remove registrationNumber if selectedRegNumber is empty
+    if (!selectedRegNumber) {
+        currentData = currentData.filter(function(item) {
+            return item.name !== 'registrationNumber';
+        });
+    }
+
+    $.ajax({
+        url: window.parent.studentConsolidatedMarksUrls.consolidatedMarks, // Use the correct URL for the grid partial
+        type: 'GET',
+        data: $.param(currentData), // Serialize the array back to a string
+        beforeSend: function() {
+            $('#consolidated-marks-container').html('<div class="d-flex justify-content-center py-5"><div class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i><p class="mt-3 mb-0 text-muted">Loading consolidated marks…</p></div></div>');
+        },
+        success: function(response) {
+            $('#consolidated-marks-container').html(response);
+        },
+        error: function() {
+            $('#consolidated-marks-container').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
+        }
+    });
 });
 
 $(window).on('beforeunload', function(){
