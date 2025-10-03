@@ -213,38 +213,62 @@ $this->params['breadcrumbs'][] = $this->title;
             $academicYear = $semesterSearch['ACADEMIC_YEAR'] ?? '';
             $degreeCode   = $semesterSearch['DEGREE_CODE'] ?? '';
 
-            // Build dynamic Level of Study options (same logic as in _search.php)
-            $levelsQuery = (new Query())
+            // Build dynamic Semester options (same logic as in _search.php)
+            $semesterQuery = (new Query())
                 ->select([
-                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
-                    'MUTHONI.LEVEL_OF_STUDY.NAME',
+                    'MUTHONI.SEMESTERS.SEMESTER_CODE',
+                    'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
+                    'MUTHONI.SEMESTERS.SEMESTER_TYPE',
                 ])
                 ->distinct()
                 ->from('MUTHONI.SEMESTERS')
                 ->innerJoin(
-                    'MUTHONI.LEVEL_OF_STUDY',
-                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
+                    'MUTHONI.SEMESTER_DESCRIPTIONS',
+                    'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
                 )
                 ->andFilterWhere([
                     'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $academicYear ?: null,
                     'MUTHONI.SEMESTERS.DEGREE_CODE' => $degreeCode ?: null,
+                    'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => $semesterSearch['LEVEL_OF_STUDY'] ?? null,
                 ])
                 ->orderBy([
-                    'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
-                    'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
+                    'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
+                    'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC' => SORT_ASC,
                 ])
                 ->all();
 
-            $yearLists = [];
+            $semesterOptions = [];
             if (!empty($academicYear) && !empty($degreeCode)) {
-                $yearLists = \yii\helpers\ArrayHelper::map($levelsQuery, 'LEVEL_OF_STUDY', 'NAME');
+                $semesterOptions = \yii\helpers\ArrayHelper::map(
+                    $semesterQuery,
+                    'SEMESTER_CODE',
+                    function ($row) {
+                        return $row['SEMESTER_CODE'] . ' - ' . $row['SEMESTER_DESC'] . ' - ' . $row['SEMESTER_TYPE'];
+                    }
+                );
             }
-            // Ensure currently selected Level Of Study remains selectable/searchable
-            $selectedLevel = $semesterSearch['LEVEL_OF_STUDY'] ?? '';
-            if (!empty($selectedLevel) && !array_key_exists($selectedLevel, $yearLists)) {
-                $lvl = \app\models\LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $selectedLevel]);
-                if ($lvl) {
-                    $yearLists[$selectedLevel] = $lvl->NAME;
+            // Ensure currently selected Semester remains selectable/searchable
+            $selectedSemester = $semesterSearch['SEMESTER_CODE'] ?? '';
+            if (!empty($selectedSemester) && !array_key_exists($selectedSemester, $semesterOptions)) {
+                $semRow = (new Query())
+                    ->select([
+                        'MUTHONI.SEMESTERS.SEMESTER_CODE',
+                        'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
+                        'MUTHONI.SEMESTERS.SEMESTER_TYPE',
+                    ])
+                    ->from('MUTHONI.SEMESTERS')
+                    ->innerJoin(
+                        'MUTHONI.SEMESTER_DESCRIPTIONS',
+                        'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
+                    )
+                    ->where([
+                        'MUTHONI.SEMESTERS.SEMESTER_CODE' => $selectedSemester,
+                    ])
+                    ->one();
+                if ($semRow) {
+                    $semesterOptions[$selectedSemester] = $semRow['SEMESTER_CODE'] . ' - ' . $semRow['SEMESTER_DESC'] . ' - ' . $semRow['SEMESTER_TYPE'];
+                } else {
+                    $semesterOptions[$selectedSemester] = $selectedSemester;
                 }
             }
 
@@ -290,7 +314,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             // Disable panel filters until a search with required parents is made
             // Require both Academic Year and Degree Code present in the query string
-            $panelDisabled = (empty($academicYear) || empty($degreeCode));
+            $panelDisabled = (empty($academicYear) || empty($degreeCode) || empty($semesterSearch['LEVEL_OF_STUDY'] ?? ''));
 
             ob_start();
             $form = ActiveForm::begin([
@@ -302,16 +326,16 @@ $this->params['breadcrumbs'][] = $this->title;
             // Preserve other SemesterSearch params when submitting from panel
             echo Html::hiddenInput('SemesterSearch[ACADEMIC_YEAR]', $academicYear);
             echo Html::hiddenInput('SemesterSearch[DEGREE_CODE]', $degreeCode);
-            echo Html::hiddenInput('SemesterSearch[SEMESTER_CODE]', $semesterSearch['SEMESTER_CODE'] ?? '');
+            echo Html::hiddenInput('SemesterSearch[LEVEL_OF_STUDY]', $semesterSearch['LEVEL_OF_STUDY'] ?? '');
             echo Html::hiddenInput('filtersFor', Yii::$app->request->get('filtersFor', ''));
 
             echo '<div class="row g-3 align-items-end">';
             echo '<div class="col-md-6">';
-            echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                'data' => $yearLists,
+            echo $form->field($searchModel, 'SEMESTER_CODE')->widget(Select2::class, [
+                'data' => $semesterOptions,
                 'options' => [
-                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
-                    'id' => 'levelSelect',
+                    'placeholder' => $panelDisabled ? 'Select Level of Study first...' : 'Select Semester...',
+                    'id' => 'semesterCodeSelect',
                     'required' => !$panelDisabled,
                     'disabled' => $panelDisabled,
                 ],

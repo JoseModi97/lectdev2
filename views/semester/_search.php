@@ -7,7 +7,6 @@ use kartik\select2\Select2;
 use app\models\Semester;
 use app\models\DegreeProgramme;
 use app\models\LevelOfStudy;
-use app\models\SemesterDescription;
 
 
 use yii\db\Expression;
@@ -19,25 +18,7 @@ $currentAcademicYear = (date('Y') - 1) . '/' . date('Y');
  * @var app\models\search\SemesterSearch $model
  * @var yii\widgets\ActiveForm $form
  */
-$data = (new \yii\db\Query())
-    ->select([
-        'MUTHONI.SEMESTERS.SEMESTER_CODE',
-        'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC',
-        new \yii\db\Expression("MUTHONI.SEMESTERS.SEMESTER_CODE || ' - ' || MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC || ' - ' || MUTHONI.SEMESTERS.SEMESTER_TYPE AS SEMESTER_LABEL")
-    ])
-    ->distinct()
-    ->from('MUTHONI.SEMESTERS')
-    ->innerJoin(
-        'MUTHONI.SEMESTER_DESCRIPTIONS',
-        'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE'
-    )
-    ->andFilterWhere([
-        'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? null,
-        'MUTHONI.SEMESTERS.DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? null,
-    ])
-    ->all();
-
-$levels = (new \yii\db\Query())
+$levelsQuery = (new \yii\db\Query())
     ->select([
         'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
         'MUTHONI.LEVEL_OF_STUDY.NAME',
@@ -58,50 +39,18 @@ $levels = (new \yii\db\Query())
     ])
     ->all();
 
-$semesterLists = '';
-$yearLists = '';
+$yearLists = [];
 if (!empty(Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR']) && !empty(Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'])) {
-    $semesterLists = ArrayHelper::map($data, 'SEMESTER_CODE', 'SEMESTER_LABEL');
-    $yearLists = ArrayHelper::map($levels, 'LEVEL_OF_STUDY', 'NAME');
+    $yearLists = ArrayHelper::map($levelsQuery, 'LEVEL_OF_STUDY', 'NAME');
 }
 
-
-
-$semester = Semester::find()
-    ->where([
-        'ACADEMIC_YEAR' => (Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '')
-    ])
-    ->all();
-
-
-
-$rows = (new Query())
-    ->select([
-        'MUTHONI.SEMESTERS.SEMESTER_CODE',
-        'MUTHONI.SEMESTERS.SEMESTER_TYPE',
-    ])
-    ->distinct()
-    ->from('MUTHONI.SEMESTERS')
-    ->all();
-
-// dd($model);
-$semType = (new Query())
-    ->select([
-        'MUTHONI.SEMESTERS.SEMESTER_TYPE',
-    ])
-    ->distinct()
-    ->from('MUTHONI.SEMESTERS')
-    ->all();
-$semesterTypeList = [
-    'REGULAR' => 'REGULAR',
-    'SUPPLEMENTARY' => 'SUPPLEMENTARY',
-    '' => '',
-];
-$semesterList = ArrayHelper::map($rows, 'SEMESTER_CODE', 'SEMESTER_CODE');
-
-
-
-$searchDegreeCodes = array_unique(array_column($semester, 'DEGREE_CODE'));
+$selectedLevel = Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? '';
+if (!empty($selectedLevel) && !array_key_exists($selectedLevel, $yearLists)) {
+    $levelModel = LevelOfStudy::findOne(['LEVEL_OF_STUDY' => $selectedLevel]);
+    if ($levelModel) {
+        $yearLists[$selectedLevel] = $levelModel->NAME;
+    }
+}
 
 $filter = Yii::$app->request->get('filtersFor') ?? Yii::$app->request->get('SemesterSearch')['purpose'] ?? '';
 
@@ -166,27 +115,6 @@ $academicYears = ArrayHelper::map(
     'ACADEMIC_YEAR'
 );
 
-$levels = ArrayHelper::map(LevelOfStudy::find()->all(), 'LEVEL_OF_STUDY', 'NAME');
-
-
-
-$semesterCodes = ArrayHelper::map(
-    Semester::find()
-        ->select(['MUTHONI.SEMESTERS.DESCRIPTION_CODE', 'MUTHONI.SEMESTERS.SEMESTER_CODE', 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC'])
-        ->leftJoin('MUTHONI.SEMESTER_DESCRIPTIONS', 'MUTHONI.SEMESTER_DESCRIPTIONS.DESCRIPTION_CODE = MUTHONI.SEMESTERS.DESCRIPTION_CODE')
-        ->distinct()
-        ->asArray()
-        ->all(),
-    'DESCRIPTION_CODE',
-    function ($model) {
-        return $model['SEMESTER_CODE'] . ' - ' . $model['SEMESTER_DESC'];
-    }
-);
-
-
-
-
-$sem = ArrayHelper::map(Semester::find()->select(['SEMESTER_CODE'])->distinct()->all(), 'SEMESTER_CODE', 'SEMESTER_CODE');
 $this->registerCss(
     "
     .help-block{
@@ -231,9 +159,10 @@ $this->registerCss(
                     'id' => 'academicYearSelect',
                     'required' => true,
                     'onchange' => <<< JS
-                        if($('#degreeCodeSelect').val() || $('#semesterCodeSelect').val()){
+                        if($('#degreeCodeSelect').val()){
                                 $('#degreeCodeSelect').val(null).trigger('change');
                         }
+                        $('#levelSelect').val(null).trigger('change');
                     JS,
                 ],
                 'pluginOptions' => ['allowClear' => true],
@@ -247,45 +176,24 @@ $this->registerCss(
                     'id' => 'degreeCodeSelect',
                     'required' => true,
                     'onchange' => <<<JS
-                        const queryString = window.location.search;
-                        const urlParams = new URLSearchParams(queryString);
                         const academicYear = $('#academicYearSelect').val();
                         // Put dependent selects into loading state
-                        const semSel = $('#semesterCodeSelect');
                         const lvlSel = $('#levelSelect');
-                        semSel.prop('disabled', true)
-                             .html('<option>Loading...</option>')
-                             .trigger('change.select2');
-                        lvlSel.html('<option>Loading...</option>')
+                        lvlSel.prop('disabled', true)
+                              .html('<option>Loading...</option>')
                               .trigger('change.select2');
-                        semSel.next('.select2-container').addClass('select2-loading');
                         lvlSel.next('.select2-container').addClass('select2-loading');
                         $.post("/semester/semcode?DEGREE_CODE=" + $(this).val()+'&ACADEMIC_YEAR='+academicYear, function(data) {
-                            // console.log(data);
-                            // $("select#semesterCodeSelect").html(data).val(null).trigger("change");
-
-                            let semOptions = '';
-                            data.semesters.forEach(function(item) {
-                                semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
-                            });
-                            $("#semesterCodeSelect").html(semOptions).val(null).trigger("change.select2");
-                            // Re-enable semester select for user to choose
-                            semSel.prop('disabled', false);
-
-
-
                             let lvlOptions = '<option value="">-- Select Level --</option>';
                             data.levels.forEach(function(item) {
                                 lvlOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
                             $("#levelSelect").html(lvlOptions).val(null).trigger("change.select2");
-                            // Remove loading states
-                            semSel.next('.select2-container').removeClass('select2-loading');
+                            lvlSel.prop('disabled', false);
                             lvlSel.next('.select2-container').removeClass('select2-loading');
-                            
+
                         }).fail(function(){
                             // On error, remove loading state and keep selects disabled until user retries
-                            semSel.next('.select2-container').removeClass('select2-loading');
                             lvlSel.next('.select2-container').removeClass('select2-loading');
                         });
                     JS,
@@ -293,16 +201,16 @@ $this->registerCss(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
-        <!-- Level of Study moved to GridView panel -->
         <div class="col-md-3">
-            <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
-                'data' => $semesterLists,
+            <?= $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+                'data' => $yearLists,
                 'options' => [
-                    'placeholder' => 'Select Semester...',
-                    'id' => 'semesterCodeSelect',
-                    'required' => true,
+                    'placeholder' => empty($yearLists) ? 'Select Degree Code first...' : 'Select Level of Study...',
+                    'id' => 'levelSelect',
+                    'required' => !empty($yearLists),
+                    'disabled' => empty($yearLists),
                 ],
-                'pluginOptions' => ['allowClear' => true],
+                'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
         <div class="col-md-1">
@@ -343,20 +251,20 @@ $this->registerCss(
 </div>
 
 <?php
-// Auto-submit only when Semester is selected (and parents already filled)
+// Auto-submit when Level of Study is selected (after parent filters are set)
 $this->registerJs(<<<JS
 (function(){
   function tryAutoSubmitSemesterSearch(){
     var ay = $('#academicYearSelect').val();
     var dc = $('#degreeCodeSelect').val();
-    var sc = $('#semesterCodeSelect').val();
-    if (ay && dc && sc) {
+    var ls = $('#levelSelect').val();
+    if (ay && dc && ls) {
       var form = document.getElementById('semester-search-form');
       if (form) form.submit();
     }
   }
-  // Do not auto-submit on degree change; only when semester is selected
-  $('#semesterCodeSelect').on('select2:select', tryAutoSubmitSemesterSearch);
+  // Do not auto-submit on degree change; only when level is selected
+  $('#levelSelect').on('select2:select', tryAutoSubmitSemesterSearch);
 })();
 JS);
 ?>
