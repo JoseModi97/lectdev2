@@ -758,6 +758,34 @@ CSS;
             throw new ServerErrorHttpException($message, '500');
         }
     }
+    /**
+     * @param string $level
+     * @return string page to set filters
+     * @throws ServerErrorHttpException
+     */
+    public function actionStudentConsolidatedMarksFiltersOld(string $level): string
+    {
+        try {
+            if ($level !== 'lecturer' && $level !== 'hod' && $level !== 'dean') {
+                throw new Exception('You may not have permissions to access these reports.');
+            }
+
+            $filter = new StudentConsolidatedMarksFilter();
+
+            $filter->approvalLevel = $level;
+
+            return $this->render('StudentConsolidatedMarksFiltersOld', [
+                'title' => 'Student consolidated marks filters',
+                'filter' => $filter
+            ]);
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, '500');
+        }
+    }
 
     /**
      * Generates a report of consolidated marks for all courses done by a student in an academic year
@@ -819,6 +847,89 @@ CSS;
                 $panelHeading = 'Consolidated marks per student';
 
                 return $this->renderAjax('consolidatedMarksPerStudent', [
+                    'title' => 'Consolidated marks per student',
+                    'students' => $students,
+                    'select2Students' => $select2Students, // Pass students for Select2
+                    'maxStudentCourses' => $maxStudentCourses,
+                    'panelHeading' => $panelHeading,
+                    'filter' => $filter
+                ]);
+            }
+
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['error' => $filter->getErrors()];
+            }
+            throw new Exception('Failed to load filters for course analysis report.');
+
+        } catch (Exception $ex) {
+            $message = $ex->getMessage();
+            if (YII_ENV_DEV) {
+                $message = $ex->getMessage() . ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+    /**
+     * Generates a report of consolidated marks for all courses done by a student in an academic year
+     * @return string page to render the report
+     * @throws ServerErrorHttpException
+     */
+    public function actionConsolidatedMarksPerStudentOld($registrationNumber = null)
+    {
+        try {
+            $filter = new StudentConsolidatedMarksFilter();
+
+            if ($filter->load(Yii::$app->request->get()) && $filter->validate()) {
+                $filter->registrationNumber = $registrationNumber; // Set registrationNumber in filter model
+
+                $bindParams = [
+                    ':academicYear' => $filter->academicYear,
+                    ':studyProgram' => $filter->degreeCode,
+                    ':studyLevel' => $filter->levelOfStudy,
+                    ':studyGroup' => $filter->group
+                ];
+
+                $connection = Yii::$app->getDb();
+
+                // Get all students registered for courses in the given timetable
+                $studentsQuery = "SELECT DISTINCT MS.REGISTRATION_NUMBER, ST.OTHER_NAMES, ST.SURNAME
+                        FROM MUTHONI.MARKSHEETS MS
+                        INNER JOIN MUTHONI.MARKSHEET_DEF MD ON MS.MRKSHEET_ID = MD.MRKSHEET_ID
+                        INNER JOIN MUTHONI.SEMESTERS SEM ON MD.SEMESTER_ID = SEM.SEMESTER_ID                    
+                        INNER JOIN MUTHONI.UON_STUDENTS ST ON MS.REGISTRATION_NUMBER = ST.REGISTRATION_NUMBER
+                        WHERE
+                            SEM.ACADEMIC_YEAR = :academicYear AND
+                            SEM.DEGREE_CODE = :studyProgram AND
+                            SEM.LEVEL_OF_STUDY = :studyLevel AND
+                            SEM.GROUP_CODE = :studyGroup";
+
+                if ($registrationNumber) {
+                    $studentsQuery .= " AND MS.REGISTRATION_NUMBER = :registrationNumber";
+                    $bindParams[':registrationNumber'] = $registrationNumber;
+                }
+
+                $studentsQuery .= " ORDER BY MS.REGISTRATION_NUMBER ASC";
+
+                $students = $connection->createCommand($studentsQuery)->bindValues($bindParams)->queryAll();
+
+                $select2Students = [];
+                foreach ($students as $student) {
+                    $select2Students[] = [
+                        'id' => $student['REGISTRATION_NUMBER'],
+                        'text' => $student['REGISTRATION_NUMBER'] . ' - ' . $student['SURNAME'] . ' ' . $student['OTHER_NAMES']
+                    ];
+                }
+
+                /**
+                 * Get the maximum number of courses registered for by students in the given timetable.
+                 * We use this number to decide how many table cells we'll have to display the courses in the report.
+                 */
+                $maxStudentCourses = SmisHelper::getMaximumCoursesRegisteredFor($filter);
+
+                $panelHeading = 'Consolidated marks per student';
+
+                return $this->renderAjax('consolidatedMarksPerStudentOld', [
                     'title' => 'Consolidated marks per student',
                     'students' => $students,
                     'select2Students' => $select2Students, // Pass students for Select2
