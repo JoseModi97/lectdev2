@@ -31,7 +31,7 @@ class SemesterSearch extends Semester
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
             [['SEMESTER_CODE_DESC'], 'safe'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
-            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE'], 'required'],
+            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'LEVEL_OF_STUDY'], 'required'],
         ];
     }
 
@@ -87,15 +87,17 @@ class SemesterSearch extends Semester
 
 
 
-        if (empty($params['DEGREE_CODE']) || empty($params['SEMESTER_CODE']) || empty($params['LEVEL_OF_STUDY'])) {
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query->limit(100),
-                'pagination' => false,
-            ]);
-        } elseif (!empty($params)) {
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-            ]);
+        $hasRequiredFilters = !empty($this->ACADEMIC_YEAR)
+            && !empty($this->DEGREE_CODE)
+            && $this->LEVEL_OF_STUDY !== null
+            && $this->LEVEL_OF_STUDY !== '';
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        if (!$hasRequiredFilters) {
+            $query->where('0=1');
         }
 
         if (!$this->validate()) {
