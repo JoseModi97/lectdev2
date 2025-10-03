@@ -31,7 +31,7 @@ class SemesterSearch extends Semester
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
             [['SEMESTER_CODE_DESC'], 'safe'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
-            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'LEVEL_OF_STUDY'], 'required'],
+            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'LEVEL_OF_STUDY',], 'required'],
         ];
     }
 
