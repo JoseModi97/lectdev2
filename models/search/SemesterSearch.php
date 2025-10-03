@@ -31,7 +31,7 @@ class SemesterSearch extends Semester
             [['LEVEL_OF_STUDY', 'SEMESTER_CODE'], 'integer'],
             [['SEMESTER_CODE_DESC'], 'safe'],
             // [['purpose', 'ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
-            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE'], 'required'],
+            [['ACADEMIC_YEAR', 'DEGREE_CODE', 'SEMESTER_CODE', 'LEVEL_OF_STUDY'], 'required'],
         ];
     }
 
@@ -55,9 +55,12 @@ class SemesterSearch extends Semester
     public function search($params, $formName = null)
     {
         $this->load($params, $formName);
-
+// dd($params['SemesterSearch']);
         $query = MarksheetDef::find();
-        $query->joinWith(['semester', 'course']);
+        $query->joinWith(['semester' => function($q){
+            $q->joinWith(['semesterDescription']);
+        }]);
+        $query->joinWith(['course']);
 
         $query->andFilterWhere([
             'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $this->ACADEMIC_YEAR,
@@ -79,7 +82,8 @@ class SemesterSearch extends Semester
             'MUTHONI.SEMESTERS.SEMESTER_CODE' => $this->SEMESTER_CODE,
             'MUTHONI.SEMESTERS.GROUP_CODE' => $this->GROUP_CODE,
             'MUTHONI.SEMESTERS.DESCRIPTION_CODE' => $this->DESCRIPTION_CODE,
-            'MUTHONI.SEMESTERS.SEMESTER_TYPE' => $this->SEMESTER_TYPE,
+            'MUTHONI.SEMESTERS.SEMESTER_TYPE' => $params['SemesterSearch']['SEMESTER_TYPE'],
+            'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC' => $params['SemesterSearch']['SEMESTER_DESC']
         ]);
 
         $query->andFilterWhere(['like', 'MUTHONI.COURSES.COURSE_CODE', $this->courseCode])
@@ -105,7 +109,7 @@ class SemesterSearch extends Semester
         }
 
 
-
+// dd($query);
 
 
 

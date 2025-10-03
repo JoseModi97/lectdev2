@@ -23,7 +23,7 @@ use yii\helpers\ArrayHelper;
 use app\components\BreadcrumbHelper;
 use app\models\CourseAssignment;
 use app\models\EmpVerifyView;
-
+// dd($dataProvider->getModels());
 $searchAcademicYear = Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? '';
 $searchDegreeCode = Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? '';
 $semCodeSearch = Yii::$app->request->get('SemesterSearch')['SEMESTER_CODE'] ?? '';
@@ -303,27 +303,10 @@ $this->params['breadcrumbs'][] = $this->title;
             echo Html::hiddenInput('SemesterSearch[ACADEMIC_YEAR]', $academicYear);
             echo Html::hiddenInput('SemesterSearch[DEGREE_CODE]', $degreeCode);
             echo Html::hiddenInput('SemesterSearch[SEMESTER_CODE]', $semesterSearch['SEMESTER_CODE'] ?? '');
+            echo Html::hiddenInput('SemesterSearch[LEVEL_OF_STUDY]', $semesterSearch['LEVEL_OF_STUDY'] ?? '');
             echo Html::hiddenInput('filtersFor', Yii::$app->request->get('filtersFor', ''));
 
             echo '<div class="row g-3 align-items-end">';
-            echo '<div class="col-md-6">';
-            echo $form->field($searchModel, 'LEVEL_OF_STUDY')->widget(Select2::class, [
-                'data' => $yearLists,
-                'options' => [
-                    'placeholder' => $panelDisabled ? 'Select Degree Code first...' : 'Select Level of Study...',
-                    'id' => 'levelSelect',
-                    'required' => !$panelDisabled,
-                    'disabled' => $panelDisabled,
-                ],
-                'pluginOptions' => [
-                    'allowClear' => true,
-                ],
-                'pluginEvents' => [
-                    'select2:select' => 'function (e) { this.form.submit(); }',
-                    'select2:clear'  => 'function (e) { this.form.submit(); }',
-                ],
-            ]);
-            echo '</div>';
             echo '<div class="col-md-6">';
             echo $form->field($searchModel, 'GROUP_CODE')->widget(Select2::class, [
                 'data' => $groupOptions,

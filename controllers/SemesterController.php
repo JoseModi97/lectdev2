@@ -267,10 +267,9 @@ class SemesterController extends BaseController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionSemcode($ACADEMIC_YEAR, $DEGREE_CODE)
+    public function actionLevels($ACADEMIC_YEAR, $DEGREE_CODE)
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
         // $semCode = Semester::find()
         //     ->select([
         //         'MUTHONI.SEMESTERS.SEMESTER_CODE',
@@ -282,6 +281,47 @@ class SemesterController extends BaseController
         //         'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
         //     ])
         //     ->all();
+
+
+        $levels = (new \yii\db\Query())
+        ->select([
+            'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
+            'MUTHONI.LEVEL_OF_STUDY.NAME',
+        ])
+        ->distinct()
+        ->from('MUTHONI.SEMESTERS')
+        ->innerJoin(
+            'MUTHONI.LEVEL_OF_STUDY',
+            'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
+        )
+        ->where([
+            'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
+            'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
+        ])->orderBy([
+            'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
+            'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
+        ])
+        ->all();
+
+        $levelOptions = [];
+        foreach ($levels as $lvl) {
+            $levelOptions[] = [
+                'id'   => $lvl['LEVEL_OF_STUDY'],
+                'text' => $lvl['NAME'],
+            ];
+        }
+
+
+        return [
+            // 'semesters' => $semesterOptions,
+            'levels'    => $levelOptions,
+        ];
+    }
+    public function actionSemcode($ACADEMIC_YEAR, $DEGREE_CODE, $LEVEL_OF_STUDY)
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+
         $semCode = (new \yii\db\Query())
             ->select([
                 'MUTHONI.SEMESTERS.SEMESTER_CODE',
@@ -298,29 +338,10 @@ class SemesterController extends BaseController
             ->where([
                 'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
                 'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
+                'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => $LEVEL_OF_STUDY,
             ])->orderBy([
                 'MUTHONI.SEMESTERS.SEMESTER_CODE' => SORT_ASC,
                 'MUTHONI.SEMESTER_DESCRIPTIONS.SEMESTER_DESC' => SORT_ASC,
-            ])
-            ->all();
-
-        $levels = (new \yii\db\Query())
-            ->select([
-                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY',
-                'MUTHONI.LEVEL_OF_STUDY.NAME',
-            ])
-            ->distinct()
-            ->from('MUTHONI.SEMESTERS')
-            ->innerJoin(
-                'MUTHONI.LEVEL_OF_STUDY',
-                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY = MUTHONI.SEMESTERS.LEVEL_OF_STUDY'
-            )
-            ->where([
-                'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => $ACADEMIC_YEAR,
-                'MUTHONI.SEMESTERS.DEGREE_CODE' => $DEGREE_CODE,
-            ])->orderBy([
-                'MUTHONI.LEVEL_OF_STUDY.LEVEL_OF_STUDY' => SORT_ASC,
-                'MUTHONI.LEVEL_OF_STUDY.NAME' => SORT_ASC,
             ])
             ->all();
 
@@ -334,18 +355,8 @@ class SemesterController extends BaseController
             ];
         }
 
-        $levelOptions = [];
-        foreach ($levels as $lvl) {
-            $levelOptions[] = [
-                'id'   => $lvl['LEVEL_OF_STUDY'],
-                'text' => $lvl['NAME'],
-            ];
-        }
-
-
         return [
             'semesters' => $semesterOptions,
-            'levels'    => $levelOptions,
         ];
     }
 }

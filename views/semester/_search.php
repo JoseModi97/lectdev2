@@ -34,6 +34,8 @@ $data = (new \yii\db\Query())
     ->andFilterWhere([
         'MUTHONI.SEMESTERS.ACADEMIC_YEAR' => Yii::$app->request->get('SemesterSearch')['ACADEMIC_YEAR'] ?? null,
         'MUTHONI.SEMESTERS.DEGREE_CODE' => Yii::$app->request->get('SemesterSearch')['DEGREE_CODE'] ?? null,
+        'MUTHONI.SEMESTERS.LEVEL_OF_STUDY' => Yii::$app->request->get('SemesterSearch')['LEVEL_OF_STUDY'] ?? null,
+
     ])
     ->all();
 
@@ -233,6 +235,8 @@ $this->registerCss(
                     'onchange' => <<< JS
                         if($('#degreeCodeSelect').val() || $('#semesterCodeSelect').val()){
                                 $('#degreeCodeSelect').val(null).trigger('change');
+                                $('#levelSelect').val(null).trigger('change').prop('disabled', true);
+                                $('#semesterCodeSelect').val(null).trigger('change').prop('disabled', true);
                         }
                     JS,
                 ],
@@ -251,41 +255,28 @@ $this->registerCss(
                         const urlParams = new URLSearchParams(queryString);
                         const academicYear = $('#academicYearSelect').val();
                         // Put dependent selects into loading state
-                        const semSel = $('#semesterCodeSelect');
                         const lvlSel = $('#levelSelect');
-                        semSel.prop('disabled', true)
-                             .html('<option>Loading...</option>')
-                             .trigger('change.select2');
-                        lvlSel.html('<option>Loading...</option>')
-                              .trigger('change.select2');
-                        semSel.next('.select2-container').addClass('select2-loading');
+                        const semSel = $('#semesterCodeSelect');
+
+                        // Clear and disable semester and level selects
+                        semSel.val(null).trigger('change').prop('disabled', true);
+                        lvlSel.val(null).trigger('change').prop('disabled', false); // Enable level select
+
+                        // Put level select into loading state
+                        lvlSel.html('<option>Loading...</option>').trigger('change.select2');
                         lvlSel.next('.select2-container').addClass('select2-loading');
-                        $.post("/semester/semcode?DEGREE_CODE=" + $(this).val()+'&ACADEMIC_YEAR='+academicYear, function(data) {
-                            // console.log(data);
-                            // $("select#semesterCodeSelect").html(data).val(null).trigger("change");
 
-                            let semOptions = '';
-                            data.semesters.forEach(function(item) {
-                                semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
-                            });
-                            $("#semesterCodeSelect").html(semOptions).val(null).trigger("change.select2");
-                            // Re-enable semester select for user to choose
-                            semSel.prop('disabled', false);
-
-
-
+                        $.post("/semester/levels?DEGREE_CODE=" + $(this).val() + '&ACADEMIC_YEAR=' + academicYear, function(data) {
                             let lvlOptions = '<option value="">-- Select Level --</option>';
                             data.levels.forEach(function(item) {
                                 lvlOptions += '<option value="' + item.id + '">' + item.text + '</option>';
                             });
-                            $("#levelSelect").html(lvlOptions).val(null).trigger("change.select2");
-                            // Remove loading states
-                            semSel.next('.select2-container').removeClass('select2-loading');
-                            lvlSel.next('.select2-container').removeClass('select2-loading');
-                            
-                        }).fail(function(){
-                            // On error, remove loading state and keep selects disabled until user retries
-                            semSel.next('.select2-container').removeClass('select2-loading');
+                            lvlSel.html(lvlOptions).val(null).trigger("change.select2");
+                        }).fail(function() {
+                            // On failure, perhaps reset the level select to a default state
+                            lvlSel.html('<option value="">-- Error Loading Levels --</option>').val(null).trigger("change.select2");
+                        }).always(function() {
+                            // Remove loading state from level select
                             lvlSel.next('.select2-container').removeClass('select2-loading');
                         });
                     JS,
@@ -293,6 +284,47 @@ $this->registerCss(
                 'pluginOptions' => ['allowClear' => false],
             ]) ?>
         </div>
+       <div class="col-md-3">
+       <?php
+          echo $form->field($model, 'LEVEL_OF_STUDY')->widget(Select2::class, [
+            'data' => $yearLists,
+            'options' => [
+                'placeholder' => 'Select Level of Study...',
+                'id' => 'levelSelect',
+                'required' => true,
+                'onchange' => <<<JS
+                const academicYear = $('#academicYearSelect').val();
+                const degreeCode = $('#degreeCodeSelect').val();
+                const semSel = $('#semesterCodeSelect');
+
+                if ($(this).val()) {
+                    semSel.prop('disabled', true).html('<option>Loading...</option>').trigger('change.select2');
+                    semSel.next('.select2-container').addClass('select2-loading');
+
+                    $.post("/semester/semcode?DEGREE_CODE=" + degreeCode + '&ACADEMIC_YEAR=' + academicYear + '&LEVEL_OF_STUDY=' + $(this).val(), function(data) {
+                        let semOptions = '<option value="">-- Select Semester --</option>';
+                        data.semesters.forEach(function(item) {
+                            semOptions += '<option value="' + item.id + '">' + item.text + '</option>';
+                        });
+                        semSel.html(semOptions).val(null).trigger("change.select2");
+                        semSel.prop('disabled', false);
+                    }).fail(function() {
+                        semSel.html('<option value="">-- Error Loading Semesters --</option>').val(null).trigger("change.select2");
+                    }).always(function() {
+                        semSel.next('.select2-container').removeClass('select2-loading');
+                    });
+                } else {
+                    semSel.val(null).trigger('change').prop('disabled', true);
+                }
+            JS,
+
+            ],
+            'pluginOptions' => [
+                'allowClear' => true,
+            ],
+        ]);
+        ?>
+       </div>
         <!-- Level of Study moved to GridView panel -->
         <div class="col-md-3">
             <?= $form->field($model, 'SEMESTER_CODE')->widget(Select2::class, [
@@ -301,10 +333,13 @@ $this->registerCss(
                     'placeholder' => 'Select Semester...',
                     'id' => 'semesterCodeSelect',
                     'required' => true,
+                    'disabled' => empty($semesterLists),
                 ],
                 'pluginOptions' => ['allowClear' => true],
             ]) ?>
         </div>
+
+      
         <div class="col-md-1">
             <?= Html::button('Reset', [
                 'class' => 'btn btn-outline-secondary px-4 mt-4',
@@ -343,20 +378,37 @@ $this->registerCss(
 </div>
 
 <?php
-// Auto-submit only when Semester is selected (and parents already filled)
 $this->registerJs(<<<JS
 (function(){
   function tryAutoSubmitSemesterSearch(){
     var ay = $('#academicYearSelect').val();
     var dc = $('#degreeCodeSelect').val();
     var sc = $('#semesterCodeSelect').val();
-    if (ay && dc && sc) {
-      var form = document.getElementById('semester-search-form');
-      if (form) form.submit();
+    var lv = $('#levelSelect').val();
+
+    if (ay && dc && sc && lv) {
+      // Build params
+      let params = new URLSearchParams(window.location.search);
+
+      let displayedText = $('#semesterCodeSelect option:selected').text();
+      let parts = displayedText.split(" - ").map(s => s.trim());
+
+
+
+      // Preserve the other existing selects
+      params.set("SemesterSearch[ACADEMIC_YEAR]", ay);
+      params.set("SemesterSearch[DEGREE_CODE]", dc);
+      params.set("SemesterSearch[SEMESTER_CODE]", sc);
+      params.set("SemesterSearch[LEVEL_OF_STUDY]", lv);
+      params.set("SemesterSearch[SEMESTER_DESC]", parts[1]);
+      params.set("SemesterSearch[SEMESTER_TYPE]", parts[2]);
+      // Reload with new params
+      window.location.search = params.toString();
     }
   }
-  // Do not auto-submit on degree change; only when semester is selected
-  $('#semesterCodeSelect').on('select2:select', tryAutoSubmitSemesterSearch);
+
+  // Attach handler to the semester code select field
+  $('#semesterCodeSelect').on('change', tryAutoSubmitSemesterSearch);
 })();
 JS);
 ?>
